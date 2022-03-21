@@ -95,7 +95,7 @@ namespace Quartz.Impl.AdoJobStore
         /// Gets the non managed TX connection.
         /// </summary>
         /// <returns></returns>
-        protected override ConnectionAndTransactionHolder GetNonManagedTXConnection()
+        protected override async Task<ConnectionAndTransactionHolder> GetNonManagedTXConnection(CancellationToken cancellationToken)
         {
             DbConnection conn;
             try
@@ -103,7 +103,7 @@ namespace Quartz.Impl.AdoJobStore
                 conn = ConnectionManager.GetConnection(DataSource);
                 if (OpenConnection)
                 {
-                    conn.Open();
+                    await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
             catch (Exception e)
@@ -129,8 +129,8 @@ namespace Quartz.Impl.AdoJobStore
         /// </summary>
         /// <seealso cref="JobStoreSupport.ExecuteInNonManagedTXLock" />
         /// <seealso cref="JobStoreSupport.ExecuteInLock" />
-        /// <seealso cref="JobStoreSupport.GetNonManagedTXConnection()" />
-        /// <seealso cref="JobStoreSupport.GetConnection()" />
+        /// <seealso cref="JobStoreSupport.GetNonManagedTXConnection(CancellationToken)" />
+        /// <seealso cref="JobStoreSupport.GetConnection(CancellationToken)" />
         /// <param name="lockName">
         /// The name of the lock to acquire, for example
         /// "TRIGGER_ACCESS".  If null, then no lock is acquired, but the
@@ -154,7 +154,7 @@ namespace Quartz.Impl.AdoJobStore
                     // until after acquiring the lock since it isn't needed.
                     if (LockHandler.RequiresConnection)
                     {
-                        conn = GetNonManagedTXConnection();
+                        conn = await GetNonManagedTXConnection(cancellationToken).ConfigureAwait(false);
                     }
 
                     transOwner = await LockHandler.ObtainLock(requestorId, conn!, lockName, cancellationToken).ConfigureAwait(false);
@@ -162,7 +162,7 @@ namespace Quartz.Impl.AdoJobStore
 
                 if (conn == null)
                 {
-                    conn = GetNonManagedTXConnection();
+                    conn = await GetNonManagedTXConnection(cancellationToken).ConfigureAwait(false);
                 }
 
                 return await txCallback(conn).ConfigureAwait(false);

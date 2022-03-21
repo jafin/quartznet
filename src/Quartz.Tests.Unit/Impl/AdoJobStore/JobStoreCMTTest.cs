@@ -1,4 +1,6 @@
-﻿using System.Data.Common;
+using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
 
 using FakeItEasy;
 
@@ -25,33 +27,33 @@ namespace Quartz.Tests.Unit.Impl.AdoJobStore
 
         private class TestJobStoreCMT : JobStoreCMT
         {
-            public void ExecuteGetNonManagedConnection()
+            public async Task ExecuteGetNonManagedConnection(CancellationToken cancellationToken)
             {
-                GetNonManagedTXConnection();
+                await GetNonManagedTXConnection(cancellationToken);
             }
         }
 
         [Test]
-        public void ShouldNotAutomaticallyOpenConnection()
+        public async Task ShouldNotAutomaticallyOpenConnection()
         {
             var mock = A.Fake<DbConnection>();
             A.CallTo(() => connectionManager.GetConnection(A<string>.Ignored)).Returns(mock);
 
-            jobStore.ExecuteGetNonManagedConnection();
+            await jobStore.ExecuteGetNonManagedConnection(CancellationToken.None);
 
             A.CallTo(() => mock.Open()).MustNotHaveHappened();
         }
 
         [Test]
-        public void ShouldOpenConnectionIfRequested()
+        public async Task ShouldOpenConnectionIfRequested()
         {
             jobStore.OpenConnection = true;
             var mock = A.Fake<DbConnection>();
             A.CallTo(() => connectionManager.GetConnection(A<string>.Ignored)).Returns(mock);
 
-            jobStore.ExecuteGetNonManagedConnection();
+            await jobStore.ExecuteGetNonManagedConnection(CancellationToken.None);
 
-            A.CallTo(() => mock.Open()).MustHaveHappened();
+            A.CallTo(() => mock.OpenAsync(CancellationToken.None)).MustHaveHappened();
         }
     }
 }

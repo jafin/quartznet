@@ -54,16 +54,16 @@ namespace Quartz.Impl.AdoJobStore
         /// For <see cref="JobStoreTX" />, the non-managed TX connection is just 
         /// the normal connection because it is not CMT.
         /// </summary> 
-        /// <seealso cref="JobStoreSupport.GetConnection()" />
-        protected override ConnectionAndTransactionHolder GetNonManagedTXConnection()
+        /// <seealso cref="JobStoreSupport.GetConnection" />
+        protected override async Task<ConnectionAndTransactionHolder> GetNonManagedTXConnection(CancellationToken cancellationToken)
         {
-            return GetConnection();
+            return await GetConnection(cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Execute the given callback having optionally acquired the given lock.
         /// For <see cref="JobStoreTX" />, because it manages its own transactions
-        /// and only has the one datasource, this is the same behavior as 
+        /// and only has the one data-source, this is the same behavior as 
         /// <see cref="JobStoreSupport.ExecuteInNonManagedTXLock" />.
         /// </summary>
         /// <param name="lockName">
@@ -75,8 +75,8 @@ namespace Quartz.Impl.AdoJobStore
         /// <param name="cancellationToken">The cancellation instruction.</param>
         /// <returns></returns>
         /// <seealso cref="JobStoreSupport.ExecuteInNonManagedTXLock" />
-        /// <seealso cref="JobStoreSupport.GetNonManagedTXConnection()" />
-        /// <seealso cref="JobStoreSupport.GetConnection()" />
+        /// <seealso cref="JobStoreSupport.GetNonManagedTXConnection" />
+        /// <seealso cref="JobStoreSupport.GetConnection" />
         protected override Task<T> ExecuteInLock<T>(
             string? lockName, 
             Func<ConnectionAndTransactionHolder, Task<T>> txCallback,
