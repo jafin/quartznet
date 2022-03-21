@@ -109,7 +109,7 @@ namespace Quartz.Impl.AdoJobStore
             catch (Exception e)
             {
                 throw new JobPersistenceException(
-                    $"Failed to obtain DB connection from data source '{DataSource}': {e}", e);
+                    $"Failed to obtain DB connection from DataSource '{DataSource}': {e}", e);
             }
 
             if (conn == null)
