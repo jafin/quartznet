@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -267,8 +268,32 @@ namespace Quartz
         /// </summary>
         protected const int NoSpec = NoSpecInt;
 
-        private static readonly Dictionary<string, int> monthMap = new Dictionary<string, int>(20);
-        private static readonly Dictionary<string, int> dayMap = new Dictionary<string, int>(60);
+        private static readonly ReadOnlyDictionary<string, int> monthMap = new (new Dictionary<string, int>
+        {
+            { "JAN", 0 },
+            { "FEB", 1 },
+            { "MAR", 2 },
+            { "APR", 3 },
+            { "MAY", 4 },
+            { "JUN", 5 },
+            { "JUL", 6 },
+            { "AUG", 7 },
+            { "SEP", 8 },
+            { "OCT", 9 },
+            { "NOV", 10 },
+            { "DEC", 11 },
+        });
+        
+        private static readonly ReadOnlyDictionary<string, int> dayMap = new (new Dictionary<string, int>
+        {
+            {"SUN",1},
+            {"MON",2},
+            {"TUE",3},
+            {"WED",4},
+            {"THU",5},
+            {"FRI",6},
+            {"SAT",7},
+        });
 
         private TimeZoneInfo? timeZone;
 
@@ -357,26 +382,6 @@ namespace Quartz
 
         static CronExpression()
         {
-            monthMap.Add("JAN", 0);
-            monthMap.Add("FEB", 1);
-            monthMap.Add("MAR", 2);
-            monthMap.Add("APR", 3);
-            monthMap.Add("MAY", 4);
-            monthMap.Add("JUN", 5);
-            monthMap.Add("JUL", 6);
-            monthMap.Add("AUG", 7);
-            monthMap.Add("SEP", 8);
-            monthMap.Add("OCT", 9);
-            monthMap.Add("NOV", 10);
-            monthMap.Add("DEC", 11);
-
-            dayMap.Add("SUN", 1);
-            dayMap.Add("MON", 2);
-            dayMap.Add("TUE", 3);
-            dayMap.Add("WED", 4);
-            dayMap.Add("THU", 5);
-            dayMap.Add("FRI", 6);
-            dayMap.Add("SAT", 7);
         }
 
         ///<summary>
@@ -492,9 +497,9 @@ namespace Quartz
             DateTimeOffset lastDate =
                 new DateTimeOffset(date.Year, date.Month, date.Day, date.Hour, date.Minute, date.Second, date.Offset).AddSeconds(-1);
 
-            //TODO: IMPROVE THIS! The following is a BAD solution to this problem. Performance will be very bad here, depending on the cron expression. It is, however A solution.
+            // TODO: IMPROVE THIS! The following is a BAD solution to this problem. Performance will be very bad here, depending on the cron expression. It is, however A solution.
 
-            //keep getting the next included time until it's farther than one second
+            // keep getting the next included time until it's farther than one second
             // apart. At that point, lastDate is the last valid fire time. We return
             // the second immediately following it.
             while (difference == 1000)
@@ -690,7 +695,7 @@ namespace Quartz
                 return i;
             }
             char c = s[i];
-            if (c >= 'A' && c <= 'Z' && !s.Equals("L") && !s.Equals("LW") && !regex.IsMatch(s))
+            if (c is >= 'A' and <= 'Z' && !s.Equals("L") && !s.Equals("LW") && !regex.IsMatch(s))
             {
                 string sub = s.Substring(i, 3);
                 int sval;
@@ -907,7 +912,7 @@ namespace Quartz
                 }
                 return i;
             }
-            if (c >= '0' && c <= '9')
+            if (c is >= '0' and <= '9')
             {
                 int val = Convert.ToInt32(c.ToString(), CultureInfo.InvariantCulture);
                 i++;
@@ -918,7 +923,7 @@ namespace Quartz
                 else
                 {
                     c = s[i];
-                    if (c >= '0' && c <= '9')
+                    if (c is >= '0' and <= '9')
                     {
                         ValueSet vs = GetValue(val, s, i);
                         val = vs.theValue;
@@ -1084,7 +1089,7 @@ namespace Quartz
                     return i;
                 }
                 c = s[i];
-                if (c >= '0' && c <= '9')
+                if (c is >= '0' and <= '9')
                 {
                     ValueSet vs = GetValue(v, s, i);
                     int v1 = vs.theValue;
@@ -1103,7 +1108,7 @@ namespace Quartz
                         return i;
                     }
                     c = s[i];
-                    if (c >= '0' && c <= '9')
+                    if (c is >= '0' and <= '9')
                     {
                         ValueSet vs = GetValue(v2, s, i);
                         int v3 = vs.theValue;
@@ -1136,7 +1141,7 @@ namespace Quartz
                     return i;
                 }
                 c = s[i];
-                if (c >= '0' && c <= '9')
+                if (c is >= '0' and <= '9')
                 {
                     ValueSet vs = GetValue(v2, s, i);
                     int v3 = vs.theValue;
@@ -1329,14 +1334,7 @@ namespace Quartz
 
             if ((incr == 0 || incr == -1) && val != AllSpecInt)
             {
-                if (val != -1)
-                {
-                    data.Add(val);
-                }
-                else
-                {
-                    data.Add(NoSpec);
-                }
+                data.Add(val != -1 ? val : NoSpec);
                 return;
             }
 
@@ -1510,7 +1508,7 @@ namespace Quartz
         {
             char c = s[i];
             StringBuilder s1 = new StringBuilder(v.ToString(CultureInfo.InvariantCulture));
-            while (c >= '0' && c <= '9')
+            while (c is >= '0' and <= '9')
             {
                 s1.Append(c);
                 i++;
@@ -1638,12 +1636,10 @@ namespace Quartz
             // loop until we've computed the next time, or we've past the endTime
             while (!gotOne)
             {
-                SortedSet<int> st;
-                int t;
                 int sec = d.Second;
 
                 // get second.................................................
-                st = seconds.TailSet(sec);
+                var st = seconds.TailSet(sec);
                 if (st.Count > 0)
                 {
                     sec = st.First();
@@ -1657,7 +1653,7 @@ namespace Quartz
 
                 int min = d.Minute;
                 int hr = d.Hour;
-                t = -1;
+                var t = -1;
 
                 // get minute.................................................
                 st = minutes.TailSet(min);
@@ -1842,7 +1838,7 @@ namespace Quartz
                         else
                         {
                             // This is to avoid a bug when moving from a month
-                            //with 30 or 31 days to a month with less. Causes an invalid datetime to be instantiated.
+                            // with 30 or 31 days to a month with less. Causes an invalid datetime to be instantiated.
                             // ex. 0 29 0 30 1 ? 2009 with clock set to 1/30/2009
                             int lDay = DateTime.DaysInMonth(d.Year, mon);
                             if (day <= lDay)
@@ -2209,8 +2205,10 @@ namespace Quartz
         /// </returns>
         public object Clone()
         {
-            var copy = new CronExpression(CronExpressionString);
-            copy.TimeZone = TimeZone;
+            var copy = new CronExpression(CronExpressionString)
+            {
+                TimeZone = TimeZone
+            };
             return copy;
         }
 
