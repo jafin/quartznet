@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30611.23
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7E6034DE-2AF7-42CE-B9E3-A1B3B582E6DA}"
 	ProjectSection(SolutionItems) = preProject
@@ -10,11 +10,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		build.sh = build.sh
 		changelog.md = changelog.md
 		src\Directory.Build.props = src\Directory.Build.props
-		Dockerfile = Dockerfile
-		README.md = README.md
-		package.json = package.json
-		docker-compose.yml = docker-compose.yml
 		src\Directory.Packages.props = src\Directory.Packages.props
+		docker-compose.yml = docker-compose.yml
+		Dockerfile = Dockerfile
+		package.json = package.json
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quartz", "src\Quartz\Quartz.csproj", "{0545C4AC-45BE-47C3-81B7-1592579B9C31}"
@@ -56,23 +56,25 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{354EFE76-4FA8-45C9-A3D4-585B8E00D242}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{BB894600-46FC-4EAD-84C8-F98622A3D012}"
-ProjectSection(SolutionItems) = preProject
-	.github\workflows\docs.yml = .github\workflows\docs.yml
-	.github\workflows\build.yml = .github\workflows\build.yml
-	.github\workflows\pr.yml = .github\workflows\pr.yml
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build.yml = .github\workflows\build.yml
+		.github\workflows\docs.yml = .github\workflows\docs.yml
+		.github\workflows\pr.yml = .github\workflows\pr.yml
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{1252A3D8-2CF1-4AF6-A80C-A9889634543B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quartz.Tests.AspNetCore", "src\Quartz.Tests.AspNetCore\Quartz.Tests.AspNetCore.csproj", "{12EA4497-DCEC-4C1A-83BD-FFAFA2C01A25}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quartz.Tests.AspNetCore", "src\Quartz.Tests.AspNetCore\Quartz.Tests.AspNetCore.csproj", "{12EA4497-DCEC-4C1A-83BD-FFAFA2C01A25}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quartz.HttpClient", "src\Quartz.HttpClient\Quartz.HttpClient.csproj", "{284C8DB7-4948-422C-B1D1-1F4CE07D83CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quartz.HttpClient", "src\Quartz.HttpClient\Quartz.HttpClient.csproj", "{284C8DB7-4948-422C-B1D1-1F4CE07D83CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quartz.Examples.HttpClient", "src\Quartz.Examples.HttpClient\Quartz.Examples.HttpClient.csproj", "{A6577639-66AB-480A-9861-027E6EE72167}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quartz.Examples.HttpClient", "src\Quartz.Examples.HttpClient\Quartz.Examples.HttpClient.csproj", "{A6577639-66AB-480A-9861-027E6EE72167}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quartz.Serialization.SystemTextJson", "src\Quartz.Serialization.SystemTextJson\Quartz.Serialization.SystemTextJson.csproj", "{597EEF73-F5A2-4E2C-9175-7F465D575C8B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quartz.Serialization.SystemTextJson", "src\Quartz.Serialization.SystemTextJson\Quartz.Serialization.SystemTextJson.csproj", "{597EEF73-F5A2-4E2C-9175-7F465D575C8B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{32367329-6157-4580-BB06-F7DD68FC1658}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quartz.Examples.AppRestart", "WebApplication2\Quartz.Examples.AppRestart.csproj", "{6899DBE4-1385-45DC-92BF-7E2368F8E18B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -80,8 +82,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1252A3D8-2CF1-4AF6-A80C-A9889634543B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1252A3D8-2CF1-4AF6-A80C-A9889634543B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0545C4AC-45BE-47C3-81B7-1592579B9C31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0545C4AC-45BE-47C3-81B7-1592579B9C31}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0545C4AC-45BE-47C3-81B7-1592579B9C31}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -150,6 +150,8 @@ Global
 		{A41539B5-18CC-4881-9E88-3C0BA55716D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A41539B5-18CC-4881-9E88-3C0BA55716D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A41539B5-18CC-4881-9E88-3C0BA55716D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1252A3D8-2CF1-4AF6-A80C-A9889634543B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1252A3D8-2CF1-4AF6-A80C-A9889634543B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{12EA4497-DCEC-4C1A-83BD-FFAFA2C01A25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{12EA4497-DCEC-4C1A-83BD-FFAFA2C01A25}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12EA4497-DCEC-4C1A-83BD-FFAFA2C01A25}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -166,20 +168,25 @@ Global
 		{597EEF73-F5A2-4E2C-9175-7F465D575C8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{597EEF73-F5A2-4E2C-9175-7F465D575C8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{597EEF73-F5A2-4E2C-9175-7F465D575C8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6899DBE4-1385-45DC-92BF-7E2368F8E18B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6899DBE4-1385-45DC-92BF-7E2368F8E18B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6899DBE4-1385-45DC-92BF-7E2368F8E18B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6899DBE4-1385-45DC-92BF-7E2368F8E18B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{98DAF894-D837-47EC-9472-50C832AFC8B2} = {32367329-6157-4580-BB06-F7DD68FC1658}
+		{54FCAFBB-0040-4FBB-96BB-0AE9C70742B0} = {32367329-6157-4580-BB06-F7DD68FC1658}
 		{E84E25C9-B291-4F51-9599-EFB63EB59569} = {FCD766DA-FF68-4A60-9130-07A56C2480F0}
 		{5224231E-7678-4EC6-B18A-FA302D9553E3} = {FCD766DA-FF68-4A60-9130-07A56C2480F0}
 		{2BB03F5A-7736-42E9-A572-5D60336A9BFF} = {FCD766DA-FF68-4A60-9130-07A56C2480F0}
 		{354EFE76-4FA8-45C9-A3D4-585B8E00D242} = {7E6034DE-2AF7-42CE-B9E3-A1B3B582E6DA}
 		{BB894600-46FC-4EAD-84C8-F98622A3D012} = {354EFE76-4FA8-45C9-A3D4-585B8E00D242}
-		{A6577639-66AB-480A-9861-027E6EE72167} = {FCD766DA-FF68-4A60-9130-07A56C2480F0}
 		{12EA4497-DCEC-4C1A-83BD-FFAFA2C01A25} = {32367329-6157-4580-BB06-F7DD68FC1658}
-		{54FCAFBB-0040-4FBB-96BB-0AE9C70742B0} = {32367329-6157-4580-BB06-F7DD68FC1658}
-		{98DAF894-D837-47EC-9472-50C832AFC8B2} = {32367329-6157-4580-BB06-F7DD68FC1658}
+		{A6577639-66AB-480A-9861-027E6EE72167} = {FCD766DA-FF68-4A60-9130-07A56C2480F0}
+		{6899DBE4-1385-45DC-92BF-7E2368F8E18B} = {FCD766DA-FF68-4A60-9130-07A56C2480F0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A8666F1F-9B78-4A1D-A3DB-0E91324AB539}
