@@ -13,14 +13,24 @@ namespace Quartz.Simpl
         public MicrosoftLoggingProvider(ILoggerFactory loggerFactory)
         {
             this.loggerFactory = loggerFactory;
+            LogProvider.SetCurrentLogProvider(this);
         }
 
         public Logger GetLogger(string name)
         {
-            var logger = loggerFactory.CreateLogger(name);
+            ILogger? logger = null;
+            try
+            {
+                logger = loggerFactory.CreateLogger(name);
+            }
+            catch (ObjectDisposedException)
+            {
+                LogProvider.SetCurrentLogProvider(null);
+            }
+
             return (level, func, exception, parameters) =>
             {
-                if (func != null)
+                if (func != null && logger != null)
                 {
                     var message = func();
                     switch (level)
