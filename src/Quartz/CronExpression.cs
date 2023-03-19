@@ -390,6 +390,18 @@ namespace Quartz
             BuildExpression(CronExpressionString);
         }
 
+        private int GetVersion(SerializationInfo info)
+        {
+            try
+            {
+                return info.GetInt32("version");
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
         /// <summary>
         /// Serialization constructor.
         /// </summary>
@@ -397,37 +409,27 @@ namespace Quartz
         /// <param name="context"></param>
         protected CronExpression(SerializationInfo info, StreamingContext context)
         {
-            int version;
-            try
-            {
-                version = info.GetInt32("version");
-            }
-            catch
-            {
-                version = 0;
-            }
-
+            var version = GetVersion(info);
             switch (version)
             {
                 case 0:
-                    CronExpressionString = (string) info.GetValue("cronExpressionString", typeof(string))!;
-                    TimeZone = (TimeZoneInfo) info.GetValue("timeZone", typeof(TimeZoneInfo))!;
+                    CronExpressionString = info.GetValue<string>("cronExpressionString")!;
+                    TimeZone = info.GetValue<TimeZoneInfo>("timeZone")!;
                     break;
                 case 1:
-                    CronExpressionString = (string) info.GetValue("cronExpression", typeof(string))!;
-                    var timeZoneId = (string) info.GetValue("timeZoneId", typeof(string))!;
+                    CronExpressionString = info.GetValue<string>("cronExpression")!;
+                    var timeZoneId = info.GetValue<string>("timeZoneId")!;
                     if (!string.IsNullOrEmpty(timeZoneId))
                     {
                         timeZone = TimeZoneUtil.FindTimeZoneById(timeZoneId);
                     }
                     break;
                 default:
-                    ThrowHelper.ThrowNotSupportedException("Unknown serialization version");
+                    ThrowHelper.ThrowNotSupportedException($"Unknown serialization version {version}");
                     break;
             }
         }
 
-        [System.Security.SecurityCritical]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("version", 1);
@@ -447,17 +449,11 @@ namespace Quartz
         public virtual bool IsSatisfiedBy(DateTimeOffset dateUtc)
         {
             var withoutMilliseconds = new DateTimeOffset(dateUtc.Year, dateUtc.Month, dateUtc.Day, dateUtc.Hour, dateUtc.Minute, dateUtc.Second, dateUtc.Offset);
-            DateTimeOffset test = withoutMilliseconds.AddSeconds(-1);
+            var test = withoutMilliseconds.AddSeconds(-1);
+            var timeAfter = GetTimeAfter(test);
 
-            DateTimeOffset? timeAfter = GetTimeAfter(test);
-
-            if (timeAfter.HasValue
-                && timeAfter.Value.Equals(withoutMilliseconds))
-            {
-                return true;
-            }
-
-            return false;
+            return timeAfter.HasValue
+                && timeAfter.Value.Equals(withoutMilliseconds);
         }
 
         /// <summary>
@@ -481,9 +477,8 @@ namespace Quartz
         {
             long difference = 1000;
 
-            //move back to the nearest second so differences will be accurate
-            DateTimeOffset lastDate =
-                new DateTimeOffset(date.Year, date.Month, date.Day, date.Hour, date.Minute, date.Second, date.Offset).AddSeconds(-1);
+            // move back to the nearest second so differences will be accurate
+            var lastDate = new DateTimeOffset(date.Year, date.Month, date.Day, date.Hour, date.Minute, date.Second, date.Offset).AddSeconds(-1);
 
             //TODO: IMPROVE THIS! The following is a BAD solution to this problem. Performance will be very bad here, depending on the cron expression. It is, however A solution.
 
@@ -492,7 +487,7 @@ namespace Quartz
             // the second immediately following it.
             while (difference == 1000)
             {
-                DateTimeOffset? newDate = GetTimeAfter(lastDate);
+                var newDate = GetTimeAfter(lastDate);
 
                 if (newDate == null)
                 {
@@ -517,15 +512,7 @@ namespace Quartz
         public TimeZoneInfo TimeZone
         {
             set => timeZone = value;
-            get
-            {
-                if (timeZone == null)
-                {
-                    timeZone = TimeZoneInfo.Local;
-                }
-
-                return timeZone;
-            }
+            get => timeZone ??= TimeZoneInfo.Local;
         }
 
         /// <summary>
@@ -585,17 +572,10 @@ namespace Quartz
                 daysOfWeek ??= new SortedSet<int>();
                 years ??= new SortedSet<int>();
 
-                int exprOn = Second;
-
-                string[] exprsTok = expression.Split(splitSeparators, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string exprTok in exprsTok)
+                var exprOn = Second;
+                
+                foreach (var expr in expression.Split(splitSeparators, StringSplitOptions.RemoveEmptyEntries).Select(x=>x.Trim()))
                 {
-                    string expr = exprTok.Trim();
-
-                    if (expr.Length == 0)
-                    {
-                        continue;
-                    }
                     if (exprOn > Year)
                     {
                         break;
@@ -616,8 +596,7 @@ namespace Quartz
                         ThrowHelper.ThrowFormatException("Support for specifying multiple \"nth\" days is not implemented.");
                     }
 
-                    string[] vTok = expr.Split(commaSeparator);
-                    foreach (string v in vTok)
+                    foreach (var v in expr.Split(commaSeparator))
                     {
                         StoreExpressionVals(0, v, exprOn);
                     }
@@ -639,14 +618,10 @@ namespace Quartz
                 var dom = GetSet(DayOfMonth);
 
                 // Copying the logic from the UnsupportedOperationException below
-                bool dayOfMSpec = !dom.Contains(NoSpec);
-                bool dayOfWSpec = !dow.Contains(NoSpec);
+                var dayOfMSpec = !dom.Contains(NoSpec);
+                var dayOfWSpec = !dow.Contains(NoSpec);
 
-                if (dayOfMSpec && !dayOfWSpec)
-                {
-                    // skip
-                }
-                else if (dayOfWSpec && !dayOfMSpec)
+                if ((dayOfMSpec && !dayOfWSpec) || (dayOfWSpec && !dayOfMSpec))
                 {
                     // skip
                 }
@@ -2264,5 +2239,9 @@ namespace Quartz
         /// The position.
         /// </summary>
         public int pos;
+    }
+
+    public static class SerializationInfoExtensions {
+        public static T GetValue<T>(this SerializationInfo info, string name) => (T)info.GetValue(name, typeof(T));
     }
 }
