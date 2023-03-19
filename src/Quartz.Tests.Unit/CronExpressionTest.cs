@@ -116,6 +116,23 @@ namespace Quartz.Tests.Unit
             Assert.IsTrue(cronExpression.IsSatisfiedBy(cal));
         }
 
+        //[TestCase("0 15 10 L-1,L-2 * ? 2010", new int[] { 31-1, 31 - 2 })] //Multiple L Not supported
+        [TestCase("0 15 10 6,15,L * ? 2010",new int[] {6,15,31})]
+        [TestCase("0 15 10 15,L * ? 2010", new int[] { 15, 31 })]
+        [TestCase("0 15 10 15,L-2 * ? 2010", new int[] { 15, 31-2 })]
+        [TestCase("0 15 10 31,L-2 * ? 2010", new int[] { 31 }, "duplicate day specified + last are equal")] 
+        [TestCase("0 15 10 1,3,6,15,L * ? 2010", new int[] { 1,3,6,15, 31 })]
+        public void LastDayOfMonthArray(string cronExpression, int[] expectedDays, string scenario = "")
+        {
+            var expr = new CronExpression(cronExpression); //10:15am <variable days> October 2010
+
+            foreach (var expectedDay in expectedDays)
+            {
+                var date = new DateTime(2010, 10, expectedDay, 10, 15, 0).ToUniversalTime(); // last day
+                expr.IsSatisfiedBy(date).Should().BeTrue($"expected day of {expectedDay}, {scenario}");
+            }
+        }
+
         [Test]
         public void CronExpression_Throw_Error_Contructed_With_Null()
         {

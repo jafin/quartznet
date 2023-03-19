@@ -584,7 +584,7 @@ namespace Quartz
                     // throw an exception if L is used with other days of the month
                     if (exprOn == DayOfMonth && expr.IndexOf('L') != -1 && expr.Length > 1 && expr.IndexOf(",", StringComparison.Ordinal) >= 0)
                     {
-                        ThrowHelper.ThrowFormatException("Support for specifying 'L' and 'LW' with other days of the month is not implemented");
+                        //ThrowHelper.ThrowFormatException("Support for specifying 'L' and 'LW' with other days of the month is not implemented");
                     }
                     // throw an exception if L is used with other days of the week
                     if (exprOn == DayOfWeek && expr.IndexOf('L') != -1 && expr.Length > 1 && expr.IndexOf(",", StringComparison.Ordinal) >= 0)
@@ -1579,6 +1579,79 @@ namespace Quartz
             }
         }
 
+        private SortedSet<int> GetDaysOfMonth(DateTimeOffset d, DateTimeOffset afterTimeUtc)
+        {
+            var mon = d.Month;
+            var day = d.Day;
+            var hr = d.Hour;
+            var min = d.Minute;
+            var sec = d.Second;
+            var t = -1;
+            int tmon = mon;
+            var afterTimeUtc1 = afterTimeUtc.AddSeconds(1);
+            var resultDaysOfMonth = new SortedSet<int>(daysOfMonth);
+
+            if (lastdayOfMonth)
+            {
+                if (!nearestWeekday)
+                {
+                    t = day;
+                    day = GetLastDayOfMonth(mon, d.Year);
+                    day -= lastdayOffset;
+
+                    if (t > day)
+                    {
+                        mon++;
+                        if (mon > 12)
+                        {
+                            mon = 1;
+                            tmon = 3333; // ensure test of mon != tmon further below fails
+                            d = d.AddYears(1);
+                        }
+                        day = 1;
+                    }
+                }
+                else
+                {
+                    t = day;
+                    day = GetLastDayOfMonth(mon, d.Year);
+                    day -= lastdayOffset;
+
+                    DateTimeOffset tcal = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
+
+                    int ldom = GetLastDayOfMonth(mon, d.Year);
+                    DayOfWeek dow = tcal.DayOfWeek;
+
+                    if (dow == System.DayOfWeek.Saturday && day == 1)
+                    {
+                        day += 2;
+                    }
+                    else if (dow == System.DayOfWeek.Saturday)
+                    {
+                        day -= 1;
+                    }
+                    else if (dow == System.DayOfWeek.Sunday && day == ldom)
+                    {
+                        day -= 2;
+                    }
+                    else if (dow == System.DayOfWeek.Sunday)
+                    {
+                        day += 1;
+                    }
+
+                    DateTimeOffset nTime = new DateTimeOffset(tcal.Year, mon, day, hr, min, sec, d.Millisecond, d.Offset);
+                    if (nTime.ToUniversalTime() < afterTimeUtc1)
+                    {
+                        day = 1;
+                        mon++;
+                    }
+                }
+
+                resultDaysOfMonth.Add(day);
+            }
+            return resultDaysOfMonth;
+        }
+
         /// <summary>
         /// Gets the next fire time after the given time.
         /// </summary>
@@ -1684,9 +1757,11 @@ namespace Quartz
                 if (dayOfMSpec && !dayOfWSpec)
                 {
                     // get day by day of month rule
-                    st = daysOfMonth.TailSet(day);
+                    //st = daysOfMonth.TailSet(day);
+                    st = GetDaysOfMonth(d, afterTimeUtc).TailSet(day);
                     bool found = st.Any();
-                    if (lastdayOfMonth)
+                    //if (lastdayOfMonth)
+                    if (day > 365) //always false fakey
                     {
                         if (!nearestWeekday)
                         {
