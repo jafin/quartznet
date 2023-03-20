@@ -1737,6 +1737,397 @@ namespace Quartz
             return (false, hr);
         }
 
+        private (bool restartLoop, int day) GetDayAndUpdateDate(ref DateTimeOffset d, DateTimeOffset afterTimeUtc)
+        {
+            var day = d.Day;
+            int mon = d.Month;
+            var t = -1;
+            int tmon = mon;
+
+            // get day...................................................
+            bool dayOfMSpec = !daysOfMonth.Contains(NoSpec);
+            bool dayOfWSpec = !daysOfWeek.Contains(NoSpec);
+            SortedSet<int> st = new SortedSet<int>();
+            if (dayOfMSpec && !dayOfWSpec)
+            {
+                // get day by day of month rule
+                st = daysOfMonth.TailSet(day);
+                bool found = st.Any();
+                if (lastdayOfMonth)
+                {
+                    if (!nearestWeekday)
+                    {
+                        t = day;
+                        day = GetLastDayOfMonth(mon, d.Year);
+                        day -= lastdayOffset;
+
+                        if (t > day)
+                        {
+                            mon++;
+                            if (mon > 12)
+                            {
+                                mon = 1;
+                                tmon = 3333; // ensure test of mon != tmon further below fails
+                                d = d.AddYears(1);
+                            }
+                            day = 1;
+                        }
+                    }
+                    else
+                    {
+                        t = day;
+                        day = GetLastDayOfMonth(mon, d.Year);
+                        day -= lastdayOffset;
+
+                        DateTimeOffset tcal = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
+
+                        int ldom = GetLastDayOfMonth(mon, d.Year);
+                        DayOfWeek dow = tcal.DayOfWeek;
+
+                        if (dow == System.DayOfWeek.Saturday && day == 1)
+                        {
+                            day += 2;
+                        }
+                        else if (dow == System.DayOfWeek.Saturday)
+                        {
+                            day -= 1;
+                        }
+                        else if (dow == System.DayOfWeek.Sunday && day == ldom)
+                        {
+                            day -= 2;
+                        }
+                        else if (dow == System.DayOfWeek.Sunday)
+                        {
+                            day += 1;
+                        }
+
+                        DateTimeOffset nTime = new DateTimeOffset(tcal.Year, mon, day, d.Hour, d.Minute, d.Second, d.Millisecond, d.Offset);
+                        if (nTime.ToUniversalTime() < afterTimeUtc)
+                        {
+                            day = 1;
+                            mon++;
+                        }
+                    }
+                }
+                else if (nearestWeekday)
+                {
+                    t = day;
+                    day = daysOfMonth.First();
+
+                    DateTimeOffset tcal = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
+
+                    int ldom = GetLastDayOfMonth(mon, d.Year);
+                    DayOfWeek dow = tcal.DayOfWeek;
+
+                    if (dow == System.DayOfWeek.Saturday && day == 1)
+                    {
+                        day += 2;
+                    }
+                    else if (dow == System.DayOfWeek.Saturday)
+                    {
+                        day -= 1;
+                    }
+                    else if (dow == System.DayOfWeek.Sunday && day == ldom)
+                    {
+                        day -= 2;
+                    }
+                    else if (dow == System.DayOfWeek.Sunday)
+                    {
+                        day += 1;
+                    }
+
+                    tcal = new DateTimeOffset(tcal.Year, mon, day, d.Hour, d.Minute, d.Second, d.Offset);
+                    if (tcal.ToUniversalTime() < afterTimeUtc)
+                    {
+                        day = daysOfMonth.First();
+                        mon++;
+                    }
+                }
+                else if (found)
+                {
+                    t = day;
+                    day = st.First();
+
+                    // make sure we don't over-run a short month, such as february
+                    int lastDay = GetLastDayOfMonth(mon, d.Year);
+                    if (day > lastDay)
+                    {
+                        day = daysOfMonth.First();
+                        mon++;
+                    }
+                }
+                else
+                {
+                    day = daysOfMonth.First();
+                    mon++;
+                }
+
+                if (day != t || mon != tmon)
+                {
+                    if (mon > 12)
+                    {
+                        d = new DateTimeOffset(d.Year, 12, day, 0, 0, 0, d.Offset).AddMonths(mon - 12);
+                    }
+                    else
+                    {
+                        // This is to avoid a bug when moving from a month
+                        //with 30 or 31 days to a month with less. Causes an invalid datetime to be instantiated.
+                        // ex. 0 29 0 30 1 ? 2009 with clock set to 1/30/2009
+                        int lDay = DateTime.DaysInMonth(d.Year, mon);
+                        if (day <= lDay)
+                        {
+                            d = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
+                        }
+                        else
+                        {
+                            d = new DateTimeOffset(d.Year, mon, lDay, 0, 0, 0, d.Offset).AddDays(day - lDay);
+                        }
+                    }
+                    return (true, day);
+                }
+            }
+            else if (dayOfWSpec && !dayOfMSpec)
+            {
+                // get day by day of week rule
+                if (lastdayOfWeek)
+                {
+                    // are we looking for the last XXX day of
+                    // the month?
+                    int dow = daysOfWeek.First(); // desired
+                                                  // d-o-w
+                    int cDow = (int)d.DayOfWeek + 1; // current d-o-w
+                    int daysToAdd = 0;
+                    if (cDow < dow)
+                    {
+                        daysToAdd = dow - cDow;
+                    }
+                    if (cDow > dow)
+                    {
+                        daysToAdd = dow + (7 - cDow);
+                    }
+
+                    int lDay = GetLastDayOfMonth(mon, d.Year);
+
+                    if (day + daysToAdd > lDay)
+                    {
+                        // did we already miss the
+                        // last one?
+                        if (mon == 12)
+                        {
+                            //will we pass the end of the year?
+                            d = new DateTimeOffset(d.Year, mon - 11, 1, 0, 0, 0, d.Offset).AddYears(1);
+                        }
+                        else
+                        {
+                            d = new DateTimeOffset(d.Year, mon + 1, 1, 0, 0, 0, d.Offset);
+                        }
+                        // we are promoting the month
+                        return (true, day);
+                    }
+
+                    // find date of last occurrence of this day in this month...
+                    while (day + daysToAdd + 7 <= lDay)
+                    {
+                        daysToAdd += 7;
+                    }
+
+                    day += daysToAdd;
+
+                    if (daysToAdd > 0)
+                    {
+                        d = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
+                        // we are not promoting the month
+                        return (true, day);
+                    }
+                }
+                else if (nthdayOfWeek != 0)
+                {
+                    // are we looking for the Nth XXX day in the month?
+                    int dow = daysOfWeek.First(); // desired
+                                                  // d-o-w
+                    int cDow = (int)d.DayOfWeek + 1; // current d-o-w
+                    int daysToAdd = 0;
+                    if (cDow < dow)
+                    {
+                        daysToAdd = dow - cDow;
+                    }
+                    else if (cDow > dow)
+                    {
+                        daysToAdd = dow + (7 - cDow);
+                    }
+
+                    bool dayShifted = daysToAdd > 0;
+
+                    day += daysToAdd;
+                    int weekOfMonth = day / 7;
+                    if (day % 7 > 0)
+                    {
+                        weekOfMonth++;
+                    }
+
+                    daysToAdd = (nthdayOfWeek - weekOfMonth) * 7;
+                    day += daysToAdd;
+                    if (daysToAdd < 0 || day > GetLastDayOfMonth(mon, d.Year))
+                    {
+                        if (mon == 12)
+                        {
+                            d = new DateTimeOffset(d.Year, mon - 11, 1, 0, 0, 0, d.Offset).AddYears(1);
+                        }
+                        else
+                        {
+                            d = new DateTimeOffset(d.Year, mon + 1, 1, 0, 0, 0, d.Offset);
+                        }
+
+                        // we are promoting the month
+                        return (true, day);
+                    }
+                    if (daysToAdd > 0 || dayShifted)
+                    {
+                        d = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
+                        // we are NOT promoting the month
+                        return (true, day);
+                    }
+                }
+                else if (everyNthWeek != 0)
+                {
+                    int cDow = (int)d.DayOfWeek + 1; // current d-o-w
+                    int dow = daysOfWeek.First(); // desired
+                                                  // d-o-w
+                    st = daysOfWeek.TailSet(cDow);
+                    if (st.Count > 0)
+                    {
+                        dow = st.First();
+                    }
+
+                    int daysToAdd = 0;
+                    if (cDow < dow)
+                    {
+                        daysToAdd = (dow - cDow) + (7 * (everyNthWeek - 1));
+                    }
+                    if (cDow > dow)
+                    {
+                        daysToAdd = (dow + (7 - cDow)) + (7 * (everyNthWeek - 1));
+                    }
+
+                    int lDay = GetLastDayOfMonth(mon, d.Year);
+
+                    if (daysToAdd > 0)
+                    {
+                        // are we switching days?
+                        d = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
+                        d = d.AddDays(daysToAdd);
+                        return (true, day);
+                    }
+                }
+                else
+                {
+                    int cDow = (int)d.DayOfWeek + 1; // current d-o-w
+                    int dow = daysOfWeek.First(); // desired
+                                                  // d-o-w
+                    st = daysOfWeek.TailSet(cDow);
+                    if (st.Count > 0)
+                    {
+                        dow = st.First();
+                    }
+
+                    int daysToAdd = 0;
+                    if (cDow < dow)
+                    {
+                        daysToAdd = dow - cDow;
+                    }
+                    if (cDow > dow)
+                    {
+                        daysToAdd = dow + (7 - cDow);
+                    }
+
+                    int lDay = GetLastDayOfMonth(mon, d.Year);
+
+                    if (day + daysToAdd > lDay)
+                    {
+                        // will we pass the end of the month?
+
+                        if (mon == 12)
+                        {
+                            //will we pass the end of the year?
+                            d = new DateTimeOffset(d.Year, mon - 11, 1, 0, 0, 0, d.Offset).AddYears(1);
+                        }
+                        else
+                        {
+                            d = new DateTimeOffset(d.Year, mon + 1, 1, 0, 0, 0, d.Offset);
+                        }
+                        // we are promoting the month
+                        return (true, day);
+                    }
+                    if (daysToAdd > 0)
+                    {
+                        // are we switching days?
+                        d = new DateTimeOffset(d.Year, mon, day + daysToAdd, 0, 0, 0, d.Offset);
+                        return (true, day);
+                    }
+                }
+            }
+            else
+            {
+                // dayOfWSpec && !dayOfMSpec
+                ThrowHelper.ThrowFormatException("Support for specifying both a day-of-week AND a day-of-month parameter is not implemented.");
+            }
+            
+            d = new DateTimeOffset(d.Year, d.Month, day, d.Hour, d.Minute, d.Second, d.Offset);
+            return (false, day);
+        }
+
+        public (bool restartLoop, int month) GetMonthAndUpdateDate(ref DateTimeOffset d)
+        {
+            var mon = d.Month;
+            int year = d.Year;
+            var t = -1;
+
+            // get month...................................................
+            var st = months.TailSet(mon);
+            if (st.Count > 0)
+            {
+                t = mon;
+                mon = st.First();
+            }
+            else
+            {
+                mon = months.First();
+                year++;
+            }
+            if (mon != t)
+            {
+                d = new DateTimeOffset(year, mon, 1, 0, 0, 0, d.Offset);
+                return (true, mon);
+            }
+            d = new DateTimeOffset(d.Year, mon, d.Day, d.Hour, d.Minute, d.Second, d.Offset);
+            
+            return (false, mon);
+        }
+
+        public (bool restartLoop, int? year) GetYearAndUpdateDate(ref DateTimeOffset d)
+        {
+            var year = d.Year;
+            var st = years.TailSet(d.Year);
+            var t = -1;
+            if (st.Count > 0)
+            {
+                t = year;
+                year = st.First();
+            }
+            else
+            {
+                return (false, null);
+            } // ran out of years...
+
+            if (year != t)
+            {
+                d = new DateTimeOffset(year, 1, 1, 0, 0, 0, d.Offset);
+                return (true, year);
+            }
+            d = new DateTimeOffset(year, d.Month, d.Day, d.Hour, d.Minute, d.Second, d.Offset);
+            return (false, year);
+        }
+
         /// <summary>
         /// Gets the next fire time after the given time.
         /// </summary>
@@ -1766,412 +2157,33 @@ namespace Quartz
                 if (restartLoop)
                     continue;
 
-                var day = d.Day;
-                int mon = d.Month;
-                var t = -1;
-                int tmon = mon;
-
-                // get day...................................................
-                bool dayOfMSpec = !daysOfMonth.Contains(NoSpec);
-                bool dayOfWSpec = !daysOfWeek.Contains(NoSpec);
-                SortedSet<int> st = new SortedSet<int>();
-                if (dayOfMSpec && !dayOfWSpec)
-                {
-                    // get day by day of month rule
-                    st = daysOfMonth.TailSet(day);
-                    bool found = st.Any();
-                    if (lastdayOfMonth)
-                    {
-                        if (!nearestWeekday)
-                        {
-                            t = day;
-                            day = GetLastDayOfMonth(mon, d.Year);
-                            day -= lastdayOffset;
-
-                            if (t > day)
-                            {
-                                mon++;
-                                if (mon > 12)
-                                {
-                                    mon = 1;
-                                    tmon = 3333; // ensure test of mon != tmon further below fails
-                                    d = d.AddYears(1);
-                                }
-                                day = 1;
-                            }
-                        }
-                        else
-                        {
-                            t = day;
-                            day = GetLastDayOfMonth(mon, d.Year);
-                            day -= lastdayOffset;
-
-                            DateTimeOffset tcal = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
-
-                            int ldom = GetLastDayOfMonth(mon, d.Year);
-                            DayOfWeek dow = tcal.DayOfWeek;
-
-                            if (dow == System.DayOfWeek.Saturday && day == 1)
-                            {
-                                day += 2;
-                            }
-                            else if (dow == System.DayOfWeek.Saturday)
-                            {
-                                day -= 1;
-                            }
-                            else if (dow == System.DayOfWeek.Sunday && day == ldom)
-                            {
-                                day -= 2;
-                            }
-                            else if (dow == System.DayOfWeek.Sunday)
-                            {
-                                day += 1;
-                            }
-
-                            DateTimeOffset nTime = new DateTimeOffset(tcal.Year, mon, day, hr, min, sec, d.Millisecond, d.Offset);
-                            if (nTime.ToUniversalTime() < afterTimeUtc)
-                            {
-                                day = 1;
-                                mon++;
-                            }
-                        }
-                    }
-                    else if (nearestWeekday)
-                    {
-                        t = day;
-                        day = daysOfMonth.First();
-
-                        DateTimeOffset tcal = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
-
-                        int ldom = GetLastDayOfMonth(mon, d.Year);
-                        DayOfWeek dow = tcal.DayOfWeek;
-
-                        if (dow == System.DayOfWeek.Saturday && day == 1)
-                        {
-                            day += 2;
-                        }
-                        else if (dow == System.DayOfWeek.Saturday)
-                        {
-                            day -= 1;
-                        }
-                        else if (dow == System.DayOfWeek.Sunday && day == ldom)
-                        {
-                            day -= 2;
-                        }
-                        else if (dow == System.DayOfWeek.Sunday)
-                        {
-                            day += 1;
-                        }
-
-                        tcal = new DateTimeOffset(tcal.Year, mon, day, hr, min, sec, d.Offset);
-                        if (tcal.ToUniversalTime() < afterTimeUtc)
-                        {
-                            day = daysOfMonth.First();
-                            mon++;
-                        }
-                    }
-                    else if (found)
-                    {
-                        t = day;
-                        day = st.First();
-
-                        // make sure we don't over-run a short month, such as february
-                        int lastDay = GetLastDayOfMonth(mon, d.Year);
-                        if (day > lastDay)
-                        {
-                            day = daysOfMonth.First();
-                            mon++;
-                        }
-                    }
-                    else
-                    {
-                        day = daysOfMonth.First();
-                        mon++;
-                    }
-
-                    if (day != t || mon != tmon)
-                    {
-                        if (mon > 12)
-                        {
-                            d = new DateTimeOffset(d.Year, 12, day, 0, 0, 0, d.Offset).AddMonths(mon - 12);
-                        }
-                        else
-                        {
-                            // This is to avoid a bug when moving from a month
-                            //with 30 or 31 days to a month with less. Causes an invalid datetime to be instantiated.
-                            // ex. 0 29 0 30 1 ? 2009 with clock set to 1/30/2009
-                            int lDay = DateTime.DaysInMonth(d.Year, mon);
-                            if (day <= lDay)
-                            {
-                                d = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
-                            }
-                            else
-                            {
-                                d = new DateTimeOffset(d.Year, mon, lDay, 0, 0, 0, d.Offset).AddDays(day - lDay);
-                            }
-                        }
-                        continue;
-                    }
-                }
-                else if (dayOfWSpec && !dayOfMSpec)
-                {
-                    // get day by day of week rule
-                    if (lastdayOfWeek)
-                    {
-                        // are we looking for the last XXX day of
-                        // the month?
-                        int dow = daysOfWeek.First(); // desired
-                        // d-o-w
-                        int cDow = (int) d.DayOfWeek + 1; // current d-o-w
-                        int daysToAdd = 0;
-                        if (cDow < dow)
-                        {
-                            daysToAdd = dow - cDow;
-                        }
-                        if (cDow > dow)
-                        {
-                            daysToAdd = dow + (7 - cDow);
-                        }
-
-                        int lDay = GetLastDayOfMonth(mon, d.Year);
-
-                        if (day + daysToAdd > lDay)
-                        {
-                            // did we already miss the
-                            // last one?
-                            if (mon == 12)
-                            {
-                                //will we pass the end of the year?
-                                d = new DateTimeOffset(d.Year, mon - 11, 1, 0, 0, 0, d.Offset).AddYears(1);
-                            }
-                            else
-                            {
-                                d = new DateTimeOffset(d.Year, mon + 1, 1, 0, 0, 0, d.Offset);
-                            }
-                            // we are promoting the month
-                            continue;
-                        }
-
-                        // find date of last occurrence of this day in this month...
-                        while (day + daysToAdd + 7 <= lDay)
-                        {
-                            daysToAdd += 7;
-                        }
-
-                        day += daysToAdd;
-
-                        if (daysToAdd > 0)
-                        {
-                            d = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
-                            // we are not promoting the month
-                            continue;
-                        }
-                    }
-                    else if (nthdayOfWeek != 0)
-                    {
-                        // are we looking for the Nth XXX day in the month?
-                        int dow = daysOfWeek.First(); // desired
-                        // d-o-w
-                        int cDow = (int) d.DayOfWeek + 1; // current d-o-w
-                        int daysToAdd = 0;
-                        if (cDow < dow)
-                        {
-                            daysToAdd = dow - cDow;
-                        }
-                        else if (cDow > dow)
-                        {
-                            daysToAdd = dow + (7 - cDow);
-                        }
-
-                        bool dayShifted = daysToAdd > 0;
-
-                        day += daysToAdd;
-                        int weekOfMonth = day / 7;
-                        if (day % 7 > 0)
-                        {
-                            weekOfMonth++;
-                        }
-
-                        daysToAdd = (nthdayOfWeek - weekOfMonth) * 7;
-                        day += daysToAdd;
-                        if (daysToAdd < 0 || day > GetLastDayOfMonth(mon, d.Year))
-                        {
-                            if (mon == 12)
-                            {
-                                d = new DateTimeOffset(d.Year, mon - 11, 1, 0, 0, 0, d.Offset).AddYears(1);
-                            }
-                            else
-                            {
-                                d = new DateTimeOffset(d.Year, mon + 1, 1, 0, 0, 0, d.Offset);
-                            }
-
-                            // we are promoting the month
-                            continue;
-                        }
-                        if (daysToAdd > 0 || dayShifted)
-                        {
-                            d = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
-                            // we are NOT promoting the month
-                            continue;
-                        }
-                    }
-                    else if (everyNthWeek != 0)
-                    {
-                        int cDow = (int)d.DayOfWeek + 1; // current d-o-w
-                        int dow = daysOfWeek.First(); // desired
-                        // d-o-w
-                        st = daysOfWeek.TailSet(cDow);
-                        if (st.Count > 0)
-                        {
-                            dow = st.First();
-                        }
-
-                        int daysToAdd = 0;
-                        if (cDow < dow)
-                        {
-                            daysToAdd = (dow - cDow) + (7 * (everyNthWeek-1));
-                        }
-                        if (cDow > dow)
-                        {
-                            daysToAdd = (dow + (7 - cDow)) + (7 * (everyNthWeek-1));
-                        }
-
-                        int lDay = GetLastDayOfMonth(mon, d.Year);
-
-                        //if (day + daysToAdd > lDay)
-                        //{
-                        //    // will we pass the end of the month?
-
-                        //    if (mon == 12)
-                        //    {
-                        //        //will we pass the end of the year?
-                        //        d = new DateTimeOffset(d.Year, mon - 11, 1, 0, 0, 0, d.Offset).AddYears(1);
-                        //    }
-                        //    else
-                        //    {
-                        //        d = new DateTimeOffset(d.Year, mon + 1, 1, 0, 0, 0, d.Offset);
-                        //    }
-                        //    // we are promoting the month
-                        //    continue;
-                        //}
-                        if (daysToAdd > 0)
-                        {
-                            // are we switching days?
-                            d = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
-                            d = d.AddDays(daysToAdd);
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        int cDow = (int) d.DayOfWeek + 1; // current d-o-w
-                        int dow = daysOfWeek.First(); // desired
-                        // d-o-w
-                        st = daysOfWeek.TailSet(cDow);
-                        if (st.Count > 0)
-                        {
-                            dow = st.First();
-                        }
-
-                        int daysToAdd = 0;
-                        if (cDow < dow)
-                        {
-                            daysToAdd = dow - cDow;
-                        }
-                        if (cDow > dow)
-                        {
-                            daysToAdd = dow + (7 - cDow);
-                        }
-
-                        int lDay = GetLastDayOfMonth(mon, d.Year);
-
-                        if (day + daysToAdd > lDay)
-                        {
-                            // will we pass the end of the month?
-
-                            if (mon == 12)
-                            {
-                                //will we pass the end of the year?
-                                d = new DateTimeOffset(d.Year, mon - 11, 1, 0, 0, 0, d.Offset).AddYears(1);
-                            }
-                            else
-                            {
-                                d = new DateTimeOffset(d.Year, mon + 1, 1, 0, 0, 0, d.Offset);
-                            }
-                            // we are promoting the month
-                            continue;
-                        }
-                        if (daysToAdd > 0)
-                        {
-                            // are we switching days?
-                            d = new DateTimeOffset(d.Year, mon, day + daysToAdd, 0, 0, 0, d.Offset);
-                            continue;
-                        }
-                    }
-                }
-                else
-                {
-                    // dayOfWSpec && !dayOfMSpec
-                    ThrowHelper.ThrowFormatException("Support for specifying both a day-of-week AND a day-of-month parameter is not implemented.");
-                }
-
-                d = new DateTimeOffset(d.Year, d.Month, day, d.Hour, d.Minute, d.Second, d.Offset);
-                mon = d.Month;
-                int year = d.Year;
-                t = -1;
+                (restartLoop, var day) = GetDayAndUpdateDate(ref d, afterTimeUtc);
+                if (restartLoop)
+                    continue;
 
                 // test for expressions that never generate a valid fire date,
                 // but keep looping...
-                if (year > MaxYear)
+                if (d.Year > MaxYear)
                 {
                     return null;
                 }
 
-                // get month...................................................
-                st = months.TailSet(mon);
-                if (st.Count > 0)
-                {
-                    t = mon;
-                    mon = st.First();
-                }
-                else
-                {
-                    mon = months.First();
-                    year++;
-                }
-                if (mon != t)
-                {
-                    d = new DateTimeOffset(year, mon, 1, 0, 0, 0, d.Offset);
+                (restartLoop, var month) = GetMonthAndUpdateDate(ref d);
+                if (restartLoop)
                     continue;
-                }
-                d = new DateTimeOffset(d.Year, mon, d.Day, d.Hour, d.Minute, d.Second, d.Offset);
-                year = d.Year;
-                t = -1;
 
-                // get year...................................................
-                st = years.TailSet(year);
-                if (st.Count > 0)
-                {
-                    t = year;
-                    year = st.First();
-                }
-                else
-                {
-                    return null;
-                } // ran out of years...
-
-                if (year != t)
-                {
-                    d = new DateTimeOffset(year, 1, 1, 0, 0, 0, d.Offset);
+                // get year
+                (restartLoop, var year) = GetYearAndUpdateDate(ref d);
+                if (restartLoop)
                     continue;
-                }
-                d = new DateTimeOffset(year, d.Month, d.Day, d.Hour, d.Minute, d.Second, d.Offset);
+                if (year == null)
+                    return null;  //ran out of years
 
-                //apply the proper offset for this date
+                // apply the proper offset for this date
                 d = new DateTimeOffset(d.DateTime, TimeZoneUtil.GetUtcOffset(d.DateTime, TimeZone));
 
                 gotOne = true;
-            } // while( !done )
+            }
 
             return d.ToUniversalTime();
         }
