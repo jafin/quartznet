@@ -1579,7 +1579,8 @@ namespace Quartz
             }
         }
 
-        private SortedSet<int> GetDaysOfMonth(DateTimeOffset d, DateTimeOffset afterTimeUtc)
+        //TODO: Maybe we should reurn full d-m-y 
+        private SortedSet<DateTimeOffset> GetDaysOfMonth(DateTimeOffset d, DateTimeOffset afterTimeUtc)
         {
             var mon = d.Month;
             var day = d.Day;
@@ -1588,8 +1589,7 @@ namespace Quartz
             var sec = d.Second;
             var t = -1;
             int tmon = mon;
-            var afterTimeUtc1 = afterTimeUtc.AddSeconds(1);
-            var resultDaysOfMonth = new SortedSet<int>(daysOfMonth);
+            var resultDaysOfMonth = new SortedSet<DateTimeOffset>(daysOfMonth.Select(day=>new DateTimeOffset(d.Year, d.Month, day, d.Hour, d.Minute, d.Second, d.Millisecond, d.Offset)));
 
             if (lastdayOfMonth)
             {
@@ -1640,16 +1640,101 @@ namespace Quartz
                     }
 
                     DateTimeOffset nTime = new DateTimeOffset(tcal.Year, mon, day, hr, min, sec, d.Millisecond, d.Offset);
-                    if (nTime.ToUniversalTime() < afterTimeUtc1)
+                    if (nTime.ToUniversalTime() < afterTimeUtc)
                     {
                         day = 1;
                         mon++;
                     }
                 }
-
-                resultDaysOfMonth.Add(day);
+                //TODO mon > 12  or day > month?
+                resultDaysOfMonth.Add(new DateTimeOffset(d.Year, mon, day, d.Hour, d.Minute, d.Second, d.Millisecond, d.Offset));
             }
             return resultDaysOfMonth;
+        }
+
+        private int GetSecondAndUpdateDate(ref DateTimeOffset d)
+        {
+            int sec = d.Second;
+
+            // get second
+            var st = seconds.TailSet(sec);
+            if (st.Count > 0)
+            {
+                sec = st.First();
+                d = new DateTimeOffset(d.Year, d.Month, d.Day, d.Hour, d.Minute, sec, d.Millisecond, d.Offset);
+            }
+            else
+            {
+                sec = seconds.First();
+                d = d.AddMinutes(1);
+                d = new DateTimeOffset(d.Year, d.Month, d.Day, d.Hour, d.Minute, sec, d.Millisecond, d.Offset);
+            }
+            return sec;
+        }
+
+        private (bool restartLoop, int min) GetMinuteAndUpdateDate(ref DateTimeOffset d)
+        {
+            int min = d.Minute;
+            int hr = d.Hour;
+            var t = -1;
+
+            // get minute
+            var st = minutes.TailSet(min);
+            if (st.Count > 0)
+            {
+                t = min;
+                min = st.First();
+            }
+            else
+            {
+                min = minutes.First();
+                hr++;
+            }
+            if (min != t)
+            {
+                d = new DateTimeOffset(d.Year, d.Month, d.Day, d.Hour, min, 0, d.Millisecond, d.Offset);
+                d = SetCalendarHour(d, hr);
+                return (true, min);
+            }
+
+            d = new DateTimeOffset(d.Year, d.Month, d.Day, d.Hour, min, d.Second, d.Millisecond, d.Offset);
+            return (false, min);
+        }
+
+        private (bool restartLoop, int hour) GetHourAndUpdateDate(ref DateTimeOffset d)
+        {
+            var hr = d.Hour;
+            int day = d.Day;
+            var t = -1;
+
+            // get hour
+            var st = hours.TailSet(hr);
+            if (st.Count > 0)
+            {
+                t = hr;
+                hr = st.First();
+            }
+            else
+            {
+                hr = hours.First();
+                day++;
+            }
+            if (hr != t)
+            {
+                int daysInMonth = DateTime.DaysInMonth(d.Year, d.Month);
+                if (day > daysInMonth)
+                {
+                    d = new DateTimeOffset(d.Year, d.Month, daysInMonth, d.Hour, 0, 0, d.Millisecond, d.Offset).AddDays(day - daysInMonth);
+                }
+                else
+                {
+                    d = new DateTimeOffset(d.Year, d.Month, day, d.Hour, 0, 0, d.Millisecond, d.Offset);
+                }
+                d = SetCalendarHour(d, hr);
+                return (true, hr);
+            }
+            d = new DateTimeOffset(d.Year, d.Month, d.Day, hr, d.Minute, d.Second, d.Millisecond, d.Offset);
+            return (false, hr);
         }
 
         /// <summary>
@@ -1673,95 +1758,29 @@ namespace Quartz
             // loop until we've computed the next time, or we've past the endTime
             while (!gotOne)
             {
-                SortedSet<int> st;
-                int t;
-                int sec = d.Second;
-
-                // get second.................................................
-                st = seconds.TailSet(sec);
-                if (st.Count > 0)
-                {
-                    sec = st.First();
-                }
-                else
-                {
-                    sec = seconds.First();
-                    d = d.AddMinutes(1);
-                }
-                d = new DateTimeOffset(d.Year, d.Month, d.Day, d.Hour, d.Minute, sec, d.Millisecond, d.Offset);
-
-                int min = d.Minute;
-                int hr = d.Hour;
-                t = -1;
-
-                // get minute.................................................
-                st = minutes.TailSet(min);
-                if (st.Count > 0)
-                {
-                    t = min;
-                    min = st.First();
-                }
-                else
-                {
-                    min = minutes.First();
-                    hr++;
-                }
-                if (min != t)
-                {
-                    d = new DateTimeOffset(d.Year, d.Month, d.Day, d.Hour, min, 0, d.Millisecond, d.Offset);
-                    d = SetCalendarHour(d, hr);
+                var sec = GetSecondAndUpdateDate(ref d);
+                var (restartLoop, min) = GetMinuteAndUpdateDate(ref d);
+                if (restartLoop)
                     continue;
-                }
-                d = new DateTimeOffset(d.Year, d.Month, d.Day, d.Hour, min, d.Second, d.Millisecond, d.Offset);
-
-                hr = d.Hour;
-                int day = d.Day;
-                t = -1;
-
-                // get hour...................................................
-                st = hours.TailSet(hr);
-                if (st.Count > 0)
-                {
-                    t = hr;
-                    hr = st.First();
-                }
-                else
-                {
-                    hr = hours.First();
-                    day++;
-                }
-                if (hr != t)
-                {
-                    int daysInMonth = DateTime.DaysInMonth(d.Year, d.Month);
-                    if (day > daysInMonth)
-                    {
-                        d = new DateTimeOffset(d.Year, d.Month, daysInMonth, d.Hour, 0, 0, d.Millisecond, d.Offset).AddDays(day - daysInMonth);
-                    }
-                    else
-                    {
-                        d = new DateTimeOffset(d.Year, d.Month, day, d.Hour, 0, 0, d.Millisecond, d.Offset);
-                    }
-                    d = SetCalendarHour(d, hr);
+                (restartLoop, var hr) = GetHourAndUpdateDate(ref d);
+                if (restartLoop)
                     continue;
-                }
-                d = new DateTimeOffset(d.Year, d.Month, d.Day, hr, d.Minute, d.Second, d.Millisecond, d.Offset);
 
-                day = d.Day;
+                var day = d.Day;
                 int mon = d.Month;
-                t = -1;
+                var t = -1;
                 int tmon = mon;
 
                 // get day...................................................
                 bool dayOfMSpec = !daysOfMonth.Contains(NoSpec);
                 bool dayOfWSpec = !daysOfWeek.Contains(NoSpec);
+                SortedSet<int> st = new SortedSet<int>();
                 if (dayOfMSpec && !dayOfWSpec)
                 {
                     // get day by day of month rule
-                    //st = daysOfMonth.TailSet(day);
-                    st = GetDaysOfMonth(d, afterTimeUtc).TailSet(day);
+                    st = daysOfMonth.TailSet(day);
                     bool found = st.Any();
-                    //if (lastdayOfMonth)
-                    if (day > 365) //always false fakey
+                    if (lastdayOfMonth)
                     {
                         if (!nearestWeekday)
                         {
