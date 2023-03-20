@@ -504,7 +504,7 @@ namespace Quartz.Tests.Unit
         }
 
         [Test]
-        public void TestQRTZNET152()
+        public void TestQRTZNET152_Nearest_Weekday_Expression_W_Does_Not_Work_In_CronTrigger()
         {
             CronExpression expression = new CronExpression("0 5 13 5W 1-12 ?");
             DateTimeOffset test = new DateTimeOffset(2009, 3, 8, 0, 0, 0, TimeSpan.Zero);
