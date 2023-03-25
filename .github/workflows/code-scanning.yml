@@ -21,6 +21,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+    
+    - name: Build
       run: ./build.cmd Compile UnitTest
 
     - name: Initialize CodeQL
