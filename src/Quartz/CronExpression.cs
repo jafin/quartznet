@@ -286,11 +286,6 @@ namespace Quartz
         /// </summary>
         [NonSerialized] protected bool calendardayOfMonth;
 
-        /// <summary>
-        /// Expression parsed.
-        /// </summary>
-        [NonSerialized] protected bool expressionParsed;
-
         public static readonly int MaxYear = DateTime.Now.Year + 100;
 
         private static readonly char[] splitSeparators = { ' ', '\t', '\r', '\n' };
