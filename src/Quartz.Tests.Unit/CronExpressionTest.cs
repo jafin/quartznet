@@ -185,8 +185,7 @@ namespace Quartz.Tests.Unit
 
         public void Ensure_NthWeek_Day_IsBetween1And7(string expression, bool isValid, string shouldSatisfyDate = null)
         {
-            //0 & 7 are sunday
-            Action act = () => new CronExpression(expression); //10:15am <variable days> October 2010
+            Action act = () => new CronExpression(expression);
             if (isValid)
             {
                 act.Should().NotThrow();
@@ -194,9 +193,7 @@ namespace Quartz.Tests.Unit
                 if (!string.IsNullOrEmpty(shouldSatisfyDate))
                 {
                     var dt = DateTime.Parse(shouldSatisfyDate);
-                    DateTimeOffset dto = new DateTimeOffset(dt);
-                    var z = exp.GetNextValidTimeAfter(dto);
-                    exp.IsSatisfiedBy(dto).Should().BeTrue();
+                    exp.IsSatisfiedBy(new DateTimeOffset(dt)).Should().BeTrue();
                 }
             }
             else

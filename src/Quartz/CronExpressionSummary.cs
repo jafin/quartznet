@@ -24,7 +24,7 @@ using System.Text;
 
 namespace Quartz
 {
-    public struct CronExpressionSummary
+    internal struct CronExpressionSummary
     {
         public CronExpressionSummary(SortedSet<int> seconds, SortedSet<int> minutes, SortedSet<int> hours, SortedSet<int> daysOfMonth,
             SortedSet<int> months, SortedSet<int> daysOfWeek, bool lastDayOfWeek, bool nearestWeekday, int nthDayOfWeek,
