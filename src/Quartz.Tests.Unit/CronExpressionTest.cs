@@ -150,6 +150,62 @@ namespace Quartz.Tests.Unit
             }
         }
 
+
+        [TestCase("0 15 10 ? * 1#0 2010", false)]
+        [TestCase("0 15 10 ? * 1#1 2010", true)]
+        [TestCase("0 15 10 ? * 1#2 2010", true)]
+        [TestCase("0 15 10 ? * 1#3 2010", true)]
+        [TestCase("0 15 10 ? * 1#4 2010", true)]
+        [TestCase("0 15 10 ? * 1#5 2010", true)]
+        [TestCase("0 15 10 ? * 1#6 2010", false)]
+
+        public void Ensure_NthWeek_IsBetween1And5(string expression, bool isValid)
+        {
+            Action act = () => new CronExpression(expression); //10:15am <variable days> October 2010
+            if (isValid)
+            {
+                act.Should().NotThrow();
+            }
+            else
+            {
+                act.Should().Throw<FormatException>();
+            }
+        }
+
+        [TestCase("0 15 10 ? * 0#1 2010", false)]
+        [TestCase("0 15 10 ? * 1#1 2010", true, "2010-01-03T10:15:00")]
+        [TestCase("0 15 10 ? * 2#1 2010", true, "2010-01-04T10:15:00")]
+        [TestCase("0 15 10 ? * 3#1 2010", true, "2010-01-05T10:15:00")]
+        [TestCase("0 15 10 ? * 4#1 2010", true, "2010-01-06T10:15:00")]
+        [TestCase("0 15 10 ? * 5#1 2010", true, "2010-01-07T10:15:00")]
+        [TestCase("0 15 10 ? * 6#1 2010", true, "2010-01-01T10:15:00")]
+        [TestCase("0 15 10 ? * 7#1 2010", true, "2010-01-02T10:15:00")]
+        [TestCase("0 15 10 ? * 8#1 2010", false)]
+        [TestCase("0 15 10 ? * 14#1 2010", false)]
+
+        public void Ensure_NthWeek_Day_IsBetween1And7(string expression, bool isValid, string shouldSatisfyDate = null)
+        {
+            //0 & 7 are sunday
+            Action act = () => new CronExpression(expression); //10:15am <variable days> October 2010
+            if (isValid)
+            {
+                act.Should().NotThrow();
+                var exp = new CronExpression(expression);
+                if (!string.IsNullOrEmpty(shouldSatisfyDate))
+                {
+                    var dt = DateTime.Parse(shouldSatisfyDate);
+                    DateTimeOffset dto = new DateTimeOffset(dt);
+                    var z = exp.GetNextValidTimeAfter(dto);
+                    exp.IsSatisfiedBy(dto).Should().BeTrue();
+                }
+            }
+            else
+            {
+                act.Should().Throw<FormatException>();
+            }
+        }
+
+
         [TestCase("0 15 10 6,15,LW * ? 2010")]
         [TestCase("0 15 10 6,15,L * ? 2010")]
         [TestCase("0 15 10 15,L * ? 2010")]
@@ -778,6 +834,7 @@ namespace Quartz.Tests.Unit
             e = Assert.Throws<FormatException>(() => new CronExpression("0 0 0 ? * 0/"), "Cron did not validate bad range interval in '0/_blank'");
             Assert.That(e.Message, Is.EqualTo("'/' must be followed by an integer."));
         }
+
 
         [Test]
         public void TestInvalidCharactersAfterAsterisk()

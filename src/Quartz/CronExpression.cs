@@ -510,13 +510,13 @@ namespace Quartz
         {
             try
             {
-                seconds ??= new SortedSet<int>();
-                minutes ??= new SortedSet<int>();
-                hours ??= new SortedSet<int>();
-                daysOfMonth ??= new SortedSet<int>();
-                months ??= new SortedSet<int>();
-                daysOfWeek ??= new SortedSet<int>();
-                years ??= new SortedSet<int>();
+                seconds ??= new();
+                minutes ??= new ();
+                hours ??= new ();
+                daysOfMonth ??= new ();
+                months ??= new ();
+                daysOfWeek ??= new ();
+                years ??= new ();
 
                 var exprOn = CronExpressionConstants.Second;
 
@@ -614,7 +614,7 @@ namespace Quartz
             AddToSet(CronExpressionConstants.NoSpecInt, -1, 0, type);
         }
 
-        private void StoreExpressioNStarOrSlash(int type, string s, int i)
+        private void StoreExpressionStarOrSlash(int type, string s, int i)
         {
             var c = s[i];
             var incr = 0;
@@ -711,7 +711,7 @@ namespace Quartz
             else
             {
                 c = s[i];
-                if (c >= '0' && c <= '9')
+                if (c is >= '0' and <= '9')
                 {
                     var vs = GetValue(val, s, i);
                     val = vs.theValue;
@@ -723,7 +723,6 @@ namespace Quartz
 
         private void StoreExpressionGeneralValue(int type, string s, int i)
         {
-            char c = s[i];
             var incr = 0;
             var sub = s.Substring(i, 3);
             int sval;
@@ -737,8 +736,7 @@ namespace Quartz
                 }
                 if (s.Length > i + 3)
                 {
-                    c = s[i + 3];
-                    if (c == '-')
+                    if (s[i + 3] == '-')
                     {
                         i += 4;
                         sub = s.Substring(i, 3);
@@ -760,57 +758,55 @@ namespace Quartz
                 }
                 if (s.Length > i + 3)
                 {
-                    c = s[i + 3];
-                    if (c == '-')
+                    var c = s[i + 3];
+                    switch (c)
                     {
-                        i += 4;
-                        sub = s.Substring(i, 3);
-                        eval = GetDayOfWeekNumber(sub);
-                        if (eval < 0)
-                        {
-                            ThrowHelper.ThrowFormatException(
-                                $"Invalid Day-of-Week value: '{sub}'");
-                        }
-                    }
-                    else if (c == '#')
-                    {
-                        try
-                        {
+                        case '-':
                             i += 4;
-                            nthdayOfWeek = Convert.ToInt32(s.Substring(i), CultureInfo.InvariantCulture);
-                            if (nthdayOfWeek is < 1 or > 5)
+                            sub = s.Substring(i, 3);
+                            eval = GetDayOfWeekNumber(sub);
+                            if (eval < 0)
                             {
-                                ThrowHelper.ThrowFormatException("nthdayOfWeek is < 1 or > 5");
+                                ThrowHelper.ThrowFormatException(
+                                    $"Invalid Day-of-Week value: '{sub}'");
                             }
-                        }
-                        catch (Exception)
-                        {
-                            ThrowHelper.ThrowFormatException("A numeric value between 1 and 5 must follow the '#' option");
-                        }
-                    }
-                    else if (c == '/')
-                    {
-                        try
-                        {
-                            i += 4;
-                            everyNthWeek = Convert.ToInt32(s.Substring(i), CultureInfo.InvariantCulture);
-                            if (everyNthWeek is < 1 or > 5)
+                            break;
+                        case '#':
+                            try
                             {
-                                ThrowHelper.ThrowFormatException("everyNthWeek is < 1 or > 5");
+                                i += 4;
+                                nthdayOfWeek = Convert.ToInt32(s.Substring(i), CultureInfo.InvariantCulture);
+                                if (nthdayOfWeek is < 1 or > 5)
+                                {
+                                    ThrowHelper.ThrowFormatException("nthdayOfWeek is < 1 or > 5");
+                                }
                             }
-                        }
-                        catch (Exception)
-                        {
-                            ThrowHelper.ThrowFormatException("A numeric value between 1 and 5 must follow the '/' option");
-                        }
-                    }
-                    else if (c == 'L')
-                    {
-                        lastdayOfWeek = true;
-                    }
-                    else
-                    {
-                        ThrowHelper.ThrowFormatException($"Illegal characters for this position: '{sub}'");
+                            catch (Exception)
+                            {
+                                ThrowHelper.ThrowFormatException("A numeric value between 1 and 5 must follow the '#' option");
+                            }
+                            break;
+                        case '/':
+                            try
+                            {
+                                i += 4;
+                                everyNthWeek = Convert.ToInt32(s.Substring(i), CultureInfo.InvariantCulture);
+                                if (everyNthWeek is < 1 or > 5)
+                                {
+                                    ThrowHelper.ThrowFormatException("everyNthWeek is < 1 or > 5");
+                                }
+                            }
+                            catch (Exception)
+                            {
+                                ThrowHelper.ThrowFormatException("A numeric value between 1 and 5 must follow the '/' option");
+                            }
+                            break;
+                        case 'L':
+                            lastdayOfWeek = true;
+                            break;
+                        default:
+                            ThrowHelper.ThrowFormatException($"Illegal characters for this position: '{sub}'");
+                            break;
                     }
                 }
             }
@@ -853,7 +849,7 @@ namespace Quartz
 
                 case '*':
                 case '/':
-                    StoreExpressioNStarOrSlash(type, s, i);
+                    StoreExpressionStarOrSlash(type, s, i);
                     break;
 
                 case 'L':
@@ -969,6 +965,15 @@ namespace Quartz
                     if (nthdayOfWeek is < 1 or > 5)
                     {
                         ThrowHelper.ThrowFormatException("nthdayOfWeek is < 1 or > 5");
+                    }
+                    //go back and check first char is numeric and is a valid Day of the week (0-6)
+                    var dayOfWeek = s.Split('#')[0];
+                    ;
+                    var isFirstValueInt= int.TryParse(dayOfWeek, out val);
+                    if (isFirstValueInt)
+                    {
+                        if (val < 1 || val > 7)
+                            ThrowHelper.ThrowFormatException("Day-of-Week values must be between 1 and 7");
                     }
                 }
                 catch (Exception)
