@@ -1503,79 +1503,6 @@ namespace Quartz
             }
         }
 
-        //TODO: Maybe we should reurn full d-m-y 
-        private SortedSet<DateTimeOffset> GetDaysOfMonth(DateTimeOffset d, DateTimeOffset afterTimeUtc)
-        {
-            var mon = d.Month;
-            var day = d.Day;
-            var hr = d.Hour;
-            var min = d.Minute;
-            var sec = d.Second;
-            var t = -1;
-            var tmon = mon;
-            var resultDaysOfMonth = new SortedSet<DateTimeOffset>(daysOfMonth.Select(day => new DateTimeOffset(d.Year, d.Month, day, d.Hour, d.Minute, d.Second, d.Millisecond, d.Offset)));
-
-            if (lastdayOfMonth)
-            {
-                if (!nearestWeekday)
-                {
-                    t = day;
-                    day = GetLastDayOfMonth(mon, d.Year);
-                    day -= lastdayOffset;
-
-                    if (t > day)
-                    {
-                        mon++;
-                        if (mon > 12)
-                        {
-                            mon = 1;
-                            tmon = 3333; // ensure test of mon != tmon further below fails
-                            d = d.AddYears(1);
-                        }
-                        day = 1;
-                    }
-                }
-                else
-                {
-                    t = day;
-                    day = GetLastDayOfMonth(mon, d.Year);
-                    day -= lastdayOffset;
-
-                    var tcal = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
-
-                    var ldom = GetLastDayOfMonth(mon, d.Year);
-                    var dow = tcal.DayOfWeek;
-
-                    if (dow == System.DayOfWeek.Saturday && day == 1)
-                    {
-                        day += 2;
-                    }
-                    else if (dow == System.DayOfWeek.Saturday)
-                    {
-                        day -= 1;
-                    }
-                    else if (dow == System.DayOfWeek.Sunday && day == ldom)
-                    {
-                        day -= 2;
-                    }
-                    else if (dow == System.DayOfWeek.Sunday)
-                    {
-                        day += 1;
-                    }
-
-                    var nTime = new DateTimeOffset(tcal.Year, mon, day, hr, min, sec, d.Millisecond, d.Offset);
-                    if (nTime.ToUniversalTime() < afterTimeUtc)
-                    {
-                        day = 1;
-                        mon++;
-                    }
-                }
-                //TODO mon > 12  or day > month?
-                resultDaysOfMonth.Add(new DateTimeOffset(d.Year, mon, day, d.Hour, d.Minute, d.Second, d.Millisecond, d.Offset));
-            }
-            return resultDaysOfMonth;
-        }
-
         /// <summary>
         /// Progress next fire time seconds
         /// </summary>
@@ -1712,16 +1639,16 @@ namespace Quartz
 
                 switch (dayOfWeek)
                 {
-                    case System.DayOfWeek.Saturday when day == 1:
+                    case DayOfWeek.Saturday when day == 1:
                         day += 2;
                         break;
-                    case System.DayOfWeek.Saturday:
+                    case DayOfWeek.Saturday:
                         day -= 1;
                         break;
-                    case System.DayOfWeek.Sunday when day == lastDayOfMonth:
+                    case DayOfWeek.Sunday when day == lastDayOfMonth:
                         day -= 2;
                         break;
-                    case System.DayOfWeek.Sunday:
+                    case DayOfWeek.Sunday:
                         day += 1;
                         break;
                 }
