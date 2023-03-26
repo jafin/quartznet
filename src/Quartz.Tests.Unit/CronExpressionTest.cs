@@ -150,8 +150,48 @@ namespace Quartz.Tests.Unit
             }
         }
 
+        [TestCase("0 15 10 6,15,LW * ? 2010")]
+        [TestCase("0 15 10 6,15,L * ? 2010")]
+        [TestCase("0 15 10 15,L * ? 2010")]
+        [TestCase("0 15 10 15,31 * ? 2010")]
+        [TestCase("0 15 10 15,L-2 * ? 2010")]
+        [TestCase("0 15 10 31,L-2 * ? 2010")]
+        [TestCase("0 15 10 1,3,6,15,L * ? 2010")]
+        public void ExpressionEquality(string expression)
+        {
+            var expr1 = new CronExpression(expression);
+            var expr2 = new CronExpression(expression);
+            expr1.Equals(expr2).Should().BeTrue();
+
+            expr1.Equals((object)expr2).Should().BeTrue();
+        }
+
+        [TestCase("0 15 10 15,L-31 * ? 2010")]
+        public void OffSetValue_CannontBe_GreaterThan30(string expression)
+        {
+            Action act = () => new CronExpression(expression);
+            act.Should().Throw<FormatException>()
+                .WithMessage("Offset from last day must be <= 30");
+        }
+
+        [TestCase("L 15 10 15 * ? 2010", false)]
+        [TestCase("0 L 10 15 * ? 2010", false)]
+        [TestCase("0 15 L 15 * ? 2010", false)]
+        [TestCase("0 15 10 L * ? 2010", true,"Valid for day of month")]
+        [TestCase("0 15 10 15 L ? 2010", false)]
+        [TestCase("0 15 10 ? * L 2010", true, "Valid for day of week")]
+        [TestCase("0 15 10 15 * ? L", false)]
+        public void Ensure_L_Token_CanOnlyBeUsedIn_DayOfWeek_ORDayOfMonth(string expression, bool isValid, string description="")
+        {
+            Action act = () => new CronExpression(expression);
+            if (isValid)
+                act.Should().NotThrow(description);
+            else
+                act.Should().Throw<FormatException>(description);
+        }
+
         [Test]
-        public void CronExpression_Throw_Error_Contructed_With_Null()
+        public void CronExpression_Throw_Error_Constructed_With_Null()
         {
             Action act = () => new CronExpression(null);
             act.Should().Throw<ArgumentException>()
@@ -822,6 +862,14 @@ namespace Quartz.Tests.Unit
             CronExpression expression = new CronExpression("0 15 15 5 11 ?");
             var sut = expression.GetNextInvalidTimeAfter(new DateTimeOffset(2010, 12, 1, 1, 1, 0, 0, TimeSpan.Zero));
             sut.Should().NotBeNull();
+        }
+
+        [Test]
+        public void CanGetHashCode()
+        {
+            CronExpression expression = new CronExpression("0 15 15 5 11 ?");
+            CronExpression expression2 = new CronExpression("0 15 15 5 11 ?");
+            expression.GetHashCode().Should().Be(expression2.GetHashCode());
         }
 
         [Test]
