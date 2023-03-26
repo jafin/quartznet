@@ -2174,18 +2174,6 @@ namespace Quartz
         }
 
         /// <summary>
-        /// Determines whether given year is a leap year.
-        /// </summary>
-        /// <param name="year">The year.</param>
-        /// <returns>
-        /// 	<c>true</c> if the specified year is a leap year; otherwise, <c>false</c>.
-        /// </returns>
-        protected virtual bool IsLeapYear(int year)
-        {
-            return DateTime.IsLeapYear(year);
-        }
-
-        /// <summary>
         /// Gets the last day of month.
         /// </summary>
         /// <param name="monthNum">The month num.</param>
