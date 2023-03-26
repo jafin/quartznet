@@ -799,5 +799,51 @@ namespace Quartz.Tests.Unit
 
             Console.WriteLine("{0}ms", sw.ElapsedMilliseconds);
         }
+
+        [Test]
+        public void GetTimeBefore_IsNotImplement_AndAlwaysReturnsNull()
+        {
+            CronExpression expression = new CronExpression("0 15 15 5 11 ?");
+            var sut = expression.GetTimeBefore(new DateTimeOffset(2010, 12, 1, 1, 1, 1, TimeSpan.Zero));
+            sut.Should().Be(null);
+        }
+
+        [Test]
+        public void GetFinalFireTime_IsNotImplement_AndAlwaysReturnsNull()
+        {
+            CronExpression expression = new CronExpression("0 15 15 5 11 ?");
+            var sut = expression.GetFinalFireTime();
+            sut.Should().Be(null);
+        }
+
+        [Test]
+        public void CanGetNextInvalidTime()
+        {
+            CronExpression expression = new CronExpression("0 15 15 5 11 ?");
+            var sut = expression.GetNextInvalidTimeAfter(new DateTimeOffset(2010, 12, 1, 1, 1, 0, 0, TimeSpan.Zero));
+            sut.Should().NotBeNull();
+        }
+
+        [Test]
+        public void CanGetExpressionSummary()
+        {
+            CronExpression expression = new CronExpression("0 15 15 5 11 ?");
+            var sut = expression.GetExpressionSummary();
+            sut.Should().Be(
+                @"seconds: 0
+minutes: 15
+hours: 15
+daysOfMonth: 5
+months: 11
+daysOfWeek: ?
+lastdayOfWeek: False
+nearestWeekday: False
+NthDayOfWeek: 0
+lastdayOfMonth: False
+calendardayOfWeek: False
+calendardayOfMonth: False
+years: *
+");
+        }
     }
 }

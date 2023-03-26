@@ -209,61 +209,6 @@ namespace Quartz
     [Serializable]
     public class CronExpression : IDeserializationCallback, ISerializable
     {
-        /// <summary>
-        /// Field specification for second.
-        /// </summary>
-        protected const int Second = 0;
-
-        /// <summary>
-        /// Field specification for minute.
-        /// </summary>
-        protected const int Minute = 1;
-
-        /// <summary>
-        /// Field specification for hour.
-        /// </summary>
-        protected const int Hour = 2;
-
-        /// <summary>
-        /// Field specification for day of month.
-        /// </summary>
-        protected const int DayOfMonth = 3;
-
-        /// <summary>
-        /// Field specification for month.
-        /// </summary>
-        protected const int Month = 4;
-
-        /// <summary>
-        /// Field specification for day of week.
-        /// </summary>
-        protected const int DayOfWeek = 5;
-
-        /// <summary>
-        /// Field specification for year.
-        /// </summary>
-        protected const int Year = 6;
-
-        /// <summary>
-        /// Field specification for all wildcard value '*'.
-        /// </summary>
-        protected const int AllSpecInt = 99; // '*'
-
-        /// <summary>
-        /// Field specification for not specified value '?'.
-        /// </summary>
-        protected const int NoSpecInt = 98; // '?'
-
-        /// <summary>
-        /// Field specification for wildcard '*'.
-        /// </summary>
-        protected const int AllSpec = AllSpecInt;
-
-        /// <summary>
-        /// Field specification for no specification at all '?'.
-        /// </summary>
-        protected const int NoSpec = NoSpecInt;
-
         private static readonly Dictionary<string, int> monthMap = new Dictionary<string, int>(20);
         private static readonly Dictionary<string, int> dayMap = new Dictionary<string, int>(60);
 
@@ -578,17 +523,17 @@ namespace Quartz
                 daysOfWeek ??= new SortedSet<int>();
                 years ??= new SortedSet<int>();
 
-                var exprOn = Second;
+                var exprOn = CronExpressionConstants.Second;
 
                 foreach (var expr in expression.Split(splitSeparators, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()))
                 {
-                    if (exprOn > Year)
+                    if (exprOn > CronExpressionConstants.Year)
                     {
                         break;
                     }
 
                     // throw an exception if L is used with other days of the month
-                    if (exprOn == DayOfMonth && expr.IndexOf('L') != -1 && expr.Length > 1 && expr.IndexOf(",", StringComparison.Ordinal) >= 0)
+                    if (exprOn == CronExpressionConstants.DayOfMonth && expr.IndexOf('L') != -1 && expr.Length > 1 && expr.IndexOf(",", StringComparison.Ordinal) >= 0)
                     {
                         if (expr.Count(f => (f == 'L')) > 1)
                         {
@@ -596,11 +541,11 @@ namespace Quartz
                         }
                     }
                     // throw an exception if L is used with other days of the week
-                    if (exprOn == DayOfWeek && expr.IndexOf('L') != -1 && expr.Length > 1 && expr.IndexOf(",", StringComparison.Ordinal) >= 0)
+                    if (exprOn == CronExpressionConstants.DayOfWeek && expr.IndexOf('L') != -1 && expr.Length > 1 && expr.IndexOf(",", StringComparison.Ordinal) >= 0)
                     {
                         ThrowHelper.ThrowFormatException("Support for specifying 'L' with other days of the week is not implemented");
                     }
-                    if (exprOn == DayOfWeek && expr.IndexOf('#') != -1 && expr.IndexOf('#', expr.IndexOf('#') + 1) != -1)
+                    if (exprOn == CronExpressionConstants.DayOfWeek && expr.IndexOf('#') != -1 && expr.IndexOf('#', expr.IndexOf('#') + 1) != -1)
                     {
                         ThrowHelper.ThrowFormatException("Support for specifying multiple \"nth\" days is not implemented.");
                     }
@@ -613,22 +558,22 @@ namespace Quartz
                     exprOn++;
                 }
 
-                if (exprOn <= DayOfWeek)
+                if (exprOn <= CronExpressionConstants.DayOfWeek)
                 {
                     ThrowHelper.ThrowFormatException("Unexpected end of expression.");
                 }
 
-                if (exprOn <= Year)
+                if (exprOn <= CronExpressionConstants.Year)
                 {
-                    StoreExpressionVals(0, "*", Year);
+                    StoreExpressionVals(0, "*", CronExpressionConstants.Year);
                 }
 
-                var dow = GetSet(DayOfWeek);
-                var dom = GetSet(DayOfMonth);
+                var dow = GetSet(CronExpressionConstants.DayOfWeek);
+                var dom = GetSet(CronExpressionConstants.DayOfMonth);
 
                 // Copying the logic from the UnsupportedOperationException below
-                var dayOfMSpec = !dom.Contains(NoSpec);
-                var dayOfWSpec = !dow.Contains(NoSpec);
+                var dayOfMSpec = !dom.Contains(CronExpressionConstants.NoSpec);
+                var dayOfWSpec = !dow.Contains(CronExpressionConstants.NoSpec);
 
                 if ((dayOfMSpec && !dayOfWSpec) || (dayOfWSpec && !dayOfMSpec))
                 {
@@ -670,7 +615,7 @@ namespace Quartz
                 var sub = s.Substring(i, 3);
                 int sval;
                 var eval = -1;
-                if (type == Month)
+                if (type == CronExpressionConstants.Month)
                 {
                     sval = GetMonthNumber(sub) + 1;
                     if (sval <= 0)
@@ -693,7 +638,7 @@ namespace Quartz
                         }
                     }
                 }
-                else if (type == DayOfWeek)
+                else if (type == CronExpressionConstants.DayOfWeek)
                 {
                     sval = GetDayOfWeekNumber(sub);
                     if (sval < 0)
@@ -777,22 +722,22 @@ namespace Quartz
                 {
                     ThrowHelper.ThrowFormatException("Illegal character after '?': " + s[i]);
                 }
-                if (type != DayOfWeek && type != DayOfMonth)
+                if (type != CronExpressionConstants.DayOfWeek && type != CronExpressionConstants.DayOfMonth)
                 {
                     ThrowHelper.ThrowFormatException(
                         "'?' can only be specified for Day-of-Month or Day-of-Week.");
                 }
-                if (type == DayOfWeek && !lastdayOfMonth)
+                if (type == CronExpressionConstants.DayOfWeek && !lastdayOfMonth)
                 {
                     var val = daysOfMonth.LastOrDefault();
-                    if (val == NoSpecInt)
+                    if (val == CronExpressionConstants.NoSpecInt)
                     {
                         ThrowHelper.ThrowFormatException(
                             "'?' can only be specified for Day-of-Month -OR- Day-of-Week.");
                     }
                 }
 
-                AddToSet(NoSpecInt, -1, 0, type);
+                AddToSet(CronExpressionConstants.NoSpecInt, -1, 0, type);
                 return i;
             }
 
@@ -801,7 +746,7 @@ namespace Quartz
             {
                 if (startsWithAsterisk && i + 1 >= s.Length)
                 {
-                    AddToSet(AllSpecInt, -1, incr, type);
+                    AddToSet(CronExpressionConstants.AllSpecInt, -1, incr, type);
                     return i + 1;
                 }
                 if (c == '/' && (i + 1 >= s.Length || s[i + 1] == ' ' || s[i + 1] == '\t'))
@@ -841,21 +786,21 @@ namespace Quartz
                     incr = 1;
                 }
 
-                AddToSet(AllSpecInt, -1, incr, type);
+                AddToSet(CronExpressionConstants.AllSpecInt, -1, incr, type);
                 return i;
             }
             if (c == 'L')
             {
                 i++;
-                if (type == DayOfMonth)
+                if (type == CronExpressionConstants.DayOfMonth)
                 {
                     lastdayOfMonth = true;
                 }
-                if (type == DayOfWeek)
+                if (type == CronExpressionConstants.DayOfWeek)
                 {
                     AddToSet(7, 7, 0, type);
                 }
-                if (type == DayOfMonth && s.Length > i)
+                if (type == CronExpressionConstants.DayOfMonth && s.Length > i)
                 {
                     c = s[i];
                     if (c == '-')
@@ -912,23 +857,23 @@ namespace Quartz
         // ReSharper disable once UnusedParameter.Local
         private static void CheckIncrementRange(int incr, int type)
         {
-            if (incr > 59 && (type == Second || type == Minute))
+            if (incr > 59 && (type == CronExpressionConstants.Second || type == CronExpressionConstants.Minute))
             {
                 ThrowHelper.ThrowFormatException($"Increment > 60 : {incr}");
             }
-            if (incr > 23 && type == Hour)
+            if (incr > 23 && type == CronExpressionConstants.Hour)
             {
                 ThrowHelper.ThrowFormatException($"Increment > 24 : {incr}");
             }
-            if (incr > 31 && type == DayOfMonth)
+            if (incr > 31 && type == CronExpressionConstants.DayOfMonth)
             {
                 ThrowHelper.ThrowFormatException($"Increment > 31 : {incr}");
             }
-            if (incr > 7 && type == DayOfWeek)
+            if (incr > 7 && type == CronExpressionConstants.DayOfWeek)
             {
                 ThrowHelper.ThrowFormatException($"Increment > 7 : {incr}");
             }
-            if (incr > 12 && type == Month)
+            if (incr > 12 && type == CronExpressionConstants.Month)
             {
                 ThrowHelper.ThrowFormatException($"Increment > 12 : {incr}");
             }
@@ -957,7 +902,7 @@ namespace Quartz
 
             if (c == 'L')
             {
-                if (type == DayOfWeek)
+                if (type == CronExpressionConstants.DayOfWeek)
                 {
                     if (val < 1 || val > 7)
                     {
@@ -977,7 +922,7 @@ namespace Quartz
 
             if (c == 'W')
             {
-                if (type == DayOfMonth)
+                if (type == CronExpressionConstants.DayOfMonth)
                 {
                     nearestWeekday = true;
                 }
@@ -998,7 +943,7 @@ namespace Quartz
 
             if (c == '#')
             {
-                if (type != DayOfWeek)
+                if (type != CronExpressionConstants.DayOfWeek)
                 {
                     ThrowHelper.ThrowFormatException($"'#' option is not valid here. (pos={i})");
                 }
@@ -1024,11 +969,11 @@ namespace Quartz
 
             if (c == 'C')
             {
-                if (type == DayOfWeek)
+                if (type == CronExpressionConstants.DayOfWeek)
                 {
                     calendardayOfWeek = true;
                 }
-                else if (type == DayOfMonth)
+                else if (type == CronExpressionConstants.DayOfMonth)
                 {
                     calendardayOfMonth = true;
                 }
@@ -1130,55 +1075,28 @@ namespace Quartz
         /// <value>The cron expression string.</value>
         public string CronExpressionString { get; }
 
+
         /// <summary>
         /// Gets the expression summary.
         /// </summary>
         /// <returns></returns>
         public virtual string GetExpressionSummary()
         {
-            var buf = new StringBuilder();
-
-            buf.Append("seconds: ");
-            buf.Append(GetExpressionSetSummary(seconds));
-            buf.Append("\n");
-            buf.Append("minutes: ");
-            buf.Append(GetExpressionSetSummary(minutes));
-            buf.Append("\n");
-            buf.Append("hours: ");
-            buf.Append(GetExpressionSetSummary(hours));
-            buf.Append("\n");
-            buf.Append("daysOfMonth: ");
-            buf.Append(GetExpressionSetSummary(daysOfMonth));
-            buf.Append("\n");
-            buf.Append("months: ");
-            buf.Append(GetExpressionSetSummary(months));
-            buf.Append("\n");
-            buf.Append("daysOfWeek: ");
-            buf.Append(GetExpressionSetSummary(daysOfWeek));
-            buf.Append("\n");
-            buf.Append("lastdayOfWeek: ");
-            buf.Append(lastdayOfWeek);
-            buf.Append("\n");
-            buf.Append("nearestWeekday: ");
-            buf.Append(nearestWeekday);
-            buf.Append("\n");
-            buf.Append("NthDayOfWeek: ");
-            buf.Append(nthdayOfWeek);
-            buf.Append("\n");
-            buf.Append("lastdayOfMonth: ");
-            buf.Append(lastdayOfMonth);
-            buf.Append("\n");
-            buf.Append("calendardayOfWeek: ");
-            buf.Append(calendardayOfWeek);
-            buf.Append("\n");
-            buf.Append("calendardayOfMonth: ");
-            buf.Append(calendardayOfMonth);
-            buf.Append("\n");
-            buf.Append("years: ");
-            buf.Append(GetExpressionSetSummary(years));
-            buf.Append("\n");
-
-            return buf.ToString();
+            return new CronExpressionSummary(
+                seconds,
+                minutes,
+                hours,
+                daysOfMonth,
+                months,
+                daysOfWeek,
+                lastdayOfWeek,
+                nearestWeekday,
+                nthdayOfWeek,
+                lastdayOfMonth,
+                calendardayOfWeek,
+                calendardayOfMonth,
+                years
+            ).ToString();
         }
 
         /// <summary>
@@ -1188,11 +1106,11 @@ namespace Quartz
         /// <returns></returns>
         protected virtual string GetExpressionSetSummary(ICollection<int> data)
         {
-            if (data.Contains(NoSpec))
+            if (data.Contains(CronExpressionConstants.NoSpec))
             {
                 return "?";
             }
-            if (data.Contains(AllSpec))
+            if (data.Contains(CronExpressionConstants.AllSpec))
             {
                 return "*";
             }
@@ -1255,45 +1173,45 @@ namespace Quartz
         {
             var data = GetSet(type);
 
-            if (type == Second || type == Minute)
+            if (type == CronExpressionConstants.Second || type == CronExpressionConstants.Minute)
             {
-                if ((val < 0 || val > 59 || end > 59) && val != AllSpecInt)
+                if ((val < 0 || val > 59 || end > 59) && val != CronExpressionConstants.AllSpecInt)
                 {
-                    ThrowHelper.ThrowFormatException("Minute and Second values must be between 0 and 59");
+                    ThrowHelper.ThrowFormatException("Minute and CronExpressionConstants.Second values must be between 0 and 59");
                 }
             }
-            else if (type == Hour)
+            else if (type == CronExpressionConstants.Hour)
             {
-                if ((val < 0 || val > 23 || end > 23) && val != AllSpecInt)
+                if ((val < 0 || val > 23 || end > 23) && val != CronExpressionConstants.AllSpecInt)
                 {
                     ThrowHelper.ThrowFormatException("Hour values must be between 0 and 23");
                 }
             }
-            else if (type == DayOfMonth)
+            else if (type == CronExpressionConstants.DayOfMonth)
             {
-                if ((val < 1 || val > 31 || end > 31) && val != AllSpecInt
-                                                      && val != NoSpecInt)
+                if ((val < 1 || val > 31 || end > 31) && val != CronExpressionConstants.AllSpecInt
+                                                      && val != CronExpressionConstants.NoSpecInt)
                 {
                     ThrowHelper.ThrowFormatException("Day of month values must be between 1 and 31");
                 }
             }
-            else if (type == Month)
+            else if (type == CronExpressionConstants.Month)
             {
-                if ((val < 1 || val > 12 || end > 12) && val != AllSpecInt)
+                if ((val < 1 || val > 12 || end > 12) && val != CronExpressionConstants.AllSpecInt)
                 {
                     ThrowHelper.ThrowFormatException("Month values must be between 1 and 12");
                 }
             }
-            else if (type == DayOfWeek)
+            else if (type == CronExpressionConstants.DayOfWeek)
             {
-                if ((val == 0 || val > 7 || end > 7) && val != AllSpecInt
-                                                     && val != NoSpecInt)
+                if ((val == 0 || val > 7 || end > 7) && val != CronExpressionConstants.AllSpecInt
+                                                     && val != CronExpressionConstants.NoSpecInt)
                 {
                     ThrowHelper.ThrowFormatException("Day-of-Week values must be between 1 and 7");
                 }
             }
 
-            if ((incr == 0 || incr == -1) && val != AllSpecInt)
+            if ((incr == 0 || incr == -1) && val != CronExpressionConstants.AllSpecInt)
             {
                 if (val != -1)
                 {
@@ -1301,7 +1219,7 @@ namespace Quartz
                 }
                 else
                 {
-                    data.Add(NoSpec);
+                    data.Add(CronExpressionConstants.NoSpec);
                 }
                 return;
             }
@@ -1309,74 +1227,74 @@ namespace Quartz
             var startAt = val;
             var stopAt = end;
 
-            if (val == AllSpecInt && incr <= 0)
+            if (val == CronExpressionConstants.AllSpecInt && incr <= 0)
             {
                 incr = 1;
-                data.Add(AllSpec); // put in a marker, but also fill values
+                data.Add(CronExpressionConstants.AllSpec); // put in a marker, but also fill values
             }
 
-            if (type == Second || type == Minute)
+            if (type == CronExpressionConstants.Second || type == CronExpressionConstants.Minute)
             {
                 if (stopAt == -1)
                 {
                     stopAt = 59;
                 }
-                if (startAt == -1 || startAt == AllSpecInt)
+                if (startAt == -1 || startAt == CronExpressionConstants.AllSpecInt)
                 {
                     startAt = 0;
                 }
             }
-            else if (type == Hour)
+            else if (type == CronExpressionConstants.Hour)
             {
                 if (stopAt == -1)
                 {
                     stopAt = 23;
                 }
-                if (startAt == -1 || startAt == AllSpecInt)
+                if (startAt == -1 || startAt == CronExpressionConstants.AllSpecInt)
                 {
                     startAt = 0;
                 }
             }
-            else if (type == DayOfMonth)
+            else if (type == CronExpressionConstants.DayOfMonth)
             {
                 if (stopAt == -1)
                 {
                     stopAt = 31;
                 }
-                if (startAt == -1 || startAt == AllSpecInt)
+                if (startAt == -1 || startAt == CronExpressionConstants.AllSpecInt)
                 {
                     startAt = 1;
                 }
             }
-            else if (type == Month)
+            else if (type == CronExpressionConstants.Month)
             {
                 if (stopAt == -1)
                 {
                     stopAt = 12;
                 }
-                if (startAt == -1 || startAt == AllSpecInt)
+                if (startAt == -1 || startAt == CronExpressionConstants.AllSpecInt)
                 {
                     startAt = 1;
                 }
             }
-            else if (type == DayOfWeek)
+            else if (type == CronExpressionConstants.DayOfWeek)
             {
                 if (stopAt == -1)
                 {
                     stopAt = 7;
                 }
-                if (startAt == -1 || startAt == AllSpecInt)
+                if (startAt == -1 || startAt == CronExpressionConstants.AllSpecInt)
                 {
                     startAt = 1;
                 }
             }
-            else if (type == Year)
+            else if (type == CronExpressionConstants.Year)
             {
                 if (stopAt == -1)
                 {
                     stopAt = MaxYear;
                 }
-                if (startAt == -1 || startAt == AllSpecInt)
+                if (startAt == -1 || startAt == CronExpressionConstants.AllSpecInt)
                 {
                     startAt = 1970;
                 }
@@ -1390,25 +1308,25 @@ namespace Quartz
             {
                 switch (type)
                 {
-                    case Second:
+                    case CronExpressionConstants.Second:
                         max = 60;
                         break;
-                    case Minute:
+                    case CronExpressionConstants.Minute:
                         max = 60;
                         break;
-                    case Hour:
+                    case CronExpressionConstants.Hour:
                         max = 24;
                         break;
-                    case Month:
+                    case CronExpressionConstants.Month:
                         max = 12;
                         break;
-                    case DayOfWeek:
+                    case CronExpressionConstants.DayOfWeek:
                         max = 7;
                         break;
-                    case DayOfMonth:
+                    case CronExpressionConstants.DayOfMonth:
                         max = 31;
                         break;
-                    case Year:
+                    case CronExpressionConstants.Year:
                         ThrowHelper.ThrowArgumentException("Start year must be less than stop year");
                         break;
                     default:
@@ -1431,7 +1349,9 @@ namespace Quartz
                     var i2 = i % max;
 
                     // 1-indexed ranges should not include 0, and should include their max
-                    if (i2 == 0 && (type == Month || type == DayOfWeek || type == DayOfMonth))
+                    if (i2 == 0 && (type == CronExpressionConstants.Month 
+                                    || type == CronExpressionConstants.DayOfWeek 
+                                    || type == CronExpressionConstants.DayOfMonth))
                     {
                         i2 = max;
                     }
@@ -1450,19 +1370,19 @@ namespace Quartz
         {
             switch (type)
             {
-                case Second:
+                case CronExpressionConstants.Second:
                     return seconds;
-                case Minute:
+                case CronExpressionConstants.Minute:
                     return minutes;
-                case Hour:
+                case CronExpressionConstants.Hour:
                     return hours;
-                case DayOfMonth:
+                case CronExpressionConstants.DayOfMonth:
                     return daysOfMonth;
-                case Month:
+                case CronExpressionConstants.Month:
                     return months;
-                case DayOfWeek:
+                case CronExpressionConstants.DayOfWeek:
                     return daysOfWeek;
-                case Year:
+                case CronExpressionConstants.Year:
                     return years;
                 default:
                     ThrowHelper.ThrowArgumentOutOfRangeException();
@@ -1829,8 +1749,8 @@ namespace Quartz
             var tmon = mon;
 
             // get day
-            var dayOfMSpec = !daysOfMonth.Contains(NoSpec);
-            var dayOfWSpec = !daysOfWeek.Contains(NoSpec);
+            var dayOfMSpec = !daysOfMonth.Contains(CronExpressionConstants.NoSpec);
+            var dayOfWSpec = !daysOfWeek.Contains(CronExpressionConstants.NoSpec);
             SortedSet<int> tailDays;
             if (dayOfMSpec && !dayOfWSpec)
             {
