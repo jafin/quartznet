@@ -4,7 +4,7 @@
 
 ## Release 4.0.0, T.B.D
 
-* BREAKING CHANGES
+### BREAKING CHANGES
 
   * netstandard2.0 build no longer reference System.Configuration.ConfigurationManager and thus there's no support for Full Framework style .config files
   * **JobKey** and **TriggerKey** now throw an **ArgumentNullException** when you specify **null** for _name_ or _group_ (#1359)
@@ -29,12 +29,12 @@
     overridden in pair with `Equals(object? obj)` and `GetHashCode()`.
 
   * The **Quartz.Util.DictionaryExtensions** type was removed.
-    
+
   * The 'Get(TKey key)' method of **DirtyFlagMap<TKey,TValue>** has been removed. You can instead use the
     this[TKey key] indexer or `TryGetValue(TKey key, out TValue value)` to obtain the value for a given key.
-    
+
   * (Logging): `LibLog` has been removed and replaced with `Microsoft.Logging.Abstractions` (#1480).
-      
+
   * The following properties of **DirtyFlagMap<TKey,TValue>** are now explicit interface implementations:
     * IsReadOnly
     * IsFixedSize
@@ -62,7 +62,25 @@
     receive.
 
   * Introduce JobType to allow storing job's type information without actual Type instance (#1610)
+  
+  * IJobExecutionContext.RecoveringTriggerKey now returns null if IJobExecutionContext.Recovering is false instead of throwing exception.
 
+  * `Task` return types and parameters have been changed to `ValueTask`.  Any consumers of Quartz expecting a `Task` will require to update the signatures to `ValueTask`,
+     or use the `AsTask()` Method on ValueTask to Return the `ValueTask` as a `Task`  (#988)
+
+#### Cron Parser
+
+  * Add cron parser support for 'L' and 'LW' in expression combinations for daysOfMonth (#1939) (#1288)
+  * Add cron parser support for `LW-<OFFSET>`. i.e. `LW-2` (calculate the Last weekday then offset by -2) (#1287)
+    If the calculated day would cross a month boundary it will be reset to the 1st of the month. (e.g. LW-30 in Feb will be 1st Feb)
+  * Add cron parser support for day-of-month and day-of-week together. (#1543)
+  
+### FIXES
+
+  * Fix for deserializing CronExpression using Json Serializer throwing error calling `GetNextValidTimeAfter`.  (#1996)
+    `IDeserializationCallback` interface was removed from class `CronExpression` and the deserialization logic 
+    added to the constructor `CronExpression(SerializationInfo info, StreamingContext context)`.
+  
 
 ## Release 3.6.1, Feb 25 2023
 
@@ -74,7 +92,6 @@ without having the attribute `DisallowConcurrentExecutionAttribute` on type itse
     * Add missing "disallow concurrency" materialization for jobs (#1923)
     * Allow accessing the wrapped scoped job instance from job execution context (#1917)
     * JobDiagnosticsWriter can throw error when writing context data (#1191)
-
 
 ## Release 3.6.0, Jan 29 2023
 

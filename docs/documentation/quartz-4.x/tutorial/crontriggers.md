@@ -19,21 +19,23 @@ endTime that specifies when the schedule should be discontinued.
 A cron expression is a string comprised of 6 or 7 fields separated by white space.
 Fields can contain any of the allowed values, along with various combinations of the allowed special characters for that field. The fields are as follows:
 
-| Field Name| Mandatory | Allowed Values | Allowed Special Characters  |
-|--------------|---------------|-----------------------|-----------------------------------|
-| Seconds  | YES   | 0-59      | , - * /       |
-| Minutes  | YES   | 0-59     | , - * /       |
-| Hours  | YES   | 0-23     | , - * /       |
-| Day of month | YES   | 1-31     | , - * ? / L W      |
-| Month  | YES   | 1-12 or JAN-DEC  | , - * /       |
-| Day of week | YES   | 1-7 or SUN-SAT  | , - * ? / L #      |
-| Year   | NO   | empty, 1970-2099  | , - * /       |
+| Field Name   | Mandatory | Allowed Values   | Allowed Special Characters |
+|--------------|-----------|------------------|----------------------------|
+| Seconds      | YES       | 0-59             | , - * /                    |
+| Minutes      | YES       | 0-59             | , - * /                    |
+| Hours        | YES       | 0-23             | , - * /                    |
+| Day of month | YES       | 1-31             | , - * ? / L W              |
+| Month        | YES       | 1-12 or JAN-DEC  | , - * /                    |
+| Day of week  | YES       | 1-7 or SUN-SAT   | , - * ? / L #              |
+| Year         | NO        | empty, 1970-2099 | , - * /                    |
 
 ::: tip
 For easy generation of cron intervals using UI you can use some of these services:
 
 - [Cron Expression Generator & Explainer](https://www.freeformatter.com/cron-expression-generator-quartz.html)
 - [CronMaker](http://www.cronmaker.com/)
+
+NOTE: There are many cron standards/implementations. The results from some generators may not always be correct for Quartz.NET
 :::
 
 An example of a complete cron-expression is the string `0 0 12 ? * WED` - which means "every Wednesday at 12:00 pm".
@@ -47,7 +49,7 @@ Wild-cards (the `*` character) can be used to say "every" possible value of this
 All of the fields have a set of valid values that can be specified. These values should be fairly obvious - such as the numbers
 0 to 59 for seconds and minutes, and the values 0 to 23 for hours. Day-of-Month can be any value 1-31, but you need to be careful
 about how many days are in a given month! Months can be specified as values between 1 and 12, or by using the strings
-JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV and DEC. Days-of-Week can be specified as vaules between 1 and 7 (1 = Sunday)
+JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV and DEC. Days-of-Week can be specified as values between 1 and 7 (1 = Sunday)
 or by using the strings SUN, MON, TUE, WED, THU, FRI and SAT.
 
 The '/' character can be used to specify increments to values. For example, if you put '0/15' in the Minutes field, it means 'every 15 minutes,
@@ -62,8 +64,7 @@ The 'L' character is allowed for the day-of-month and day-of-week fields. This c
 but it has different meaning in each of the two fields. For example, the value "L" in the day-of-month field means
 "the last day of the month" - day 31 for January, day 28 for February on non-leap years. If used in the day-of-week field by itself,
 it simply means "7" or "SAT". But if used in the day-of-week field after another value, it means "the last xxx day of the month" -
-for example "6L" or "FRIL" both mean "the last friday of the month". When using the 'L' option, it is important not to specify lists,
-or ranges of values, as you'll get confusing results.
+for example "6L" or "FRIL" both mean "the last Friday of the month".
 
 The 'W' is used to specify the weekday (Monday-Friday) nearest the given day. As an example, if you were to specify "15W" as the value for the day-of-month field, the meaning is: "the nearest weekday to the 15th of the month".
 
@@ -165,7 +166,7 @@ ITrigger trigger = TriggerBuilder.Create()
 ## CronTrigger Misfire Instructions
 
 The following instructions can be used to inform Quartz what it should do when a misfire occurs for CronTrigger.
-(Misfire situations were introduced in the More About Triggers section of this tutorial). These instructions are defined in  as
+(Misfire situations were introduced in the More About Triggers section of this tutorial). These instructions are defined in as
 constants (and API documentation has description for their behavior). The instructions include:
 
 - `MisfireInstruction.IgnoreMisfirePolicy`

@@ -19,6 +19,7 @@
 
 #endregion
 
+using System.Collections;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Text;
@@ -207,173 +208,64 @@ namespace Quartz
     /// <author>Refactoring from CronTrigger to CronExpression by Aaron Craven</author>
     /// <author>Marko Lahma (.NET)</author>
     [Serializable]
-    public class CronExpression : IDeserializationCallback, ISerializable
+    public sealed class CronExpression : ISerializable
     {
-        /// <summary>
-        /// Field specification for second.
-        /// </summary>
-        protected const int Second = 0;
-
-        /// <summary>
-        /// Field specification for minute.
-        /// </summary>
-        protected const int Minute = 1;
-
-        /// <summary>
-        /// Field specification for hour.
-        /// </summary>
-        protected const int Hour = 2;
-
-        /// <summary>
-        /// Field specification for day of month.
-        /// </summary>
-        protected const int DayOfMonth = 3;
-
-        /// <summary>
-        /// Field specification for month.
-        /// </summary>
-        protected const int Month = 4;
-
-        /// <summary>
-        /// Field specification for day of week.
-        /// </summary>
-        protected const int DayOfWeek = 5;
-
-        /// <summary>
-        /// Field specification for year.
-        /// </summary>
-        protected const int Year = 6;
-
-        /// <summary>
-        /// Field specification for all wildcard value '*'.
-        /// </summary>
-        protected const int AllSpecInt = 99; // '*'
-
-        /// <summary>
-        /// Field specification for not specified value '?'.
-        /// </summary>
-        protected const int NoSpecInt = 98; // '?'
-
-        /// <summary>
-        /// Field specification for wildcard '*'.
-        /// </summary>
-        protected const int AllSpec = AllSpecInt;
-
-        /// <summary>
-        /// Field specification for no specification at all '?'.
-        /// </summary>
-        protected const int NoSpec = NoSpecInt;
-
-        private static readonly Dictionary<string, int> monthMap = new Dictionary<string, int>(20);
-        private static readonly Dictionary<string, int> dayMap = new Dictionary<string, int>(60);
-
         private TimeZoneInfo? timeZone;
 
-        /// <summary>
-        /// Seconds.
-        /// </summary>
-        [NonSerialized] protected SortedSet<int> seconds = null!;
-
-        /// <summary>
-        /// minutes.
-        /// </summary>
-        [NonSerialized] protected SortedSet<int> minutes = null!;
-
-        /// <summary>
-        /// Hours.
-        /// </summary>
-        [NonSerialized] protected SortedSet<int> hours = null!;
-
-        /// <summary>
-        /// Days of month.
-        /// </summary>
-        [NonSerialized] protected SortedSet<int> daysOfMonth = null!;
-
-        /// <summary>
-        /// Months.
-        /// </summary>
-        [NonSerialized] protected SortedSet<int> months = null!;
-
-        /// <summary>
-        /// Days of week.
-        /// </summary>
-        [NonSerialized] protected SortedSet<int> daysOfWeek = null!;
-
-        /// <summary>
-        /// Years.
-        /// </summary>
-        [NonSerialized] protected SortedSet<int> years = null!;
+        [NonSerialized] private CronField seconds = new();
+        [NonSerialized] private CronField minutes = new();
+        [NonSerialized] private CronField hours = new();
+        [NonSerialized] private CronField daysOfMonth = new();
+        [NonSerialized] private CronField months = new();
+        [NonSerialized] private CronField daysOfWeek = new();
+        [NonSerialized] private CronField years = new();
 
         /// <summary>
         /// Last day of week.
         /// </summary>
-        [NonSerialized] protected bool lastdayOfWeek;
+        [NonSerialized] private bool lastDayOfWeek;
 
         /// <summary>
         /// N number of weeks.
         /// </summary>
-        [NonSerialized] protected int everyNthWeek;
+        [NonSerialized] private int everyNthWeek;
 
         /// <summary>
         /// Nth day of week.
         /// </summary>
-        [NonSerialized] protected int nthdayOfWeek;
+        [NonSerialized] private int nthdayOfWeek;
 
         /// <summary>
         /// Last day of month.
         /// </summary>
-        [NonSerialized] protected bool lastdayOfMonth;
+        [NonSerialized] private bool lastDayOfMonth;
 
         /// <summary>
         /// Nearest weekday.
         /// </summary>
-        [NonSerialized] protected bool nearestWeekday;
+        [NonSerialized] private bool nearestWeekday;
 
-        [NonSerialized] protected int lastdayOffset;
+        [NonSerialized] private int lastDayOffset;
+
+        [NonSerialized] private int lastWeekdayOffset;
 
         /// <summary>
         /// Calendar day of week.
         /// </summary>
-        [NonSerialized] protected bool calendardayOfWeek;
+        [NonSerialized] private bool calendarDayOfWeek;
 
         /// <summary>
         /// Calendar day of month.
         /// </summary>
-        [NonSerialized] protected bool calendardayOfMonth;
-
-        /// <summary>
-        /// Expression parsed.
-        /// </summary>
-        [NonSerialized] protected bool expressionParsed;
+        [NonSerialized] private bool calendarDayOfMonth;
 
         public static readonly int MaxYear = DateTime.Now.Year + 100;
 
-        private static readonly char[] splitSeparators = {' ', '\t', '\r', '\n'};
-        private static readonly char[] commaSeparator = {','};
-        private static readonly Regex regex = new Regex("^L-[0-9]*[W]?", RegexOptions.Compiled);
+        private static Regex regex = new Regex("^L(-\\d{1,2})?(W(-\\d{1,2})?)?$", RegexOptions.Compiled); //e.g. LW L-0W L-4 L-12W LW-4 LW-12
+        private static Regex offsetRegex = new Regex("LW-(?<offset>[0-9]+)", RegexOptions.Compiled);
 
         static CronExpression()
         {
-            monthMap.Add("JAN", 0);
-            monthMap.Add("FEB", 1);
-            monthMap.Add("MAR", 2);
-            monthMap.Add("APR", 3);
-            monthMap.Add("MAY", 4);
-            monthMap.Add("JUN", 5);
-            monthMap.Add("JUL", 6);
-            monthMap.Add("AUG", 7);
-            monthMap.Add("SEP", 8);
-            monthMap.Add("OCT", 9);
-            monthMap.Add("NOV", 10);
-            monthMap.Add("DEC", 11);
-
-            dayMap.Add("SUN", 1);
-            dayMap.Add("MON", 2);
-            dayMap.Add("TUE", 3);
-            dayMap.Add("WED", 4);
-            dayMap.Add("THU", 5);
-            dayMap.Add("FRI", 6);
-            dayMap.Add("SAT", 7);
         }
 
         ///<summary>
@@ -391,45 +283,47 @@ namespace Quartz
                 ThrowHelper.ThrowArgumentException("cronExpression cannot be null", nameof(cronExpression));
             }
 
-            CronExpressionString = CultureInfo.InvariantCulture.TextInfo.ToUpper(cronExpression);
+            CronExpressionString = CultureInfo.InvariantCulture.TextInfo.ToUpper(cronExpression).Trim();
             BuildExpression(CronExpressionString);
+        }
+
+        private int GetVersion(SerializationInfo info)
+        {
+            try
+            {
+                return info.GetInt32("version");
+            }
+            catch
+            {
+                return 0;
+            }
         }
 
         /// <summary>
         /// Serialization constructor.
         /// </summary>
-        /// <param name="info"></param>
-        /// <param name="context"></param>
-        protected CronExpression(SerializationInfo info, StreamingContext context)
+        private CronExpression(SerializationInfo info, StreamingContext context)
         {
-            int version;
-            try
-            {
-                version = info.GetInt32("version");
-            }
-            catch
-            {
-                version = 0;
-            }
-
+            var version = GetVersion(info);
             switch (version)
             {
                 case 0:
-                    CronExpressionString = (string) info.GetValue("cronExpressionString", typeof(string))!;
-                    TimeZone = (TimeZoneInfo) info.GetValue("timeZone", typeof(TimeZoneInfo))!;
+                    CronExpressionString = info.GetValue<string>("cronExpressionString")!;
+                    TimeZone = info.GetValue<TimeZoneInfo>("timeZone")!;
                     break;
                 case 1:
-                    CronExpressionString = (string) info.GetValue("cronExpression", typeof(string))!;
-                    var timeZoneId = (string) info.GetValue("timeZoneId", typeof(string))!;
+                    CronExpressionString = info.GetValue<string>("cronExpression")!;
+                    var timeZoneId = info.GetValue<string>("timeZoneId")!;
                     if (!string.IsNullOrEmpty(timeZoneId))
                     {
                         timeZone = TimeZoneUtil.FindTimeZoneById(timeZoneId);
                     }
                     break;
                 default:
-                    ThrowHelper.ThrowNotSupportedException("Unknown serialization version");
+                    ThrowHelper.ThrowNotSupportedException($"Unknown serialization version {version}");
                     break;
             }
+            BuildExpression(CronExpressionString);
         }
 
         [System.Security.SecurityCritical]
@@ -449,20 +343,14 @@ namespace Quartz
         /// </remarks>
         /// <param name="dateUtc">The date to evaluate.</param>
         /// <returns>a boolean indicating whether the given date satisfies the cron expression</returns>
-        public virtual bool IsSatisfiedBy(DateTimeOffset dateUtc)
+        public bool IsSatisfiedBy(DateTimeOffset dateUtc)
         {
             var withoutMilliseconds = new DateTimeOffset(dateUtc.Year, dateUtc.Month, dateUtc.Day, dateUtc.Hour, dateUtc.Minute, dateUtc.Second, dateUtc.Offset);
-            DateTimeOffset test = withoutMilliseconds.AddSeconds(-1);
+            var test = withoutMilliseconds.AddSeconds(-1);
+            var timeAfter = GetTimeAfter(test);
 
-            DateTimeOffset? timeAfter = GetTimeAfter(test);
-
-            if (timeAfter.HasValue
-                && timeAfter.Value.Equals(withoutMilliseconds))
-            {
-                return true;
-            }
-
-            return false;
+            return timeAfter.HasValue
+                   && timeAfter.Value.Equals(withoutMilliseconds);
         }
 
         /// <summary>
@@ -471,7 +359,7 @@ namespace Quartz
         /// </summary>
         /// <param name="date">the date/time at which to begin the search for the next valid date/time</param>
         /// <returns>the next valid date/time</returns>
-        public virtual DateTimeOffset? GetNextValidTimeAfter(DateTimeOffset date)
+        public DateTimeOffset? GetNextValidTimeAfter(DateTimeOffset date)
         {
             return GetTimeAfter(date);
         }
@@ -482,13 +370,12 @@ namespace Quartz
         /// </summary>
         /// <param name="date">the date/time at which to begin the search for the next invalid date/time</param>
         /// <returns>the next valid date/time</returns>
-        public virtual DateTimeOffset? GetNextInvalidTimeAfter(DateTimeOffset date)
+        public DateTimeOffset? GetNextInvalidTimeAfter(DateTimeOffset date)
         {
             long difference = 1000;
 
-            //move back to the nearest second so differences will be accurate
-            DateTimeOffset lastDate =
-                new DateTimeOffset(date.Year, date.Month, date.Day, date.Hour, date.Minute, date.Second, date.Offset).AddSeconds(-1);
+            // move back to the nearest second so differences will be accurate
+            var lastDate = new DateTimeOffset(date.Year, date.Month, date.Day, date.Hour, date.Minute, date.Second, date.Offset).AddSeconds(-1);
 
             //TODO: IMPROVE THIS! The following is a BAD solution to this problem. Performance will be very bad here, depending on the cron expression. It is, however A solution.
 
@@ -497,14 +384,14 @@ namespace Quartz
             // the second immediately following it.
             while (difference == 1000)
             {
-                DateTimeOffset? newDate = GetTimeAfter(lastDate);
+                var newDate = GetTimeAfter(lastDate);
 
                 if (newDate == null)
                 {
                     break;
                 }
 
-                difference = (long) (newDate.Value - lastDate).TotalMilliseconds;
+                difference = (long)(newDate.Value - lastDate).TotalMilliseconds;
 
                 if (difference == 1000)
                 {
@@ -522,15 +409,7 @@ namespace Quartz
         public TimeZoneInfo TimeZone
         {
             set => timeZone = value;
-            get
-            {
-                if (timeZone == null)
-                {
-                    timeZone = TimeZoneInfo.Local;
-                }
-
-                return timeZone;
-            }
+            get => timeZone ??= TimeZoneInfo.Local;
         }
 
         /// <summary>
@@ -553,7 +432,7 @@ namespace Quartz
         {
             try
             {
-                new CronExpression(cronExpression);
+                var _ = new CronExpression(cronExpression);
             }
             catch (FormatException)
             {
@@ -565,7 +444,7 @@ namespace Quartz
 
         public static void ValidateExpression(string cronExpression)
         {
-            new CronExpression(cronExpression);
+            var _ = new CronExpression(cronExpression);
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -578,88 +457,69 @@ namespace Quartz
         /// Builds the expression.
         /// </summary>
         /// <param name="expression">The expression.</param>
-        protected void BuildExpression(string expression)
+        private void BuildExpression(string expression)
         {
-            expressionParsed = true;
-
             try
             {
-                seconds ??= new SortedSet<int>();
-                minutes ??= new SortedSet<int>();
-                hours ??= new SortedSet<int>();
-                daysOfMonth ??= new SortedSet<int>();
-                months ??= new SortedSet<int>();
-                daysOfWeek ??= new SortedSet<int>();
-                years ??= new SortedSet<int>();
+                seconds.Clear();
+                minutes.Clear();
+                hours.Clear();
+                daysOfMonth.Clear();
+                months.Clear();
+                daysOfWeek.Clear();
+                years.Clear();
 
-                int exprOn = Second;
+                var exprOn = CronExpressionConstants.Second;
 
-                string[] exprsTok = expression.Split(splitSeparators, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string exprTok in exprsTok)
+                foreach (var (expr, _) in expression.SpanSplit(' ', '\t'))
                 {
-                    string expr = exprTok.Trim();
-
-                    if (expr.Length == 0)
-                    {
-                        continue;
-                    }
-                    if (exprOn > Year)
+                    if (exprOn > CronExpressionConstants.Year)
                     {
                         break;
                     }
 
                     // throw an exception if L is used with other days of the month
-                    if (exprOn == DayOfMonth && expr.IndexOf('L') != -1 && expr.Length > 1 && expr.IndexOf(",", StringComparison.Ordinal) >= 0)
+                    if (exprOn == CronExpressionConstants.DayOfMonth)
                     {
-                        ThrowHelper.ThrowFormatException("Support for specifying 'L' and 'LW' with other days of the month is not implemented");
+                        if (expr.IndexOf('L') != -1 && expr.Length > 1 && expr.IndexOf(',') >= 0 && expr.Slice(expr.IndexOf('L') + 1).IndexOf('L') != -1)
+                        {
+                            ThrowHelper.ThrowFormatException("Support for specifying 'L' with other days of the month is limited to one instance of L");
+                        }
                     }
                     // throw an exception if L is used with other days of the week
-                    if (exprOn == DayOfWeek && expr.IndexOf('L') != -1 && expr.Length > 1 && expr.IndexOf(",", StringComparison.Ordinal) >= 0)
+                    if (exprOn == CronExpressionConstants.DayOfWeek && expr.IndexOf('L') != -1 && expr.Length > 1 && expr.IndexOf(',') >= 0)
                     {
                         ThrowHelper.ThrowFormatException("Support for specifying 'L' with other days of the week is not implemented");
                     }
-                    if (exprOn == DayOfWeek && expr.IndexOf('#') != -1 && expr.IndexOf('#', expr.IndexOf('#') + 1) != -1)
+                    if (exprOn == CronExpressionConstants.DayOfWeek && expr.IndexOf('#') != -1 && expr.Slice(expr.IndexOf('#') + 1 + 1).IndexOf('#') != -1)
                     {
                         ThrowHelper.ThrowFormatException("Support for specifying multiple \"nth\" days is not implemented.");
                     }
 
-                    string[] vTok = expr.Split(commaSeparator);
-                    foreach (string v in vTok)
+                    if (expr.IndexOf(',') != -1)
                     {
-                        StoreExpressionVals(0, v, exprOn);
+                        foreach (var v in expr.SpanSplit(','))
+                        {
+                            StoreExpressionValues(0, v, exprOn);
+                        }
+                    }
+                    else
+                    {
+                        // simple field
+                        StoreExpressionValues(0, expr, exprOn);
                     }
 
                     exprOn++;
                 }
 
-                if (exprOn <= DayOfWeek)
+                if (exprOn <= CronExpressionConstants.DayOfWeek)
                 {
                     ThrowHelper.ThrowFormatException("Unexpected end of expression.");
                 }
 
-                if (exprOn <= Year)
+                if (exprOn <= CronExpressionConstants.Year)
                 {
-                    StoreExpressionVals(0, "*", Year);
-                }
-
-                var dow = GetSet(DayOfWeek);
-                var dom = GetSet(DayOfMonth);
-
-                // Copying the logic from the UnsupportedOperationException below
-                bool dayOfMSpec = !dom.Contains(NoSpec);
-                bool dayOfWSpec = !dow.Contains(NoSpec);
-
-                if (dayOfMSpec && !dayOfWSpec)
-                {
-                    // skip
-                }
-                else if (dayOfWSpec && !dayOfMSpec)
-                {
-                    // skip
-                }
-                else
-                {
-                    ThrowHelper.ThrowFormatException("Support for specifying both a day-of-week AND a day-of-month parameter is not implemented.");
+                    StoreExpressionValues(0, "*".AsSpan(), CronExpressionConstants.Year);
                 }
             }
             catch (FormatException)
@@ -672,77 +532,204 @@ namespace Quartz
             }
         }
 
-        /// <summary>
-        /// Stores the expression values.
-        /// </summary>
-        /// <param name="pos">The position.</param>
-        /// <param name="s">The string to traverse.</param>
-        /// <param name="type">The type of value.</param>
-        /// <returns></returns>
-        protected virtual int StoreExpressionVals(int pos, string s, int type)
+        private void StoreExpressionQuestionMark(int type, ReadOnlySpan<char> s, int i)
         {
-            int incr = 0;
-            int i = SkipWhiteSpace(pos, s);
+            i++;
+            if (i + 1 <= s.Length && s[i] != ' ' && s[i] != '\t')
+            {
+                ThrowHelper.ThrowFormatException("Illegal character after '?': " + s[i]);
+            }
+            if (type != CronExpressionConstants.DayOfWeek && type != CronExpressionConstants.DayOfMonth)
+            {
+                ThrowHelper.ThrowFormatException("'?' can only be specified for Day-of-Month or Day-of-Week.");
+            }
+            if (type == CronExpressionConstants.DayOfWeek && !lastDayOfMonth)
+            {
+                var val = daysOfMonth.LastOrDefault();
+                if (val == CronExpressionConstants.NoSpec)
+                {
+                    ThrowHelper.ThrowFormatException("'?' can only be specified for Day-of-Month -OR- Day-of-Week.");
+                }
+            }
+
+            AddToSet(CronExpressionConstants.NoSpec, -1, 0, type);
+        }
+
+        private void StoreExpressionStarOrSlash(int type, ReadOnlySpan<char> s, int i)
+        {
+            var c = s[i];
+            var incr = 0;
+            var startsWithAsterisk = c == '*';
+            if (startsWithAsterisk && i + 1 >= s.Length)
+            {
+                AddToSet(CronExpressionConstants.AllSpec, -1, incr, type);
+                return;
+            }
+            if (c == '/' && (i + 1 >= s.Length || s[i + 1] == ' ' || s[i + 1] == '\t'))
+            {
+                ThrowHelper.ThrowFormatException("'/' must be followed by an integer.");
+            }
+            if (startsWithAsterisk)
+            {
+                i++;
+            }
+            c = s[i];
+            if (c == '/')
+            {
+                // is an increment specified?
+                i++;
+                if (i >= s.Length)
+                {
+                    ThrowHelper.ThrowFormatException("Unexpected end of string.");
+                }
+
+                incr = GetNumericValue(s, i);
+                CheckIncrementRange(incr, type);
+            }
+            else
+            {
+                if (startsWithAsterisk)
+                {
+                    ThrowHelper.ThrowFormatException("Illegal characters after asterisk: " + s.ToString());
+                }
+                incr = 1;
+            }
+
+            AddToSet(CronExpressionConstants.AllSpec, -1, incr, type);
+        }
+
+        private void StoreExpressionL(int type, ReadOnlySpan<char> s, int i)
+        {
+            i++;
+            switch (type)
+            {
+                case CronExpressionConstants.DayOfMonth:
+                    {
+                        lastDayOfMonth = true;
+                        if (s.Length > i)
+                        {
+                            var c = s[i];
+                            if (c == '-')
+                            {
+                                (lastDayOffset, i) = GetValue(0, s, i + 1);
+                                if (lastDayOffset > 30)
+                                {
+                                    ThrowHelper.ThrowFormatException("Offset from last day must be <= 30");
+                                }
+                            }
+                            if (s.Length > i)
+                            {
+                                c = s[i];
+                                if (c == 'W')
+                                {
+                                    nearestWeekday = true;
+                                }
+
+                                var match = offsetRegex.Match(s.ToString());
+                                if (match.Success)
+                                {
+                                    var offSetGroup = match.Groups["offset"];
+                                    if (offSetGroup.Success)
+                                    {
+                                        lastWeekdayOffset = int.Parse(offSetGroup.Value);
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+
+                case CronExpressionConstants.DayOfWeek:
+                    AddToSet(7, 7, 0, type);
+                    break;
+                default:
+                    ThrowHelper.ThrowFormatException($"'L' option is not valid here. (pos={i})");
+                    break;
+            }
+        }
+
+        private void StoreExpressionNumeric(int type, ReadOnlySpan<char> s, int i)
+        {
+#if NET6_0_OR_GREATER
+            // test fast case
+            if (int.TryParse(s, out var temp))
+            {
+                AddToSet(temp, -1, -1, type);
+                return;
+            }
+#endif
+
+            var c = s[i];
+            var val = ToInt32(c);
+            i++;
             if (i >= s.Length)
             {
-                return i;
+                AddToSet(val, -1, -1, type);
             }
-            char c = s[i];
-            if (c >= 'A' && c <= 'Z' && !s.Equals("L") && !s.Equals("LW") && !regex.IsMatch(s))
+            else
             {
-                string sub = s.Substring(i, 3);
-                int sval;
-                int eval = -1;
-                if (type == Month)
+                c = s[i];
+                if (char.IsDigit(c))
                 {
-                    sval = GetMonthNumber(sub) + 1;
-                    if (sval <= 0)
+                    (val, i) = GetValue(val, s, i);
+                }
+                CheckNext(i, s, val, type);
+            }
+        }
+
+        private void StoreExpressionGeneralValue(int type, ReadOnlySpan<char> s, int i)
+        {
+            var incr = 0;
+            var sub = s.Slice(i, 3);
+            int sval;
+            var eval = -1;
+            if (type == CronExpressionConstants.Month)
+            {
+                sval = GetMonthNumber(sub) + 1;
+                if (sval <= 0)
+                {
+                    ThrowHelper.ThrowFormatException($"Invalid Month value: '{sub.ToString()}'");
+                }
+                if (s.Length > i + 3)
+                {
+                    if (s[i + 3] == '-')
                     {
-                        ThrowHelper.ThrowFormatException($"Invalid Month value: '{sub}'");
-                    }
-                    if (s.Length > i + 3)
-                    {
-                        c = s[i + 3];
-                        if (c == '-')
+                        i += 4;
+                        sub = s.Slice(i, 3);
+                        eval = GetMonthNumber(sub) + 1;
+                        if (eval <= 0)
                         {
-                            i += 4;
-                            sub = s.Substring(i, 3);
-                            eval = GetMonthNumber(sub) + 1;
-                            if (eval <= 0)
-                            {
-                                ThrowHelper.ThrowFormatException(
-                                    $"Invalid Month value: '{sub}'");
-                            }
+                            ThrowHelper.ThrowFormatException($"Invalid Month value: '{sub.ToString()}'");
                         }
                     }
                 }
-                else if (type == DayOfWeek)
+            }
+            else if (type == CronExpressionConstants.DayOfWeek)
+            {
+                sval = GetDayOfWeekNumber(sub);
+                if (sval < 0)
                 {
-                    sval = GetDayOfWeekNumber(sub);
-                    if (sval < 0)
+                    ThrowHelper.ThrowFormatException($"Invalid Day-of-Week value: '{sub.ToString()}'");
+                }
+                if (s.Length > i + 3)
+                {
+                    var c = s[i + 3];
+                    switch (c)
                     {
-                        ThrowHelper.ThrowFormatException($"Invalid Day-of-Week value: '{sub}'");
-                    }
-                    if (s.Length > i + 3)
-                    {
-                        c = s[i + 3];
-                        if (c == '-')
-                        {
+                        case '-':
                             i += 4;
-                            sub = s.Substring(i, 3);
+                            sub = s.Slice(i, 3);
                             eval = GetDayOfWeekNumber(sub);
                             if (eval < 0)
                             {
-                                ThrowHelper.ThrowFormatException(
-                                    $"Invalid Day-of-Week value: '{sub}'");
+                                ThrowHelper.ThrowFormatException($"Invalid Day-of-Week value: '{sub.ToString()}'");
                             }
-                        }
-                        else if (c == '#')
-                        {
+                            break;
+                        case '#':
                             try
                             {
                                 i += 4;
-                                nthdayOfWeek = Convert.ToInt32(s.Substring(i), CultureInfo.InvariantCulture);
+                                nthdayOfWeek = ToInt32(s.Slice(i));
                                 if (nthdayOfWeek is < 1 or > 5)
                                 {
                                     ThrowHelper.ThrowFormatException("nthdayOfWeek is < 1 or > 5");
@@ -752,13 +739,12 @@ namespace Quartz
                             {
                                 ThrowHelper.ThrowFormatException("A numeric value between 1 and 5 must follow the '#' option");
                             }
-                        }
-                        else if (c == '/')
-                        {
+                            break;
+                        case '/':
                             try
                             {
                                 i += 4;
-                                everyNthWeek = Convert.ToInt32(s.Substring(i), CultureInfo.InvariantCulture);
+                                everyNthWeek = ToInt32(s.Slice(i));
                                 if (everyNthWeek is < 1 or > 5)
                                 {
                                     ThrowHelper.ThrowFormatException("everyNthWeek is < 1 or > 5");
@@ -768,383 +754,274 @@ namespace Quartz
                             {
                                 ThrowHelper.ThrowFormatException("A numeric value between 1 and 5 must follow the '/' option");
                             }
-                        }
-                        else if (c == 'L')
-                        {
-                            lastdayOfWeek = true;
-                            i++;
-                        }
-                        else
-                        {
-                            ThrowHelper.ThrowFormatException($"Illegal characters for this position: '{sub}'");
-                        }
+                            break;
+                        case 'L':
+                            lastDayOfWeek = true;
+                            break;
+                        default:
+                            ThrowHelper.ThrowFormatException($"Illegal characters for this position: '{sub.ToString()}'");
+                            break;
                     }
-                }
-                else
-                {
-                    ThrowHelper.ThrowFormatException($"Illegal characters for this position: '{sub}'");
-                    return default;
-                }
-                if (eval != -1)
-                {
-                    incr = 1;
-                }
-                AddToSet(sval, eval, incr, type);
-                return i + 3;
-            }
-
-            if (c == '?')
-            {
-                i++;
-                if (i + 1 <= s.Length && s[i] != ' ' && s[i] != '\t')
-                {
-                    ThrowHelper.ThrowFormatException("Illegal character after '?': " + s[i]);
-                }
-                if (type != DayOfWeek && type != DayOfMonth)
-                {
-                    ThrowHelper.ThrowFormatException(
-                        "'?' can only be specified for Day-of-Month or Day-of-Week.");
-                }
-                if (type == DayOfWeek && !lastdayOfMonth)
-                {
-                    int val = daysOfMonth.LastOrDefault();
-                    if (val == NoSpecInt)
-                    {
-                        ThrowHelper.ThrowFormatException(
-                            "'?' can only be specified for Day-of-Month -OR- Day-of-Week.");
-                    }
-                }
-
-                AddToSet(NoSpecInt, -1, 0, type);
-                return i;
-            }
-
-            var startsWithAsterisk = c == '*';
-            if (startsWithAsterisk || c == '/')
-            {
-                if (startsWithAsterisk && i + 1 >= s.Length)
-                {
-                    AddToSet(AllSpecInt, -1, incr, type);
-                    return i + 1;
-                }
-                if (c == '/' && (i + 1 >= s.Length || s[i + 1] == ' ' || s[i + 1] == '\t'))
-                {
-                    ThrowHelper.ThrowFormatException("'/' must be followed by an integer.");
-                }
-                if (startsWithAsterisk)
-                {
-                    i++;
-                }
-                c = s[i];
-                if (c == '/')
-                {
-                    // is an increment specified?
-                    i++;
-                    if (i >= s.Length)
-                    {
-                        ThrowHelper.ThrowFormatException("Unexpected end of string.");
-                    }
-
-                    incr = GetNumericValue(s, i);
-
-                    i++;
-                    if (incr > 10)
-                    {
-                        i++;
-                    }
-                    CheckIncrementRange(incr, type);
-                }
-                else
-                {
-                    if (startsWithAsterisk)
-                    {
-                        // invalid value s
-                        ThrowHelper.ThrowFormatException("Illegal characters after asterisk: " + s);
-                    }
-                    incr = 1;
-                }
-
-                AddToSet(AllSpecInt, -1, incr, type);
-                return i;
-            }
-            if (c == 'L')
-            {
-                i++;
-                if (type == DayOfMonth)
-                {
-                    lastdayOfMonth = true;
-                }
-                if (type == DayOfWeek)
-                {
-                    AddToSet(7, 7, 0, type);
-                }
-                if (type == DayOfMonth && s.Length > i)
-                {
-                    c = s[i];
-                    if (c == '-')
-                    {
-                        ValueSet vs = GetValue(0, s, i + 1);
-                        lastdayOffset = vs.theValue;
-                        if (lastdayOffset > 30)
-                        {
-                            ThrowHelper.ThrowFormatException("Offset from last day must be <= 30");
-                        }
-                        i = vs.pos;
-                    }
-                    if (s.Length > i)
-                    {
-                        c = s[i];
-                        if (c == 'W')
-                        {
-                            nearestWeekday = true;
-                            i++;
-                        }
-                    }
-                }
-                return i;
-            }
-            if (c >= '0' && c <= '9')
-            {
-                int val = Convert.ToInt32(c.ToString(), CultureInfo.InvariantCulture);
-                i++;
-                if (i >= s.Length)
-                {
-                    AddToSet(val, -1, -1, type);
-                }
-                else
-                {
-                    c = s[i];
-                    if (c >= '0' && c <= '9')
-                    {
-                        ValueSet vs = GetValue(val, s, i);
-                        val = vs.theValue;
-                        i = vs.pos;
-                    }
-                    i = CheckNext(i, s, val, type);
-                    return i;
                 }
             }
             else
             {
-                ThrowHelper.ThrowFormatException($"Unexpected character: {c}");
+                ThrowHelper.ThrowFormatException($"Illegal characters for this position: '{sub.ToString()}'");
+                return;
+            }
+            if (eval != -1)
+            {
+                incr = 1;
+            }
+            AddToSet(sval, eval, incr, type);
+        }
+
+        private void StoreExpressionValues(int pos, ReadOnlySpan<char> s, int type)
+        {
+            var i = pos;
+            if (i < s.Length && char.IsWhiteSpace(s[i]))
+            {
+                i = SkipWhiteSpace(pos, s);
+            }
+            if (i >= s.Length)
+            {
+                return;
             }
 
-            return i;
+            switch (s[i])
+            {
+                case >= 'A' and <= 'Z' when !s.SequenceEqual("L".AsSpan()) && !regex.IsMatch(s.ToString()):
+                    StoreExpressionGeneralValue(type, s, i);
+                    break;
+
+                case '?':
+                    StoreExpressionQuestionMark(type, s, i);
+                    break;
+
+                case '*':
+                case '/':
+                    StoreExpressionStarOrSlash(type, s, i);
+                    break;
+
+                case 'L':
+                    StoreExpressionL(type, s, i);
+                    break;
+
+                case >= '0' and <= '9':
+                    StoreExpressionNumeric(type, s, i);
+                    break;
+                default:
+                    ThrowHelper.ThrowFormatException($"Unexpected character: {s[i]}");
+                    break;
+            }
         }
 
         // ReSharper disable once UnusedParameter.Local
         private static void CheckIncrementRange(int incr, int type)
         {
-            if (incr > 59 && (type == Second || type == Minute))
+            if (incr > 59 && (type == CronExpressionConstants.Second || type == CronExpressionConstants.Minute))
             {
                 ThrowHelper.ThrowFormatException($"Increment > 60 : {incr}");
             }
-            if (incr > 23 && type == Hour)
+            if (incr > 23 && type == CronExpressionConstants.Hour)
             {
                 ThrowHelper.ThrowFormatException($"Increment > 24 : {incr}");
             }
-            if (incr > 31 && type == DayOfMonth)
+            if (incr > 31 && type == CronExpressionConstants.DayOfMonth)
             {
                 ThrowHelper.ThrowFormatException($"Increment > 31 : {incr}");
             }
-            if (incr > 7 && type == DayOfWeek)
+            if (incr > 7 && type == CronExpressionConstants.DayOfWeek)
             {
                 ThrowHelper.ThrowFormatException($"Increment > 7 : {incr}");
             }
-            if (incr > 12 && type == Month)
+            if (incr > 12 && type == CronExpressionConstants.Month)
             {
                 ThrowHelper.ThrowFormatException($"Increment > 12 : {incr}");
             }
         }
 
-        /// <summary>
-        /// Checks the next value.
-        /// </summary>
-        /// <param name="pos">The position.</param>
-        /// <param name="s">The string to check.</param>
-        /// <param name="val">The value.</param>
-        /// <param name="type">The type to search.</param>
-        /// <returns></returns>
-        protected virtual int CheckNext(int pos, string s, int val, int type)
+        private void CheckNext(int pos, ReadOnlySpan<char> s, int val, int type)
         {
-            int end = -1;
-            int i = pos;
+            var end = -1;
+            var i = pos;
 
             if (i >= s.Length)
             {
                 AddToSet(val, end, -1, type);
-                return i;
+                return;
             }
 
-            char c = s[pos];
-
-            if (c == 'L')
+            switch (s[pos])
             {
-                if (type == DayOfWeek)
-                {
-                    if (val < 1 || val > 7)
+                case 'L':
                     {
-                        ThrowHelper.ThrowFormatException("Day-of-Week values must be between 1 and 7");
+                        if (type == CronExpressionConstants.DayOfWeek)
+                        {
+                            if (val is < 1 or > 7)
+                            {
+                                ThrowHelper.ThrowFormatException("Day-of-Week values must be between 1 and 7");
+                            }
+                            lastDayOfWeek = true;
+                        }
+                        else
+                        {
+                            ThrowHelper.ThrowFormatException($"'L' option is not valid here. (pos={i})");
+                        }
+                        var data = GetSet(type);
+                        data.Add(val);
+                        return;
                     }
-                    lastdayOfWeek = true;
-                }
-                else
-                {
-                    ThrowHelper.ThrowFormatException($"'L' option is not valid here. (pos={i})");
-                }
-                var data = GetSet(type);
-                data.Add(val);
-                i++;
-                return i;
-            }
 
-            if (c == 'W')
-            {
-                if (type == DayOfMonth)
-                {
-                    nearestWeekday = true;
-                }
-                else
-                {
-                    ThrowHelper.ThrowFormatException($"'W' option is not valid here. (pos={i})");
-                }
-                if (val > 31)
-                {
-                    ThrowHelper.ThrowFormatException("The 'W' option does not make sense with values larger than 31 (max number of days in a month)");
-                }
-
-                var data = GetSet(type);
-                data.Add(val);
-                i++;
-                return i;
-            }
-
-            if (c == '#')
-            {
-                if (type != DayOfWeek)
-                {
-                    ThrowHelper.ThrowFormatException($"'#' option is not valid here. (pos={i})");
-                }
-                i++;
-                try
-                {
-                    nthdayOfWeek = Convert.ToInt32(s.Substring(i), CultureInfo.InvariantCulture);
-                    if (nthdayOfWeek is < 1 or > 5)
+                case 'W':
                     {
-                        ThrowHelper.ThrowFormatException("nthdayOfWeek is < 1 or > 5");
+                        if (type == CronExpressionConstants.DayOfMonth)
+                        {
+                            nearestWeekday = true;
+                        }
+                        else
+                        {
+                            ThrowHelper.ThrowFormatException($"'W' option is not valid here. (pos={i})");
+                        }
+                        if (val > 31)
+                        {
+                            ThrowHelper.ThrowFormatException("The 'W' option does not make sense with values larger than 31 (max number of days in a month)");
+                        }
+
+                        var data = GetSet(type);
+                        data.Add(val);
+                        return;
                     }
-                }
-                catch (Exception)
-                {
-                    ThrowHelper.ThrowFormatException("A numeric value between 1 and 5 must follow the '#' option");
-                }
 
-                var data = GetSet(type);
-                data.Add(val);
-                i++;
-                return i;
-            }
-
-            if (c == 'C')
-            {
-                if (type == DayOfWeek)
-                {
-                    calendardayOfWeek = true;
-                }
-                else if (type == DayOfMonth)
-                {
-                    calendardayOfMonth = true;
-                }
-                else
-                {
-                    ThrowHelper.ThrowFormatException($"'C' option is not valid here. (pos={i})");
-                }
-                var data = GetSet(type);
-                data.Add(val);
-                i++;
-                return i;
-            }
-
-            if (c == '-')
-            {
-                i++;
-                c = s[i];
-                int v = Convert.ToInt32(c.ToString(), CultureInfo.InvariantCulture);
-                end = v;
-                i++;
-                if (i >= s.Length)
-                {
-                    AddToSet(val, end, 1, type);
-                    return i;
-                }
-                c = s[i];
-                if (c >= '0' && c <= '9')
-                {
-                    ValueSet vs = GetValue(v, s, i);
-                    int v1 = vs.theValue;
-                    end = v1;
-                    i = vs.pos;
-                }
-                if (i < s.Length && s[i] == '/')
-                {
-                    i++;
-                    c = s[i];
-                    int v2 = Convert.ToInt32(c.ToString(), CultureInfo.InvariantCulture);
-                    i++;
-                    if (i >= s.Length)
+                case '#':
                     {
-                        AddToSet(val, end, v2, type);
-                        return i;
+                        if (type != CronExpressionConstants.DayOfWeek)
+                        {
+                            ThrowHelper.ThrowFormatException($"'#' option is not valid here. (pos={i})");
+                        }
+                        i++;
+                        try
+                        {
+                            nthdayOfWeek = ToInt32(s.Slice(i));
+                            if (nthdayOfWeek is < 1 or > 5)
+                            {
+                                ThrowHelper.ThrowFormatException("nthdayOfWeek is < 1 or > 5");
+                            }
+                            // check first char is numeric and is a valid Day of week (1-7)
+#if NET6_0_OR_GREATER
+                            if (int.TryParse(s.Slice(0, pos), out val))
+#else
+                            if (int.TryParse(s.Slice(0, pos).ToString(), out val))
+#endif
+                            {
+                                if (val is < 1 or > 7)
+                                {
+                                    ThrowHelper.ThrowFormatException("Day-of-Week values must be between 1 and 7");
+                                }
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            ThrowHelper.ThrowFormatException("A numeric value between 1 and 5 must follow the '#' option");
+                        }
+
+                        var data = GetSet(type);
+                        data.Add(val);
+                        return;
                     }
-                    c = s[i];
-                    if (c >= '0' && c <= '9')
+
+                case 'C':
                     {
-                        ValueSet vs = GetValue(v2, s, i);
-                        int v3 = vs.theValue;
-                        AddToSet(val, end, v3, type);
-                        i = vs.pos;
-                        return i;
+                        switch (type)
+                        {
+                            case CronExpressionConstants.DayOfWeek:
+                                calendarDayOfWeek = true;
+                                break;
+                            case CronExpressionConstants.DayOfMonth:
+                                calendarDayOfMonth = true;
+                                break;
+                            default:
+                                ThrowHelper.ThrowFormatException($"'C' option is not valid here. (pos={i})");
+                                break;
+                        }
+                        var data = GetSet(type);
+                        data.Add(val);
+                        return;
                     }
-                    AddToSet(val, end, v2, type);
-                    return i;
-                }
-                AddToSet(val, end, 1, type);
-                return i;
-            }
 
-            if (c == '/')
-            {
-                if (i + 1 >= s.Length || s[i + 1] == ' ' || s[i + 1] == '\t')
-                {
-                    ThrowHelper.ThrowFormatException("\'/\' must be followed by an integer.");
-                }
+                case '-':
+                    {
+                        i++;
+                        var c = s[i];
+                        var v = ToInt32(c);
+                        end = v;
+                        i++;
+                        if (i >= s.Length)
+                        {
+                            AddToSet(val, end, 1, type);
+                            return;
+                        }
+                        c = s[i];
+                        if (char.IsDigit(c))
+                        {
+                            (end, i)  = GetValue(v, s, i);
+                        }
+                        if (i < s.Length && s[i] == '/')
+                        {
+                            i++;
+                            c = s[i];
+                            var v2 = ToInt32(c);
+                            i++;
+                            if (i >= s.Length)
+                            {
+                                AddToSet(val, end, v2, type);
+                                return;
+                            }
+                            c = s[i];
+                            if (char.IsDigit(c))
+                            {
+                                var (v3, _) = GetValue(v2, s, i);
+                                AddToSet(val, end, v3, type);
+                                return;
+                            }
+                            AddToSet(val, end, v2, type);
+                            return;
+                        }
+                        AddToSet(val, end, 1, type);
+                        return;
+                    }
 
-                i++;
-                c = s[i];
-                int v2 = Convert.ToInt32(c.ToString(), CultureInfo.InvariantCulture);
-                i++;
-                if (i >= s.Length)
-                {
-                    CheckIncrementRange(v2, type);
-                    AddToSet(val, end, v2, type);
-                    return i;
-                }
-                c = s[i];
-                if (c >= '0' && c <= '9')
-                {
-                    ValueSet vs = GetValue(v2, s, i);
-                    int v3 = vs.theValue;
-                    CheckIncrementRange(v3, type);
-                    AddToSet(val, end, v3, type);
-                    i = vs.pos;
-                    return i;
-                }
-                ThrowHelper.ThrowFormatException($"Unexpected character '{c}' after '/'");
+                case '/':
+                    {
+                        if (i + 1 >= s.Length || s[i + 1] == ' ' || s[i + 1] == '\t')
+                        {
+                            ThrowHelper.ThrowFormatException("\'/\' must be followed by an integer.");
+                        }
+
+                        i++;
+                        var c = s[i];
+                        var v2 = ToInt32(c);
+                        i++;
+                        if (i >= s.Length)
+                        {
+                            CheckIncrementRange(v2, type);
+                            AddToSet(val, end, v2, type);
+                            return;
+                        }
+                        c = s[i];
+                        if (char.IsDigit(c))
+                        {
+                            var (v3, _) = GetValue(v2, s, i);
+                            CheckIncrementRange(v3, type);
+                            AddToSet(val, end, v3, type);
+                            return;
+                        }
+                        ThrowHelper.ThrowFormatException($"Unexpected character '{c}' after '/'");
+                        break;
+                    }
             }
 
             AddToSet(val, end, 0, type);
-            i++;
-            return i;
         }
 
         /// <summary>
@@ -1153,79 +1030,47 @@ namespace Quartz
         /// <value>The cron expression string.</value>
         public string CronExpressionString { get; }
 
+
         /// <summary>
         /// Gets the expression summary.
         /// </summary>
         /// <returns></returns>
-        public virtual string GetExpressionSummary()
+        public string GetExpressionSummary()
         {
-            StringBuilder buf = new StringBuilder();
-
-            buf.Append("seconds: ");
-            buf.Append(GetExpressionSetSummary(seconds));
-            buf.Append("\n");
-            buf.Append("minutes: ");
-            buf.Append(GetExpressionSetSummary(minutes));
-            buf.Append("\n");
-            buf.Append("hours: ");
-            buf.Append(GetExpressionSetSummary(hours));
-            buf.Append("\n");
-            buf.Append("daysOfMonth: ");
-            buf.Append(GetExpressionSetSummary(daysOfMonth));
-            buf.Append("\n");
-            buf.Append("months: ");
-            buf.Append(GetExpressionSetSummary(months));
-            buf.Append("\n");
-            buf.Append("daysOfWeek: ");
-            buf.Append(GetExpressionSetSummary(daysOfWeek));
-            buf.Append("\n");
-            buf.Append("lastdayOfWeek: ");
-            buf.Append(lastdayOfWeek);
-            buf.Append("\n");
-            buf.Append("nearestWeekday: ");
-            buf.Append(nearestWeekday);
-            buf.Append("\n");
-            buf.Append("NthDayOfWeek: ");
-            buf.Append(nthdayOfWeek);
-            buf.Append("\n");
-            buf.Append("lastdayOfMonth: ");
-            buf.Append(lastdayOfMonth);
-            buf.Append("\n");
-            buf.Append("calendardayOfWeek: ");
-            buf.Append(calendardayOfWeek);
-            buf.Append("\n");
-            buf.Append("calendardayOfMonth: ");
-            buf.Append(calendardayOfMonth);
-            buf.Append("\n");
-            buf.Append("years: ");
-            buf.Append(GetExpressionSetSummary(years));
-            buf.Append("\n");
-
-            return buf.ToString();
+            return new CronExpressionSummary(
+                seconds,
+                minutes,
+                hours,
+                daysOfMonth,
+                months,
+                daysOfWeek,
+                lastDayOfWeek,
+                nearestWeekday,
+                nthdayOfWeek,
+                lastDayOfMonth,
+                calendarDayOfWeek,
+                calendarDayOfMonth,
+                years
+            ).ToString();
         }
 
-        /// <summary>
-        /// Gets the expression set summary.
-        /// </summary>
-        /// <param name="data">The data.</param>
-        /// <returns></returns>
-        protected virtual string GetExpressionSetSummary(ICollection<int> data)
+        private string GetExpressionSetSummary(ICollection<int> data)
         {
-            if (data.Contains(NoSpec))
+            if (data.Contains(CronExpressionConstants.NoSpec))
             {
                 return "?";
             }
-            if (data.Contains(AllSpec))
+            if (data.Contains(CronExpressionConstants.AllSpec))
             {
                 return "*";
             }
 
-            StringBuilder buf = new StringBuilder();
+            var buf = new StringBuilder();
 
-            bool first = true;
-            foreach (int iVal in data)
+            var first = true;
+            foreach (var iVal in data)
             {
-                string val = iVal.ToString(CultureInfo.InvariantCulture);
+                var val = iVal.ToString(CultureInfo.InvariantCulture);
                 if (!first)
                 {
                     buf.Append(",");
@@ -1237,169 +1082,144 @@ namespace Quartz
             return buf.ToString();
         }
 
-        /// <summary>
-        /// Skips the white space.
-        /// </summary>
-        /// <param name="i">The i.</param>
-        /// <param name="s">The s.</param>
-        /// <returns></returns>
-        protected virtual int SkipWhiteSpace(int i, string s)
+        private static int SkipWhiteSpace(int position, ReadOnlySpan<char> str)
         {
-            for (; i < s.Length && (s[i] == ' ' || s[i] == '\t'); i++)
+            for (; position < str.Length && (str[position] == ' ' || str[position] == '\t'); position++)
             {
             }
 
-            return i;
+            return position;
         }
 
-        /// <summary>
-        /// Finds the next white space.
-        /// </summary>
-        /// <param name="i">The i.</param>
-        /// <param name="s">The s.</param>
-        /// <returns></returns>
-        protected virtual int FindNextWhiteSpace(int i, string s)
+        private int FindNextWhiteSpace(int position, ReadOnlySpan<char> str)
         {
-            for (; i < s.Length && (s[i] != ' ' || s[i] != '\t'); i++)
+            for (; position < str.Length && (str[position] != ' ' || str[position] != '\t'); position++)
             {
             }
 
-            return i;
+            return position;
         }
 
-        /// <summary>
-        /// Adds to set.
-        /// </summary>
-        /// <param name="val">The val.</param>
-        /// <param name="end">The end.</param>
-        /// <param name="incr">The incr.</param>
-        /// <param name="type">The type.</param>
-        protected virtual void AddToSet(int val, int end, int incr, int type)
+        private void AddToSet(int val, int end, int incr, int type)
         {
             var data = GetSet(type);
 
-            if (type == Second || type == Minute)
+            if (type == CronExpressionConstants.Second || type == CronExpressionConstants.Minute)
             {
-                if ((val < 0 || val > 59 || end > 59) && val != AllSpecInt)
+                if ((val < 0 || val > 59 || end > 59) && val != CronExpressionConstants.AllSpec)
                 {
-                    ThrowHelper.ThrowFormatException("Minute and Second values must be between 0 and 59");
+                    ThrowHelper.ThrowFormatException("Minute and CronExpressionConstants.Second values must be between 0 and 59");
                 }
             }
-            else if (type == Hour)
+            else if (type == CronExpressionConstants.Hour)
             {
-                if ((val < 0 || val > 23 || end > 23) && val != AllSpecInt)
+                if ((val < 0 || val > 23 || end > 23) && val != CronExpressionConstants.AllSpec)
                 {
                     ThrowHelper.ThrowFormatException("Hour values must be between 0 and 23");
                 }
             }
-            else if (type == DayOfMonth)
+            else if (type == CronExpressionConstants.DayOfMonth)
             {
-                if ((val < 1 || val > 31 || end > 31) && val != AllSpecInt
-                    && val != NoSpecInt)
+                if ((val < 1 || val > 31 || end > 31) && val != CronExpressionConstants.AllSpec
+                                                      && val != CronExpressionConstants.NoSpec)
                 {
                     ThrowHelper.ThrowFormatException("Day of month values must be between 1 and 31");
                 }
             }
-            else if (type == Month)
+            else if (type == CronExpressionConstants.Month)
             {
-                if ((val < 1 || val > 12 || end > 12) && val != AllSpecInt)
+                if ((val < 1 || val > 12 || end > 12) && val != CronExpressionConstants.AllSpec)
                 {
                     ThrowHelper.ThrowFormatException("Month values must be between 1 and 12");
                 }
             }
-            else if (type == DayOfWeek)
+            else if (type == CronExpressionConstants.DayOfWeek)
             {
-                if ((val == 0 || val > 7 || end > 7) && val != AllSpecInt
-                    && val != NoSpecInt)
+                if ((val == 0 || val > 7 || end > 7) && val != CronExpressionConstants.AllSpec
+                                                     && val != CronExpressionConstants.NoSpec)
                 {
                     ThrowHelper.ThrowFormatException("Day-of-Week values must be between 1 and 7");
                 }
             }
 
-            if ((incr == 0 || incr == -1) && val != AllSpecInt)
+            if ((incr == 0 || incr == -1) && val != CronExpressionConstants.AllSpec)
             {
-                if (val != -1)
-                {
-                    data.Add(val);
-                }
-                else
-                {
-                    data.Add(NoSpec);
-                }
+                data.Add(val != -1 ? val : CronExpressionConstants.NoSpec);
                 return;
             }
 
-            int startAt = val;
-            int stopAt = end;
+            var startAt = val;
+            var stopAt = end;
 
-            if (val == AllSpecInt && incr <= 0)
+            if (val == CronExpressionConstants.AllSpec && incr <= 0)
             {
-                incr = 1;
-                data.Add(AllSpec); // put in a marker, but also fill values
+                data.Add(CronExpressionConstants.AllSpec);
+                // skip adding other data, we check this wildcard in TryGetMinValueStartingFrom
+                return;
             }
 
-            if (type == Second || type == Minute)
+            if (type == CronExpressionConstants.Second || type == CronExpressionConstants.Minute)
             {
                 if (stopAt == -1)
                 {
                     stopAt = 59;
                 }
-                if (startAt == -1 || startAt == AllSpecInt)
+                if (startAt == -1 || startAt == CronExpressionConstants.AllSpec)
                 {
                     startAt = 0;
                 }
             }
-            else if (type == Hour)
+            else if (type == CronExpressionConstants.Hour)
             {
                 if (stopAt == -1)
                 {
                     stopAt = 23;
                 }
-                if (startAt == -1 || startAt == AllSpecInt)
+                if (startAt == -1 || startAt == CronExpressionConstants.AllSpec)
                 {
                     startAt = 0;
                 }
             }
-            else if (type == DayOfMonth)
+            else if (type == CronExpressionConstants.DayOfMonth)
             {
                 if (stopAt == -1)
                 {
                     stopAt = 31;
                 }
-                if (startAt == -1 || startAt == AllSpecInt)
+                if (startAt == -1 || startAt == CronExpressionConstants.AllSpec)
                 {
                     startAt = 1;
                 }
             }
-            else if (type == Month)
+            else if (type == CronExpressionConstants.Month)
             {
                 if (stopAt == -1)
                 {
                     stopAt = 12;
                 }
-                if (startAt == -1 || startAt == AllSpecInt)
+                if (startAt == -1 || startAt == CronExpressionConstants.AllSpec)
                 {
                     startAt = 1;
                 }
             }
-            else if (type == DayOfWeek)
+            else if (type == CronExpressionConstants.DayOfWeek)
             {
                 if (stopAt == -1)
                 {
                     stopAt = 7;
                 }
-                if (startAt == -1 || startAt == AllSpecInt)
+                if (startAt == -1 || startAt == CronExpressionConstants.AllSpec)
                 {
                     startAt = 1;
                 }
             }
-            else if (type == Year)
+            else if (type == CronExpressionConstants.Year)
             {
                 if (stopAt == -1)
                 {
                     stopAt = MaxYear;
                 }
-                if (startAt == -1 || startAt == AllSpecInt)
+                if (startAt is -1 or CronExpressionConstants.AllSpec)
                 {
                     startAt = 1970;
                 }
@@ -1408,30 +1228,30 @@ namespace Quartz
             // if the end of the range is before the start, then we need to overflow into
             // the next day, month etc. This is done by adding the maximum amount for that
             // type, and using modulus max to determine the value being added.
-            int max = -1;
+            var max = -1;
             if (stopAt < startAt)
             {
                 switch (type)
                 {
-                    case Second:
+                    case CronExpressionConstants.Second:
                         max = 60;
                         break;
-                    case Minute:
+                    case CronExpressionConstants.Minute:
                         max = 60;
                         break;
-                    case Hour:
+                    case CronExpressionConstants.Hour:
                         max = 24;
                         break;
-                    case Month:
+                    case CronExpressionConstants.Month:
                         max = 12;
                         break;
-                    case DayOfWeek:
+                    case CronExpressionConstants.DayOfWeek:
                         max = 7;
                         break;
-                    case DayOfMonth:
+                    case CronExpressionConstants.DayOfMonth:
                         max = 31;
                         break;
-                    case Year:
+                    case CronExpressionConstants.Year:
                         ThrowHelper.ThrowArgumentException("Start year must be less than stop year");
                         break;
                     default:
@@ -1441,7 +1261,7 @@ namespace Quartz
                 stopAt += max;
             }
 
-            for (int i = startAt; i <= stopAt; i += incr)
+            for (var i = startAt; i <= stopAt; i += incr)
             {
                 if (max == -1)
                 {
@@ -1451,10 +1271,12 @@ namespace Quartz
                 else
                 {
                     // take the modulus to get the real value
-                    int i2 = i % max;
+                    var i2 = i % max;
 
                     // 1-indexed ranges should not include 0, and should include their max
-                    if (i2 == 0 && (type == Month || type == DayOfWeek || type == DayOfMonth))
+                    if (i2 == 0 && (type == CronExpressionConstants.Month
+                                    || type == CronExpressionConstants.DayOfWeek
+                                    || type == CronExpressionConstants.DayOfMonth))
                     {
                         i2 = max;
                     }
@@ -1467,46 +1289,38 @@ namespace Quartz
         /// <summary>
         /// Gets the set of given type.
         /// </summary>
-        /// <param name="type">The type of set to get.</param>
-        /// <returns></returns>
-        protected virtual SortedSet<int> GetSet(int type)
+        internal CronField GetSet(int type)
         {
-            switch (type)
+            var field = type switch
             {
-                case Second:
-                    return seconds;
-                case Minute:
-                    return minutes;
-                case Hour:
-                    return hours;
-                case DayOfMonth:
-                    return daysOfMonth;
-                case Month:
-                    return months;
-                case DayOfWeek:
-                    return daysOfWeek;
-                case Year:
-                    return years;
-                default:
-                    ThrowHelper.ThrowArgumentOutOfRangeException();
-                    return default;
+                CronExpressionConstants.Second => seconds,
+                CronExpressionConstants.Minute => minutes,
+                CronExpressionConstants.Hour => hours,
+                CronExpressionConstants.DayOfMonth => daysOfMonth,
+                CronExpressionConstants.Month => months,
+                CronExpressionConstants.DayOfWeek => daysOfWeek,
+                CronExpressionConstants.Year => years,
+                _ => default
+            };
+
+            if (field is null)
+            {
+                ThrowHelper.ThrowArgumentOutOfRangeException(nameof(type));
             }
+
+            return field;
         }
 
-        /// <summary>
-        /// Gets the value.
-        /// </summary>
-        /// <param name="v">The v.</param>
-        /// <param name="s">The s.</param>
-        /// <param name="i">The i.</param>
-        /// <returns></returns>
-        protected virtual ValueSet GetValue(int v, string s, int i)
+        private static ValueAndPosition GetValue(int v, ReadOnlySpan<char> s, int i)
         {
-            char c = s[i];
-            StringBuilder s1 = new StringBuilder(v.ToString(CultureInfo.InvariantCulture));
-            while (c >= '0' && c <= '9')
+            var c = s[i];
+
+            var builder = new StringBuilder(s.Length);
+            builder.Append(v);
+
+            while (char.IsDigit(c))
             {
-                s1.Append(c);
+                builder.Append(c);
                 i++;
                 if (i >= s.Length)
                 {
@@ -1514,30 +1328,19 @@ namespace Quartz
                 }
                 c = s[i];
             }
-            ValueSet val = new ValueSet();
-            if (i < s.Length)
-            {
-                val.pos = i;
-            }
-            else
-            {
-                val.pos = i + 1;
-            }
-            val.theValue = Convert.ToInt32(s1.ToString(), CultureInfo.InvariantCulture);
-            return val;
+
+            var value = Convert.ToInt32(builder.ToString(), CultureInfo.InvariantCulture);
+            var pos = i < s.Length ? i : i + 1;
+            return new ValueAndPosition(value, pos);
         }
 
         /// <summary>
         /// Gets the numeric value from string.
         /// </summary>
-        /// <param name="s">The string to parse from.</param>
-        /// <param name="i">The i.</param>
-        /// <returns></returns>
-        protected virtual int GetNumericValue(string s, int i)
+        private int GetNumericValue(ReadOnlySpan<char> s, int i)
         {
-            int endOfVal = FindNextWhiteSpace(i, s);
-            string val = s.Substring(i, endOfVal - i);
-            return Convert.ToInt32(val, CultureInfo.InvariantCulture);
+            var endOfVal = FindNextWhiteSpace(i, s);
+            return ToInt32(s.Slice(i, endOfVal - i));
         }
 
         /// <summary>
@@ -1545,41 +1348,42 @@ namespace Quartz
         /// </summary>
         /// <param name="s">The string to map with.</param>
         /// <returns></returns>
-        protected virtual int GetMonthNumber(string s)
+        private int GetMonthNumber(ReadOnlySpan<char> s)
         {
-            if (monthMap.ContainsKey(s))
+            return s switch
             {
-                return monthMap[s];
-            }
-
-            return -1;
+                "JAN" => 0,
+                "FEB" => 1,
+                "MAR" => 2,
+                "APR" => 3,
+                "MAY" => 4,
+                "JUN" => 5,
+                "JUL" => 6,
+                "AUG" => 7,
+                "SEP" => 8,
+                "OCT" => 9,
+                "NOV" => 1,
+                "DEC" => 1,
+                _ => -1
+            };
         }
 
-        /// <summary>
-        /// Gets the day of week number.
-        /// </summary>
-        /// <param name="s">The s.</param>
-        /// <returns></returns>
-        protected virtual int GetDayOfWeekNumber(string s)
+        private int GetDayOfWeekNumber(ReadOnlySpan<char> s)
         {
-            if (dayMap.ContainsKey(s))
+            return s switch
             {
-                return dayMap[s];
-            }
-
-            return -1;
+                "SUN" => 1,
+                "MON" => 2,
+                "TUE" => 3,
+                "WED" => 4,
+                "THU" => 5,
+                "FRI" => 6,
+                "SAT" => 7,
+                _ => -1
+            };
         }
 
-        /// <summary>
-        /// Gets the time from given time parts.
-        /// </summary>
-        /// <param name="sc">The seconds.</param>
-        /// <param name="mn">The minutes.</param>
-        /// <param name="hr">The hours.</param>
-        /// <param name="dayofmn">The day of month.</param>
-        /// <param name="mon">The month.</param>
-        /// <returns></returns>
-        protected virtual DateTimeOffset? GetTime(int sc, int mn, int hr, int dayofmn, int mon)
+        private DateTimeOffset? GetTime(int sc, int mn, int hr, int dayOfMonth, int mon)
         {
             try
             {
@@ -1595,15 +1399,15 @@ namespace Quartz
                 {
                     hr = 0;
                 }
-                if (dayofmn == -1)
+                if (dayOfMonth == -1)
                 {
-                    dayofmn = 0;
+                    dayOfMonth = 0;
                 }
                 if (mon == -1)
                 {
                     mon = 0;
                 }
-                return new DateTimeOffset(SystemTime.UtcNow().Year, mon, dayofmn, hr, mn, sc, TimeSpan.Zero);
+                return new DateTimeOffset(SystemTime.UtcNow().Year, mon, dayOfMonth, hr, mn, sc, TimeSpan.Zero);
             }
             catch (Exception)
             {
@@ -1612,504 +1416,561 @@ namespace Quartz
         }
 
         /// <summary>
+        /// Progress next fire time seconds
+        /// </summary>
+        private NextFireTimeCursor ProgressNextFireTimeSecond(DateTimeOffset d)
+        {
+            var sec = d.Second;
+            if (seconds.TryGetMinValueStartingFrom(sec, out var min))
+            {
+                sec = min;
+            }
+            else
+            {
+                sec = seconds.Min;
+                d = d.AddMinutes(1);
+            }
+
+            return new NextFireTimeCursor(false, new DateTimeOffset(d.Year, d.Month, d.Day, d.Hour, d.Minute, sec, d.Millisecond, d.Offset));
+        }
+
+        /// <summary>
+        /// Progress next Fire time Minutes
+        /// </summary>
+        /// <param name="d">NextFireTimeCheck</param>
+        private NextFireTimeCursor ProgressNextFireTimeMinute(DateTimeOffset d)
+        {
+            var minute = d.Minute;
+            var hr = d.Hour;
+            var t = -1;
+
+            if (minutes.TryGetMinValueStartingFrom(minute, out var min))
+            {
+                t = minute;
+                minute = min;
+            }
+            else
+            {
+                minute = minutes.Min;
+                hr++;
+            }
+
+            if (minute != t)
+            {
+                d = new DateTimeOffset(d.Year, d.Month, d.Day, d.Hour, minute, 0, d.Millisecond, d.Offset);
+                d = SetCalendarHour(d, hr);
+                return new NextFireTimeCursor(true, d);
+            }
+
+            return new NextFireTimeCursor(false, new DateTimeOffset(d.Year, d.Month, d.Day, d.Hour, minute, d.Second, d.Millisecond, d.Offset));
+        }
+
+        /// <summary>
+        /// Progress next fire time Hour
+        /// </summary>
+        /// <param name="d">NextFireTimeCheck</param>
+        private NextFireTimeCursor ProgressNextFireTimeHour(DateTimeOffset d)
+        {
+            int hour;
+            var day = d.Day;
+            var t = -1;
+
+            if (hours.TryGetMinValueStartingFrom(d.Hour, out var min))
+            {
+                t = d.Hour;
+                hour = min;
+            }
+            else
+            {
+                hour = hours.Min;
+                day++;
+            }
+
+            if (hour != t)
+            {
+                var daysInMonth = DateTime.DaysInMonth(d.Year, d.Month);
+                if (day > daysInMonth)
+                {
+                    d = new DateTimeOffset(d.Year, d.Month, daysInMonth, d.Hour, 0, 0, d.Millisecond, d.Offset).AddDays(day - daysInMonth);
+                }
+                else
+                {
+                    d = new DateTimeOffset(d.Year, d.Month, day, d.Hour, 0, 0, d.Millisecond, d.Offset);
+                }
+
+                d = SetCalendarHour(d, hour);
+                return new NextFireTimeCursor(true, d);
+            }
+
+            return new NextFireTimeCursor(false, new DateTimeOffset(d.Year, d.Month, d.Day, hour, d.Minute, d.Second, d.Millisecond, d.Offset));
+        }
+
+        private SortedSet<int> CalculateDaysOfMonth(DateTimeOffset dt)
+        {
+            var results = new SortedSet<int>(daysOfMonth);
+            if (lastDayOfMonth)
+            {
+                var lastDayOfMonth = GetLastDayOfMonth(dt.Month, dt.Year);
+                var lastDayOfMonthWithOffset = lastDayOfMonth - lastDayOffset;
+
+                if (nearestWeekday)
+                {
+                    var checkDay = new DateTimeOffset(dt.Year, dt.Month, lastDayOfMonthWithOffset, dt.Hour, dt.Minute, dt.Second, dt.Millisecond, dt.Offset);
+                    var calculatedDay= lastDayOfMonthWithOffset;
+                    switch (checkDay.DayOfWeek)
+                    {
+                        case DayOfWeek.Saturday:
+                            calculatedDay -= 1;
+                            break;
+                        case DayOfWeek.Sunday:
+                            calculatedDay -= 2;
+                            break;
+                    }
+
+                    var calculatedLastDayWithOffset = calculatedDay - lastWeekdayOffset;
+                    // If the day has crossed to the prior month, reset to 1st.
+                    if (calculatedLastDayWithOffset <= 0)
+                    {
+                        calculatedLastDayWithOffset = 1;
+                    }
+
+                    results.Add(calculatedLastDayWithOffset);
+                }
+                else
+                {
+                    results.Add(lastDayOfMonthWithOffset);
+                }
+            }
+            else if (nearestWeekday) //AND not lastDay
+            {
+                var day = daysOfMonth.Min;
+                var tcal = new DateTimeOffset(dt.Year, dt.Month, day, 0, 0, 0, dt.Offset);
+                var lastDayOfMonth = GetLastDayOfMonth(dt.Month, dt.Year);
+                var dayOfWeek = tcal.DayOfWeek;
+
+                // evict original date since it has a weekDayModifier
+                results.Remove(day);
+
+                switch (dayOfWeek)
+                {
+                    case DayOfWeek.Saturday when day == 1:
+                        day += 2;
+                        break;
+                    case DayOfWeek.Saturday:
+                        day -= 1;
+                        break;
+                    case DayOfWeek.Sunday when day == lastDayOfMonth:
+                        day -= 2;
+                        break;
+                    case DayOfWeek.Sunday:
+                        day += 1;
+                        break;
+                }
+
+                results.Add(day);
+            }
+
+            return results;
+        }
+
+        private NextFireTimeCursor ProgressNextFireTimeDayOfMonth(DateTimeOffset d)
+        {
+            var day = d.Day;
+            var mon = d.Month;
+            var t = -1;
+            var tmon = mon;
+
+            // get day by day of month rule
+            var daysOfMonthCalculated = CalculateDaysOfMonth(d);
+            if (daysOfMonthCalculated.TryGetMinValueStartingFrom(d.Day, out var min))
+            {
+                t = day;
+                day = min;
+
+                // make sure we don't over-run a short month, such as february
+                var lastDay = GetLastDayOfMonth(mon, d.Year);
+                if (day > lastDay)
+                {
+                    day = daysOfMonthCalculated.Min;
+                    mon++;
+                }
+            }
+            else
+            {
+                if (lastDayOfMonth)
+                {
+                    day = daysOfMonthCalculated.Min; //for lastDayOfMonth use calculated fields
+                }
+                else
+                {
+                    day = daysOfMonth.Min; //if not then initial set of days uncalculated (to avoid issue with stale weekday in wrong month value)
+                }
+
+                mon++;
+            }
+
+            if (day != t || mon != tmon)
+            {
+                if (mon > 12)
+                {
+                    d = new DateTimeOffset(d.Year, 12, day, 0, 0, 0, d.Offset).AddMonths(mon - 12);
+                }
+                else
+                {
+                    // This is to avoid a bug when moving from a month
+                    // with 30 or 31 days to a month with less. Causes an invalid datetime to be instantiated.
+                    // ex. 0 29 0 30 1 ? 2009 with clock set to 1/30/2009
+                    var lDay = DateTime.DaysInMonth(d.Year, mon);
+                    if (day <= lDay)
+                    {
+                        d = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
+                    }
+                    else
+                    {
+                        d = new DateTimeOffset(d.Year, mon, lDay, 0, 0, 0, d.Offset).AddDays(day - lDay);
+                    }
+                }
+                return new NextFireTimeCursor(true, d);
+            }
+            return new NextFireTimeCursor(false, d);
+        }
+
+        private NextFireTimeCursor ProgressNextFireTimeDayOfWeek(DateTimeOffset d)
+        {
+            var day = d.Day;
+            var mon = d.Month;
+
+            // get day by day of week rule
+            if (lastDayOfWeek)
+            {
+                // are we looking for the last XXX day of
+                // the month?
+                var dow = daysOfWeek.Min; // desired
+                                              // d-o-w
+                var cDow = (int)d.DayOfWeek + 1; // current d-o-w
+                var daysToAdd = 0;
+                if (cDow < dow)
+                {
+                    daysToAdd = dow - cDow;
+                }
+
+                if (cDow > dow)
+                {
+                    daysToAdd = dow + (7 - cDow);
+                }
+
+                var lDay = GetLastDayOfMonth(mon, d.Year);
+
+                if (day + daysToAdd > lDay)
+                {
+                    // did we already miss the
+                    // last one?
+                    if (mon == 12)
+                    {
+                        //will we pass the end of the year?
+                        d = new DateTimeOffset(d.Year, mon - 11, 1, 0, 0, 0, d.Offset).AddYears(1);
+                    }
+                    else
+                    {
+                        d = new DateTimeOffset(d.Year, mon + 1, 1, 0, 0, 0, d.Offset);
+                    }
+
+                    // we are promoting the month
+                    return new NextFireTimeCursor(true, d);
+                }
+
+                // find date of last occurrence of this day in this month...
+                while (day + daysToAdd + 7 <= lDay)
+                {
+                    daysToAdd += 7;
+                }
+
+                day += daysToAdd;
+
+                if (daysToAdd > 0)
+                {
+                    // we are not promoting the month
+                    return new NextFireTimeCursor(true, new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset));
+                }
+            }
+            else if (nthdayOfWeek != 0)
+            {
+                // are we looking for the Nth XXX day in the month?
+                var dow = daysOfWeek.Min; // desired
+                                              // d-o-w
+                var cDow = (int)d.DayOfWeek + 1; // current d-o-w
+                var daysToAdd = 0;
+                if (cDow < dow)
+                {
+                    daysToAdd = dow - cDow;
+                }
+                else if (cDow > dow)
+                {
+                    daysToAdd = dow + (7 - cDow);
+                }
+
+                var dayShifted = daysToAdd > 0;
+
+                day += daysToAdd;
+                var weekOfMonth = day / 7;
+                if (day % 7 > 0)
+                {
+                    weekOfMonth++;
+                }
+
+                daysToAdd = (nthdayOfWeek - weekOfMonth) * 7;
+                day += daysToAdd;
+                if (daysToAdd < 0 || day > GetLastDayOfMonth(mon, d.Year))
+                {
+                    if (mon == 12)
+                    {
+                        d = new DateTimeOffset(d.Year, mon - 11, 1, 0, 0, 0, d.Offset).AddYears(1);
+                    }
+                    else
+                    {
+                        d = new DateTimeOffset(d.Year, mon + 1, 1, 0, 0, 0, d.Offset);
+                    }
+
+                    // we are promoting the month
+                    return new NextFireTimeCursor(true, d);
+                }
+
+                if (daysToAdd > 0 || dayShifted)
+                {
+                    // we are NOT promoting the month
+                    return new NextFireTimeCursor(true, new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset));
+                }
+            }
+            else if (everyNthWeek != 0)
+            {
+                var cDow = (int)d.DayOfWeek + 1; // current d-o-w
+                var dow = daysOfWeek.Min; // desired d-o-w
+                if (daysOfWeek.TryGetMinValueStartingFrom(cDow, out var min))
+                {
+                    dow = min;
+                }
+
+                var daysToAdd = 0;
+                if (cDow < dow)
+                {
+                    daysToAdd = (dow - cDow) + (7 * (everyNthWeek - 1));
+                }
+
+                if (cDow > dow)
+                {
+                    daysToAdd = (dow + (7 - cDow)) + (7 * (everyNthWeek - 1));
+                }
+
+                if (daysToAdd > 0)
+                {
+                    // are we switching days?
+                    d = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
+                    d = d.AddDays(daysToAdd);
+                    return new NextFireTimeCursor(true, d);
+                }
+            }
+            else
+            {
+                var cDow = (int)d.DayOfWeek + 1; // current d-o-w
+                var dow = daysOfWeek.Min; // desired d-o-w
+                if (daysOfWeek.TryGetMinValueStartingFrom(cDow, out var min))
+                {
+                    dow = min;
+                }
+
+                var daysToAdd = 0;
+                if (cDow < dow)
+                {
+                    daysToAdd = dow - cDow;
+                }
+
+                if (cDow > dow)
+                {
+                    daysToAdd = dow + (7 - cDow);
+                }
+
+                var lDay = GetLastDayOfMonth(mon, d.Year);
+
+                if (day + daysToAdd > lDay)
+                {
+                    // will we pass the end of the month?
+
+                    if (mon == 12)
+                    {
+                        //will we pass the end of the year?
+                        d = new DateTimeOffset(d.Year, mon - 11, 1, 0, 0, 0, d.Offset).AddYears(1);
+                    }
+                    else
+                    {
+                        d = new DateTimeOffset(d.Year, mon + 1, 1, 0, 0, 0, d.Offset);
+                    }
+
+                    // we are promoting the month
+                    return new NextFireTimeCursor(true, d);
+                }
+
+                if (daysToAdd > 0)
+                {
+                    // are we switching days?
+                    return new NextFireTimeCursor(true, new DateTimeOffset(d.Year, mon, day + daysToAdd, 0, 0, 0, d.Offset));
+                }
+            }
+
+            return new NextFireTimeCursor(false, new DateTimeOffset(d.Year, d.Month, day, d.Hour, d.Minute, d.Second, d.Offset));
+        }
+
+        /// <summary>
+        /// Progress next fire time day
+        /// </summary>
+        /// <param name="d">NextFireTimeCheck</param>
+        private NextFireTimeCursor ProgressNextFireTimeDay(DateTimeOffset d)
+        {
+            var dayOfMSpec = !daysOfMonth.Contains(CronExpressionConstants.NoSpec);
+            var dayOfWSpec = !daysOfWeek.Contains(CronExpressionConstants.NoSpec);
+            if (dayOfMSpec && !dayOfWSpec)
+            {
+                return ProgressNextFireTimeDayOfMonth(d);
+            }
+            if (dayOfWSpec && !dayOfMSpec)
+            {
+                return ProgressNextFireTimeDayOfWeek(d);
+            }
+
+            var dayOfMonthProgressResult = ProgressNextFireTimeDayOfMonth(d);
+            var dayOfWeekProgressResult = ProgressNextFireTimeDayOfWeek(d);
+            if (dayOfMonthProgressResult.RestartLoop && dayOfWeekProgressResult.RestartLoop)
+            {
+                return dayOfWeekProgressResult.Date < dayOfMonthProgressResult.Date
+                    ? dayOfWeekProgressResult
+                    : dayOfMonthProgressResult;
+            }
+
+            // only 1 result has value then return it
+            if (dayOfWeekProgressResult is { Date: { }, RestartLoop: false })
+                return dayOfWeekProgressResult;
+            if (dayOfMonthProgressResult is { Date: { }, RestartLoop: false })
+                return dayOfMonthProgressResult;
+
+            // both results have value, return earliest
+            return dayOfWeekProgressResult.Date!.Value < dayOfMonthProgressResult.Date!.Value
+                ? dayOfWeekProgressResult
+                : dayOfMonthProgressResult;
+        }
+
+        /// <summary>
+        /// Progress next fire time Month
+        /// </summary>
+        /// <param name="d">NextFireTimeCheck</param>
+        private NextFireTimeCursor ProgressNextFireTimeMonth(DateTimeOffset d)
+        {
+            var mon = d.Month;
+            var year = d.Year;
+            var t = -1;
+
+            if (months.TryGetMinValueStartingFrom(mon, out var min))
+            {
+                t = mon;
+                mon = min;
+            }
+            else
+            {
+                mon = months.Min;
+                year++;
+            }
+
+            return mon != t
+                ? new NextFireTimeCursor(true, new DateTimeOffset(year, mon, 1, 0, 0, 0, d.Offset))
+                : new NextFireTimeCursor(false, new DateTimeOffset(d.Year, mon, d.Day, d.Hour, d.Minute, d.Second, d.Offset));
+        }
+
+        private NextFireTimeCursor ProgressNextFireTimeYear(DateTimeOffset d)
+        {
+            var year = d.Year;
+            int t;
+            if (years.TryGetMinValueStartingFrom(d.Year, out var min))
+            {
+                t = year;
+                year = min;
+            }
+            else
+            {
+                // ran out of years...
+                return new NextFireTimeCursor(false, null);
+            }
+
+            if (year != t)
+            {
+                return new NextFireTimeCursor(true, new DateTimeOffset(year, 1, 1, 0, 0, 0, d.Offset));
+            }
+
+            return new NextFireTimeCursor(false, new DateTimeOffset(year, d.Month, d.Day, d.Hour, d.Minute, d.Second, d.Offset));
+        }
+
+        /// <summary>
         /// Gets the next fire time after the given time.
         /// </summary>
         /// <param name="afterTimeUtc">The UTC time to start searching from.</param>
         /// <returns></returns>
-        public virtual DateTimeOffset? GetTimeAfter(DateTimeOffset afterTimeUtc)
+        public DateTimeOffset? GetTimeAfter(DateTimeOffset afterTimeUtc)
         {
             // move ahead one second, since we're computing the time *after* the
             // given time
             afterTimeUtc = afterTimeUtc.AddSeconds(1);
 
             // CronTrigger does not deal with milliseconds
-            DateTimeOffset d = CreateDateTimeWithoutMillis(afterTimeUtc);
+            var d = CreateDateTimeWithoutMilliseconds(afterTimeUtc);
 
             // change to specified time zone
             d = TimeZoneUtil.ConvertTime(d, TimeZone);
 
-            bool gotOne = false;
-            // loop until we've computed the next time, or we've past the endTime
-            while (!gotOne)
+            var nextFireTimeProgressors = new[]
             {
-                SortedSet<int> st;
-                int t;
-                int sec = d.Second;
+                ProgressNextFireTimeSecond,
+                ProgressNextFireTimeMinute,
+                ProgressNextFireTimeHour,
+                ProgressNextFireTimeDay,
+                ProgressNextFireTimeMonth,
+                ProgressNextFireTimeYear
+            };
 
-                // get second.................................................
-                st = seconds.TailSet(sec);
-                if (st.Count > 0)
-                {
-                    sec = st.First();
-                }
-                else
-                {
-                    sec = seconds.First();
-                    d = d.AddMinutes(1);
-                }
-                d = new DateTimeOffset(d.Year, d.Month, d.Day, d.Hour, d.Minute, sec, d.Millisecond, d.Offset);
+            var nextFireTimeCursor = new NextFireTimeCursor(false, d);
+            var foundNextFireTime = false;
 
-                int min = d.Minute;
-                int hr = d.Hour;
-                t = -1;
-
-                // get minute.................................................
-                st = minutes.TailSet(min);
-                if (st.Count > 0)
+            // loop until we've computed the next time, or we've past the endTime
+            while (!foundNextFireTime)
+            {
+                foreach (var progressor in nextFireTimeProgressors)
                 {
-                    t = min;
-                    min = st.First();
-                }
-                else
-                {
-                    min = minutes.First();
-                    hr++;
-                }
-                if (min != t)
-                {
-                    d = new DateTimeOffset(d.Year, d.Month, d.Day, d.Hour, min, 0, d.Millisecond, d.Offset);
-                    d = SetCalendarHour(d, hr);
-                    continue;
-                }
-                d = new DateTimeOffset(d.Year, d.Month, d.Day, d.Hour, min, d.Second, d.Millisecond, d.Offset);
-
-                hr = d.Hour;
-                int day = d.Day;
-                t = -1;
-
-                // get hour...................................................
-                st = hours.TailSet(hr);
-                if (st.Count > 0)
-                {
-                    t = hr;
-                    hr = st.First();
-                }
-                else
-                {
-                    hr = hours.First();
-                    day++;
-                }
-                if (hr != t)
-                {
-                    int daysInMonth = DateTime.DaysInMonth(d.Year, d.Month);
-                    if (day > daysInMonth)
+                    if (nextFireTimeCursor.Date.HasValue)
                     {
-                        d = new DateTimeOffset(d.Year, d.Month, daysInMonth, d.Hour, 0, 0, d.Millisecond, d.Offset).AddDays(day - daysInMonth);
+                        nextFireTimeCursor = progressor(nextFireTimeCursor.Date.Value);
                     }
                     else
                     {
-                        d = new DateTimeOffset(d.Year, d.Month, day, d.Hour, 0, 0, d.Millisecond, d.Offset);
-                    }
-                    d = SetCalendarHour(d, hr);
-                    continue;
-                }
-                d = new DateTimeOffset(d.Year, d.Month, d.Day, hr, d.Minute, d.Second, d.Millisecond, d.Offset);
-
-                day = d.Day;
-                int mon = d.Month;
-                t = -1;
-                int tmon = mon;
-
-                // get day...................................................
-                bool dayOfMSpec = !daysOfMonth.Contains(NoSpec);
-                bool dayOfWSpec = !daysOfWeek.Contains(NoSpec);
-                if (dayOfMSpec && !dayOfWSpec)
-                {
-                    // get day by day of month rule
-                    st = daysOfMonth.TailSet(day);
-                    bool found = st.Any();
-                    if (lastdayOfMonth)
-                    {
-                        if (!nearestWeekday)
-                        {
-                            t = day;
-                            day = GetLastDayOfMonth(mon, d.Year);
-                            day -= lastdayOffset;
-
-                            if (t > day)
-                            {
-                                mon++;
-                                if (mon > 12)
-                                {
-                                    mon = 1;
-                                    tmon = 3333; // ensure test of mon != tmon further below fails
-                                    d = d.AddYears(1);
-                                }
-                                day = 1;
-                            }
-                        }
-                        else
-                        {
-                            t = day;
-                            day = GetLastDayOfMonth(mon, d.Year);
-                            day -= lastdayOffset;
-
-                            DateTimeOffset tcal = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
-
-                            int ldom = GetLastDayOfMonth(mon, d.Year);
-                            DayOfWeek dow = tcal.DayOfWeek;
-
-                            if (dow == System.DayOfWeek.Saturday && day == 1)
-                            {
-                                day += 2;
-                            }
-                            else if (dow == System.DayOfWeek.Saturday)
-                            {
-                                day -= 1;
-                            }
-                            else if (dow == System.DayOfWeek.Sunday && day == ldom)
-                            {
-                                day -= 2;
-                            }
-                            else if (dow == System.DayOfWeek.Sunday)
-                            {
-                                day += 1;
-                            }
-
-                            DateTimeOffset nTime = new DateTimeOffset(tcal.Year, mon, day, hr, min, sec, d.Millisecond, d.Offset);
-                            if (nTime.ToUniversalTime() < afterTimeUtc)
-                            {
-                                day = 1;
-                                mon++;
-                            }
-                        }
-                    }
-                    else if (nearestWeekday)
-                    {
-                        t = day;
-                        day = daysOfMonth.First();
-
-                        DateTimeOffset tcal = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
-
-                        int ldom = GetLastDayOfMonth(mon, d.Year);
-                        DayOfWeek dow = tcal.DayOfWeek;
-
-                        if (dow == System.DayOfWeek.Saturday && day == 1)
-                        {
-                            day += 2;
-                        }
-                        else if (dow == System.DayOfWeek.Saturday)
-                        {
-                            day -= 1;
-                        }
-                        else if (dow == System.DayOfWeek.Sunday && day == ldom)
-                        {
-                            day -= 2;
-                        }
-                        else if (dow == System.DayOfWeek.Sunday)
-                        {
-                            day += 1;
-                        }
-
-                        tcal = new DateTimeOffset(tcal.Year, mon, day, hr, min, sec, d.Offset);
-                        if (tcal.ToUniversalTime() < afterTimeUtc)
-                        {
-                            day = daysOfMonth.First();
-                            mon++;
-                        }
-                    }
-                    else if (found)
-                    {
-                        t = day;
-                        day = st.First();
-
-                        // make sure we don't over-run a short month, such as february
-                        int lastDay = GetLastDayOfMonth(mon, d.Year);
-                        if (day > lastDay)
-                        {
-                            day = daysOfMonth.First();
-                            mon++;
-                        }
-                    }
-                    else
-                    {
-                        day = daysOfMonth.First();
-                        mon++;
+                        break;
                     }
 
-                    if (day != t || mon != tmon)
+                    if (nextFireTimeCursor.RestartLoop)
                     {
-                        if (mon > 12)
-                        {
-                            d = new DateTimeOffset(d.Year, 12, day, 0, 0, 0, d.Offset).AddMonths(mon - 12);
-                        }
-                        else
-                        {
-                            // This is to avoid a bug when moving from a month
-                            //with 30 or 31 days to a month with less. Causes an invalid datetime to be instantiated.
-                            // ex. 0 29 0 30 1 ? 2009 with clock set to 1/30/2009
-                            int lDay = DateTime.DaysInMonth(d.Year, mon);
-                            if (day <= lDay)
-                            {
-                                d = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
-                            }
-                            else
-                            {
-                                d = new DateTimeOffset(d.Year, mon, lDay, 0, 0, 0, d.Offset).AddDays(day - lDay);
-                            }
-                        }
-                        continue;
+                        break;
                     }
                 }
-                else if (dayOfWSpec && !dayOfMSpec)
-                {
-                    // get day by day of week rule
-                    if (lastdayOfWeek)
-                    {
-                        // are we looking for the last XXX day of
-                        // the month?
-                        int dow = daysOfWeek.First(); // desired
-                        // d-o-w
-                        int cDow = (int) d.DayOfWeek + 1; // current d-o-w
-                        int daysToAdd = 0;
-                        if (cDow < dow)
-                        {
-                            daysToAdd = dow - cDow;
-                        }
-                        if (cDow > dow)
-                        {
-                            daysToAdd = dow + (7 - cDow);
-                        }
-
-                        int lDay = GetLastDayOfMonth(mon, d.Year);
-
-                        if (day + daysToAdd > lDay)
-                        {
-                            // did we already miss the
-                            // last one?
-                            if (mon == 12)
-                            {
-                                //will we pass the end of the year?
-                                d = new DateTimeOffset(d.Year, mon - 11, 1, 0, 0, 0, d.Offset).AddYears(1);
-                            }
-                            else
-                            {
-                                d = new DateTimeOffset(d.Year, mon + 1, 1, 0, 0, 0, d.Offset);
-                            }
-                            // we are promoting the month
-                            continue;
-                        }
-
-                        // find date of last occurrence of this day in this month...
-                        while (day + daysToAdd + 7 <= lDay)
-                        {
-                            daysToAdd += 7;
-                        }
-
-                        day += daysToAdd;
-
-                        if (daysToAdd > 0)
-                        {
-                            d = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
-                            // we are not promoting the month
-                            continue;
-                        }
-                    }
-                    else if (nthdayOfWeek != 0)
-                    {
-                        // are we looking for the Nth XXX day in the month?
-                        int dow = daysOfWeek.First(); // desired
-                        // d-o-w
-                        int cDow = (int) d.DayOfWeek + 1; // current d-o-w
-                        int daysToAdd = 0;
-                        if (cDow < dow)
-                        {
-                            daysToAdd = dow - cDow;
-                        }
-                        else if (cDow > dow)
-                        {
-                            daysToAdd = dow + (7 - cDow);
-                        }
-
-                        bool dayShifted = daysToAdd > 0;
-
-                        day += daysToAdd;
-                        int weekOfMonth = day / 7;
-                        if (day % 7 > 0)
-                        {
-                            weekOfMonth++;
-                        }
-
-                        daysToAdd = (nthdayOfWeek - weekOfMonth) * 7;
-                        day += daysToAdd;
-                        if (daysToAdd < 0 || day > GetLastDayOfMonth(mon, d.Year))
-                        {
-                            if (mon == 12)
-                            {
-                                d = new DateTimeOffset(d.Year, mon - 11, 1, 0, 0, 0, d.Offset).AddYears(1);
-                            }
-                            else
-                            {
-                                d = new DateTimeOffset(d.Year, mon + 1, 1, 0, 0, 0, d.Offset);
-                            }
-
-                            // we are promoting the month
-                            continue;
-                        }
-                        if (daysToAdd > 0 || dayShifted)
-                        {
-                            d = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
-                            // we are NOT promoting the month
-                            continue;
-                        }
-                    }
-                    else if (everyNthWeek != 0)
-                    {
-                        int cDow = (int)d.DayOfWeek + 1; // current d-o-w
-                        int dow = daysOfWeek.First(); // desired
-                        // d-o-w
-                        st = daysOfWeek.TailSet(cDow);
-                        if (st.Count > 0)
-                        {
-                            dow = st.First();
-                        }
-
-                        int daysToAdd = 0;
-                        if (cDow < dow)
-                        {
-                            daysToAdd = (dow - cDow) + (7 * (everyNthWeek-1));
-                        }
-                        if (cDow > dow)
-                        {
-                            daysToAdd = (dow + (7 - cDow)) + (7 * (everyNthWeek-1));
-                        }
-
-                        int lDay = GetLastDayOfMonth(mon, d.Year);
-
-                        //if (day + daysToAdd > lDay)
-                        //{
-                        //    // will we pass the end of the month?
-
-                        //    if (mon == 12)
-                        //    {
-                        //        //will we pass the end of the year?
-                        //        d = new DateTimeOffset(d.Year, mon - 11, 1, 0, 0, 0, d.Offset).AddYears(1);
-                        //    }
-                        //    else
-                        //    {
-                        //        d = new DateTimeOffset(d.Year, mon + 1, 1, 0, 0, 0, d.Offset);
-                        //    }
-                        //    // we are promoting the month
-                        //    continue;
-                        //}
-                        if (daysToAdd > 0)
-                        {
-                            // are we switching days?
-                            d = new DateTimeOffset(d.Year, mon, day, 0, 0, 0, d.Offset);
-                            d = d.AddDays(daysToAdd);
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        int cDow = (int) d.DayOfWeek + 1; // current d-o-w
-                        int dow = daysOfWeek.First(); // desired
-                        // d-o-w
-                        st = daysOfWeek.TailSet(cDow);
-                        if (st.Count > 0)
-                        {
-                            dow = st.First();
-                        }
-
-                        int daysToAdd = 0;
-                        if (cDow < dow)
-                        {
-                            daysToAdd = dow - cDow;
-                        }
-                        if (cDow > dow)
-                        {
-                            daysToAdd = dow + (7 - cDow);
-                        }
-
-                        int lDay = GetLastDayOfMonth(mon, d.Year);
-
-                        if (day + daysToAdd > lDay)
-                        {
-                            // will we pass the end of the month?
-
-                            if (mon == 12)
-                            {
-                                //will we pass the end of the year?
-                                d = new DateTimeOffset(d.Year, mon - 11, 1, 0, 0, 0, d.Offset).AddYears(1);
-                            }
-                            else
-                            {
-                                d = new DateTimeOffset(d.Year, mon + 1, 1, 0, 0, 0, d.Offset);
-                            }
-                            // we are promoting the month
-                            continue;
-                        }
-                        if (daysToAdd > 0)
-                        {
-                            // are we switching days?
-                            d = new DateTimeOffset(d.Year, mon, day + daysToAdd, 0, 0, 0, d.Offset);
-                            continue;
-                        }
-                    }
-                }
-                else
-                {
-                    // dayOfWSpec && !dayOfMSpec
-                    ThrowHelper.ThrowFormatException("Support for specifying both a day-of-week AND a day-of-month parameter is not implemented.");
-                }
-
-                d = new DateTimeOffset(d.Year, d.Month, day, d.Hour, d.Minute, d.Second, d.Offset);
-                mon = d.Month;
-                int year = d.Year;
-                t = -1;
 
                 // test for expressions that never generate a valid fire date,
-                // but keep looping...
-                if (year > MaxYear)
+                if (nextFireTimeCursor.Date == null || nextFireTimeCursor.Date.Value.Year > MaxYear)
                 {
-                    return null;
+                    return null; // ran out of years
                 }
 
-                // get month...................................................
-                st = months.TailSet(mon);
-                if (st.Count > 0)
+                if (nextFireTimeCursor.RestartLoop)
                 {
-                    t = mon;
-                    mon = st.First();
-                }
-                else
-                {
-                    mon = months.First();
-                    year++;
-                }
-                if (mon != t)
-                {
-                    d = new DateTimeOffset(year, mon, 1, 0, 0, 0, d.Offset);
                     continue;
                 }
-                d = new DateTimeOffset(d.Year, mon, d.Day, d.Hour, d.Minute, d.Second, d.Offset);
-                year = d.Year;
-                t = -1;
 
-                // get year...................................................
-                st = years.TailSet(year);
-                if (st.Count > 0)
-                {
-                    t = year;
-                    year = st.First();
-                }
-                else
-                {
-                    return null;
-                } // ran out of years...
-
-                if (year != t)
-                {
-                    d = new DateTimeOffset(year, 1, 1, 0, 0, 0, d.Offset);
-                    continue;
-                }
-                d = new DateTimeOffset(year, d.Month, d.Day, d.Hour, d.Minute, d.Second, d.Offset);
-
-                //apply the proper offset for this date
-                d = new DateTimeOffset(d.DateTime, TimeZoneUtil.GetUtcOffset(d.DateTime, TimeZone));
-
-                gotOne = true;
-            } // while( !done )
+                // apply the proper offset for this date
+                d = new DateTimeOffset(nextFireTimeCursor.Date.Value.DateTime, TimeZoneUtil.GetUtcOffset(nextFireTimeCursor.Date.Value.DateTime, TimeZone));
+                foundNextFireTime = true;
+            }
 
             return d.ToUniversalTime();
         }
@@ -2119,7 +1980,7 @@ namespace Quartz
         /// </summary>
         /// <param name="time">The time.</param>
         /// <returns></returns>
-        protected static DateTimeOffset CreateDateTimeWithoutMillis(DateTimeOffset time)
+        private static DateTimeOffset CreateDateTimeWithoutMilliseconds(DateTimeOffset time)
         {
             return new DateTimeOffset(time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second, time.Offset);
         }
@@ -2131,21 +1992,23 @@ namespace Quartz
         /// <param name="date">The date.</param>
         /// <param name="hour">The hour.</param>
         /// <returns></returns>
-        protected static DateTimeOffset SetCalendarHour(DateTimeOffset date, int hour)
+        private static DateTimeOffset SetCalendarHour(DateTimeOffset date, int hour)
         {
             // Java version of Quartz uses lenient calendar
             // so hour 24 creates day increment and zeroes hour
-            int hourToSet = hour;
+            var hourToSet = hour;
             if (hourToSet == 24)
             {
                 hourToSet = 0;
             }
-            DateTimeOffset d = new DateTimeOffset(date.Year, date.Month, date.Day, hourToSet, date.Minute, date.Second, date.Millisecond, date.Offset);
+
+            var d = new DateTimeOffset(date.Year, date.Month, date.Day, hourToSet, date.Minute, date.Second, date.Millisecond, date.Offset);
             if (hour == 24)
             {
                 // increment day
                 d = d.AddDays(1);
             }
+
             return d;
         }
 
@@ -2154,7 +2017,7 @@ namespace Quartz
         /// </summary>
         /// <param name="endTime">The end time.</param>
         /// <returns></returns>
-        public virtual DateTimeOffset? GetTimeBefore(DateTimeOffset? endTime)
+        public DateTimeOffset? GetTimeBefore(DateTimeOffset? endTime)
         {
             // TODO: implement
             return null;
@@ -2165,33 +2028,29 @@ namespace Quartz
         /// <see cref="CronExpression" /> will match.
         /// </summary>
         /// <returns></returns>
-        public virtual DateTimeOffset? GetFinalFireTime()
+        public DateTimeOffset? GetFinalFireTime()
         {
             // TODO: implement QUARTZ-423
             return null;
         }
 
         /// <summary>
-        /// Determines whether given year is a leap year.
-        /// </summary>
-        /// <param name="year">The year.</param>
-        /// <returns>
-        /// 	<c>true</c> if the specified year is a leap year; otherwise, <c>false</c>.
-        /// </returns>
-        protected virtual bool IsLeapYear(int year)
-        {
-            return DateTime.IsLeapYear(year);
-        }
-
-        /// <summary>
         /// Gets the last day of month.
         /// </summary>
-        /// <param name="monthNum">The month num.</param>
-        /// <param name="year">The year.</param>
-        /// <returns></returns>
-        protected virtual int GetLastDayOfMonth(int monthNum, int year)
+        private static int GetLastDayOfMonth(int monthNum, int year)
         {
             return DateTime.DaysInMonth(year, monthNum);
+        }
+
+        private static int ToInt32(char c) => c - '0';
+
+        private static int ToInt32(ReadOnlySpan<char> span)
+        {
+#if NET6_0_OR_GREATER
+            return int.Parse(span);
+#else
+            return int.Parse(span.ToString());
+#endif
         }
 
         /// <summary>
@@ -2205,11 +2064,6 @@ namespace Quartz
             var copy = new CronExpression(CronExpressionString);
             copy.TimeZone = TimeZone;
             return copy;
-        }
-
-        public void OnDeserialization(object? sender)
-        {
-            BuildExpression(CronExpressionString);
         }
 
         /// <summary>
@@ -2238,7 +2092,7 @@ namespace Quartz
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != typeof(CronExpression)) return false;
-            return Equals((CronExpression) obj);
+            return Equals((CronExpression)obj);
         }
 
         /// <summary>
@@ -2257,19 +2111,183 @@ namespace Quartz
         }
     }
 
-    /// <summary>
-    /// Helper class for cron expression handling.
-    /// </summary>
-    public class ValueSet
-    {
-        /// <summary>
-        /// The value.
-        /// </summary>
-        public int theValue;
+    internal readonly record struct ValueAndPosition(int Value, int Position);
 
-        /// <summary>
-        /// The position.
-        /// </summary>
-        public int pos;
+    /// <summary>
+    /// </summary>
+    /// <param name="RestartLoop">Indicate if the Next fire date progressor loop should restart</param>
+    /// <param name="Date">NextFireDate calculated progress result</param>
+    internal readonly record struct NextFireTimeCursor(bool RestartLoop, DateTimeOffset? Date);
+
+    /// <summary>
+    /// Optimized structure to hold either one value or multiple.
+    /// </summary>
+    internal sealed class CronField : IEnumerable<int>
+    {
+        // null == not set, all spec or individual value
+        private int? singleValue;
+        private SortedSet<int>? values;
+        private bool hasAllOrNoSpec;
+
+        public CronField()
+        {
+            Clear();
+        }
+
+        internal int Count
+        {
+            get
+            {
+                if (singleValue is not null)
+                {
+                    return 1;
+                }
+
+                return values?.Count ?? 0;
+            }
+        }
+
+        internal int Min
+        {
+            get
+            {
+                if (singleValue is not null)
+                {
+                    return hasAllOrNoSpec  ? 0 : singleValue.Value;
+                }
+
+                if (values is not null)
+                {
+                    return hasAllOrNoSpec ? 0 : values.Min;
+                }
+
+                return 0;
+            }
+        }
+
+        internal void Clear()
+        {
+            singleValue = null;
+            values = null;
+            hasAllOrNoSpec = false;
+        }
+
+        internal bool TryGetMinValueStartingFrom(int start, out int min)
+        {
+            min = 0;
+
+            if (singleValue == CronExpressionConstants.AllSpec)
+            {
+                min = start;
+                return true;
+            }
+
+            if (singleValue != null)
+            {
+                if (singleValue >= start)
+                {
+                    min = singleValue.Value;
+                    return true;
+                }
+
+                // didn't match
+                return false;
+            }
+
+            var set = values;
+
+            if (set == null)
+            {
+                return false;
+            }
+
+            min = set.Min;
+
+            if (set.Contains(start))
+            {
+                min = start;
+                return true;
+            }
+
+            if (set.Count == 0 || set.Max < start)
+            {
+                return false;
+            }
+
+            if (set.Min >= start)
+            {
+                // value is contained and would be returned from view
+                return true;
+            }
+
+            // slow path
+            var view = set.GetViewBetween(start, int.MaxValue);
+            if (view.Count > 0)
+            {
+                min = view.Min;
+                return true;
+            }
+
+            return false;
+        }
+
+        public void Add(int value)
+        {
+            hasAllOrNoSpec = value is CronExpressionConstants.AllSpec or CronExpressionConstants.NoSpec;
+
+            if (singleValue is null)
+            {
+                if (values is null)
+                {
+                    singleValue = value;
+                }
+                else
+                {
+                    values.Add(value);
+                }
+            }
+            else if (singleValue != value)
+            {
+                values = new SortedSet<int>
+                {
+                    singleValue.Value,
+                    value
+                };
+                singleValue = null;
+            }
+        }
+
+        public bool Contains(int value)
+        {
+            if (singleValue == value
+                || (value != CronExpressionConstants.AllSpec && value != CronExpressionConstants.NoSpec && hasAllOrNoSpec))
+            {
+                return true;
+            }
+
+            return values != null && values.Contains(value);
+        }
+
+        public IEnumerator<int> GetEnumerator()
+        {
+            if (singleValue is not null)
+            {
+                yield return singleValue.Value;
+                yield break;
+            }
+
+            if (values is not null)
+            {
+                foreach (var value in values)
+                {
+                    yield return value;
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

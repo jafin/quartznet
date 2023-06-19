@@ -20,6 +20,7 @@
 #endregion
 
 using System.Collections.Specialized;
+using System.Diagnostics;
 
 using Quartz.Impl;
 using Quartz.Impl.AdoJobStore;
@@ -56,12 +57,12 @@ namespace Quartz
         public static SchedulerBuilder Create(string? id, string? name)
         {
             var builder = Create();
-            if (!string.IsNullOrWhiteSpace(id))
+            if (!string.IsNullOrWhiteSpace(id) && id != null)
             {
                 builder.SchedulerId = id;
             }
 
-            if (!string.IsNullOrWhiteSpace(name))
+            if (!string.IsNullOrWhiteSpace(name) && name != null)
             {
                 builder.SchedulerName = name;
             }
@@ -151,7 +152,7 @@ namespace Quartz
         /// <summary>
         /// Finalizes the configuration and builds the actual scheduler.
         /// </summary>
-        public Task<IScheduler> BuildScheduler()
+        public ValueTask<IScheduler> BuildScheduler()
         {
             var schedulerFactory = new StdSchedulerFactory(Properties);
             return schedulerFactory.GetScheduler();

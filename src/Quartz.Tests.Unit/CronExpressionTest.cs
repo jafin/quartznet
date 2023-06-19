@@ -23,6 +23,8 @@ using System.Diagnostics;
 
 using FluentAssertions;
 
+using Newtonsoft.Json;
+
 using NUnit.Framework;
 
 using Quartz.Simpl;
@@ -116,8 +118,184 @@ namespace Quartz.Tests.Unit
             Assert.IsTrue(cronExpression.IsSatisfiedBy(cal));
         }
 
+        [TestCase("0 15 10 6,15 * ? 2010", "0 15 10 6,15 * ? 2010")]
+        public void ExpressionToString(string cronExpression, string expected)
+        {
+            var expr = new CronExpression(cronExpression);
+            expr.ToString().Should().Be(expected);
+        }
+
+        [TestCase("0 15 10 L-1,L-2 * ? 2010", new int[] { 31 - 1, 31 - 2 })] //Multiple L Not supported
+        public void CannotUseMultipleLastDayOfMonthInArray(string cronExpression, int[] expectedDays, string scenario = "")
+        {
+            // Limitation of implementation, could be supported but for now we throw an error.
+            Action act = () => new CronExpression(cronExpression); //10:15am <variable days> October 2010
+            act.Should().Throw<FormatException>()
+                .WithMessage("Support for specifying 'L' with other days of the month is limited to one instance of L");
+        }
+
+        [TestCase("0 15 10 6,15,LW * ? 2010", new int[] { 6, 15, 29 })] //31 oct 2010 is a Sunday, week day would be 29
+        [TestCase("0 15 10 6,15,L * ? 2010", new int[] { 6, 15, 31 })]
+        [TestCase("0 15 10 15,L * ? 2010", new int[] { 15, 31 })]
+        [TestCase("0 15 10 15,31 * ? 2010", new int[] { 15, 31 })]
+        [TestCase("0 15 10 15,L-2 * ? 2010", new int[] { 15, 31 - 2 })]
+        [TestCase("0 15 10 31,L-2 * ? 2010", new int[] { 31 }, "duplicate day specified + last are equal")]
+        [TestCase("0 15 10 1,3,6,15,L * ? 2010", new int[] { 1, 3, 6, 15, 31 })]
+        [TestCase("0 15 10 15,LW-2 * ? 2010", new int[] { 15, 29 - 2 })] //29 is last week day
+        public void CanUseLastDayOfMonthInArray(string cronExpression, int[] expectedDays, string scenario = "")
+        {
+            var expr = new CronExpression(cronExpression); //10:15am <variable days> October 2010
+
+            foreach (var expectedDay in expectedDays)
+            {
+                var date = new DateTime(2010, 10, expectedDay, 10, 15, 0).ToUniversalTime(); // last day
+                expr.IsSatisfiedBy(date).Should().BeTrue($"expected day of {expectedDay}, {scenario}");
+            }
+        }
+
+        private int[] CreateArrayOfDays(int year, int month)
+        {
+            var daysInMonth = DateTime.DaysInMonth(year, month);
+            var numbers = new List<int>();
+            for (var i = 0; i < daysInMonth; i++)
+            {
+                numbers.Add(i + 1);
+            }
+
+            return numbers.ToArray();
+        }
+
+        [TestCase("0 15 10 5/5 * MON 2010", new int[] { 4,11,18,25,5,10,15,20,25,30 }, "10:15am every 5th day of the month from 5 to 31, and on Mondays in October 2010")]
+        [TestCase("0 15 10 3 * MON,THU,FRI 2010", new int[] { 1,3,4,11,18,25,7,14,21,28,8,15,22,29 }, "10:15am 3rd of month and every mon,thu,fri October 2010")]
+        [TestCase("0 15 10 1,2,3,4,5,6 * MON,THU,FRI 2010", new int[] { 1, 2, 3, 4, 5, 6, 11, 18, 25, 7, 14, 21, 28, 8, 15, 22, 29 }, "10:15am 1-6th of mon and every Mon,Thu,Fri October 2010")]
+        [TestCase("0 15 10 * * MON,THU,FRI 2010", new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,31 }, "10:15am EveryDay of Month October 2010, Wildcard specified")]
+        [TestCase("0 15 10 1 * * 2010", new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 }, "10:15am Every Day of Month October 2010, Wildcard specified")]
+        public void CanUse_DayOfMonth_And_DayOfWeek_Together(string cronExpression, int[] expectedDays,string scenario = "")
+        {
+            var expr = new CronExpression(cronExpression);
+            var templateDate = new DateTime(2010, 10, 1, 10, 15, 0).ToUniversalTime();
+
+            foreach (var day in expectedDays)
+            {
+                var date = new DateTime(templateDate.Year, templateDate.Month, day, templateDate.Hour, templateDate.Minute, templateDate.Second, templateDate.Kind);
+                expr.IsSatisfiedBy(date).Should().BeTrue($"expected day of {day}, {scenario}");
+            }
+
+            var invalidDays = CreateArrayOfDays(2010,10).Except(expectedDays);
+
+            foreach (var day in invalidDays)
+            {
+                var date = new DateTime(templateDate.Year, templateDate.Month, day, templateDate.Hour, templateDate.Minute, templateDate.Second, templateDate.Kind);
+                expr.IsSatisfiedBy(date).Should().BeFalse($"invalid day of {day}, {scenario}");
+            }
+        }
+
+        [TestCase("0 15 10 LW-2 * ? 2010", 27, "31 Oct 2010 is Sunday, last-weekday (LW) is 29 (FRI) -2 Offset")]
+        [TestCase("0 15 10 LW-5 * ? 2010", 24, "31 Oct 2010 is Sunday, last-weekday (LW) is 29 (FRI) -5 Offset")]
+        [TestCase("0 15 10 LW-7 * ? 2010", 22, "31 Oct 2010 is Sunday, last-weekday (LW) is 29 (FRI) -7 Offset")]
+        [TestCase("0 15 10 LW-28 * ? 2010", 1, "31 Oct 2010 is Sunday, last-weekday (LW) is 29 (FRI) -28 Offset")]
+        [TestCase("0 15 10 LW-29 * ? 2010", 1, "31 Oct 2010 is Sunday, last-weekday (LW) is 29 (FRI) -29 Offset fallback to 1st of month")]
+        [TestCase("0 15 10 LW-30 * ? 2010", 1, "31 Oct 2010 is Sunday, last-weekday (LW) is 29 (FRI) -30 Offset fallback to 1st of month")]
+        public void LastWeekDayWithOffset(string cronExpression, int expectedDay, string reason)
+        {
+            var expr = new CronExpression(cronExpression);
+            var date = new DateTime(2010, 10, expectedDay, 10, 15, 0).ToUniversalTime(); // last day
+            expr.IsSatisfiedBy(date).Should().BeTrue(reason);
+        }
+
+        [TestCase("0 15 10 ? * 1#0 2010", false)]
+        [TestCase("0 15 10 ? * 1#1 2010", true)]
+        [TestCase("0 15 10 ? * 1#2 2010", true)]
+        [TestCase("0 15 10 ? * 1#3 2010", true)]
+        [TestCase("0 15 10 ? * 1#4 2010", true)]
+        [TestCase("0 15 10 ? * 1#5 2010", true)]
+        [TestCase("0 15 10 ? * 1#6 2010", false)]
+
+        public void Ensure_NthWeek_IsBetween1And5(string expression, bool isValid)
+        {
+            Action act = () => new CronExpression(expression); //10:15am <variable days> October 2010
+            if (isValid)
+            {
+                act.Should().NotThrow();
+            }
+            else
+            {
+                act.Should().Throw<FormatException>();
+            }
+        }
+
+        [TestCase("0 15 10 ? * 0#1 2010", false)]
+        [TestCase("0 15 10 ? * 1#1 2010", true, "2010-01-03T10:15:00")]
+        [TestCase("0 15 10 ? * 2#1 2010", true, "2010-01-04T10:15:00")]
+        [TestCase("0 15 10 ? * 3#1 2010", true, "2010-01-05T10:15:00")]
+        [TestCase("0 15 10 ? * 4#1 2010", true, "2010-01-06T10:15:00")]
+        [TestCase("0 15 10 ? * 5#1 2010", true, "2010-01-07T10:15:00")]
+        [TestCase("0 15 10 ? * 6#1 2010", true, "2010-01-01T10:15:00")]
+        [TestCase("0 15 10 ? * 7#1 2010", true, "2010-01-02T10:15:00")]
+        [TestCase("0 15 10 ? * 8#1 2010", false)]
+        [TestCase("0 15 10 ? * 14#1 2010", false)]
+
+        public void Ensure_NthWeek_Day_IsBetween1And7(string expression, bool isValid, string shouldSatisfyDate = null)
+        {
+            Action act = () => new CronExpression(expression);
+            if (isValid)
+            {
+                act.Should().NotThrow();
+                var exp = new CronExpression(expression);
+                if (!string.IsNullOrEmpty(shouldSatisfyDate))
+                {
+                    var dt = DateTime.Parse(shouldSatisfyDate);
+                    exp.IsSatisfiedBy(new DateTimeOffset(dt)).Should().BeTrue();
+                }
+            }
+            else
+            {
+                act.Should().Throw<FormatException>();
+            }
+        }
+
+        [TestCase("0 15 10 6,15,LW * ? 2010")]
+        [TestCase("0 15 10 6,15,L * ? 2010")]
+        [TestCase("0 15 10 15,L * ? 2010")]
+        [TestCase("0 15 10 15,31 * ? 2010")]
+        [TestCase("0 15 10 15,L-2 * ? 2010")]
+        [TestCase("0 15 10 31,L-2 * ? 2010")]
+        [TestCase("0 15 10 1,3,6,15,L * ? 2010")]
+        public void ExpressionEquality(string expression)
+        {
+            var expr1 = new CronExpression(expression);
+            var expr2 = new CronExpression(expression);
+            expr1.Equals(expr2).Should().BeTrue();
+
+            expr1.Equals((object)expr2).Should().BeTrue();
+        }
+
+        [TestCase("0 15 10 15,L-31 * ? 2010")]
+        public void OffSetValue_CannontBe_GreaterThan30(string expression)
+        {
+            Action act = () => new CronExpression(expression);
+            act.Should().Throw<FormatException>()
+                .WithMessage("Offset from last day must be <= 30");
+        }
+
+        [TestCase("L 15 10 15 * ? 2010", false)]
+        [TestCase("0 L 10 15 * ? 2010", false)]
+        [TestCase("0 15 L 15 * ? 2010", false)]
+        [TestCase("0 15 10 L * ? 2010", true,"Valid for day of month")]
+        [TestCase("0 15 10 15 L ? 2010", false)]
+        [TestCase("0 15 10 ? * L 2010", true, "Valid for day of week")]
+        [TestCase("0 15 10 15 * ? L", false)]
+        public void Ensure_L_Token_CanOnlyBeUsedIn_DayOfWeek_ORDayOfMonth(string expression, bool isValid, string description="")
+        {
+            Action act = () => new CronExpression(expression);
+            if (isValid)
+                act.Should().NotThrow(description);
+            else
+                act.Should().Throw<FormatException>(description);
+        }
+
         [Test]
-        public void CronExpression_Throw_Error_Contructed_With_Null()
+        public void CronExpression_Throw_Error_Constructed_With_Null()
         {
             Action act = () => new CronExpression(null);
             act.Should().Throw<ArgumentException>()
@@ -140,6 +318,18 @@ namespace Quartz.Tests.Unit
         {
             Action act = () => new CronExpression($"0 0 * * * ?{allowedChar}");
             act.Should().NotThrow();
+        }
+
+        [Test]
+        public void CanGetNextTimeAfterExternal_From_JsonDeserializedExpression()
+        {
+            // Scenario where external serialization occurrs outside of the provided Quartz Serializers.
+            var cronExpression = new CronExpression("0 15 23 * * ?");
+            var cal = new DateTime(2005, 6, 1, 23, 16, 0).ToUniversalTime();
+            var nextExpectedFireTime = new DateTime(2005, 6, 2, 23, 15, 0).ToUniversalTime();
+            var jsonCronExpression = JsonConvert.SerializeObject(cronExpression);
+            var deSerializedCron = JsonConvert.DeserializeObject<CronExpression>(jsonCronExpression);
+            deSerializedCron.GetNextValidTimeAfter(cal).Value.Should().Be(nextExpectedFireTime);
         }
 
         [Test]
@@ -167,7 +357,7 @@ namespace Quartz.Tests.Unit
         {
             CronExpression cronExpression = new CronExpression("0 0 12 ? * MON-FRI");
             int[] arrJuneDaysThatShouldFire =
-                {1, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 18, 19, 20, 22, 21, 25, 26, 27, 28, 29};
+                { 1, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 18, 19, 20, 22, 21, 25, 26, 27, 28, 29 };
             List<int> juneDays = new List<int>(arrJuneDaysThatShouldFire);
 
             TestCorrectWeekFireDays(cronExpression, juneDays);
@@ -181,7 +371,7 @@ namespace Quartz.Tests.Unit
             var nextRunTime2 = cronExpression.GetTimeAfter((DateTimeOffset)nextRunTime);
 
             int[] arrJuneDaysThatShouldFire =
-                {1, 8, 15, 22, 29};
+                { 1, 8, 15, 22, 29 };
             List<int> juneDays = new List<int>(arrJuneDaysThatShouldFire);
 
             TestCorrectWeekFireDays(cronExpression, juneDays);
@@ -195,7 +385,7 @@ namespace Quartz.Tests.Unit
             var nextRunTime2 = cronExpression.GetTimeAfter((DateTimeOffset)nextRunTime);
 
             int[] arrJuneDaysThatShouldFire =
-                {1, 15, 29};
+                { 1, 15, 29 };
             List<int> juneDays = new List<int>(arrJuneDaysThatShouldFire);
 
             TestCorrectWeekFireDays(cronExpression, juneDays);
@@ -209,7 +399,7 @@ namespace Quartz.Tests.Unit
             var nextRunTime2 = cronExpression.GetTimeAfter((DateTimeOffset)nextRunTime);
 
             int[] arrJuneDaysThatShouldFire =
-                {1, 14, 15, 28, 29};
+                { 1, 14, 15, 28, 29 };
             List<int> juneDays = new List<int>(arrJuneDaysThatShouldFire);
 
             TestCorrectWeekFireDays(cronExpression, juneDays);
@@ -219,7 +409,7 @@ namespace Quartz.Tests.Unit
         public void TestCronExpressionLastDayOfMonth()
         {
             CronExpression cronExpression = new CronExpression("0 0 12 L * ?");
-            int[] arrJuneDaysThatShouldFire = {30};
+            int[] arrJuneDaysThatShouldFire = { 30 };
             List<int> juneDays = new List<int>(arrJuneDaysThatShouldFire);
 
             TestCorrectWeekFireDays(cronExpression, juneDays);
@@ -310,24 +500,6 @@ namespace Quartz.Tests.Unit
         }
 
         [Test]
-        public void TestFormatExceptionWildCardDayOfMonthAndDayOfWeek()
-        {
-            Assert.Throws<FormatException>(() => new CronExpression("0 0 * * * *"), "Support for specifying both a day-of-week AND a day-of-month parameter is not implemented.");
-        }
-
-        [Test]
-        public void TestFormatExceptionSpecifiedDayOfMonthAndWildCardDayOfWeek()
-        {
-            Assert.Throws<FormatException>(() => new CronExpression("0 0 * 4 * *"), "Support for specifying both a day-of-week AND a day-of-month parameter is not implemented.");
-        }
-
-        [Test]
-        public void TestFormatExceptionWildCardDayOfMonthAndSpecifiedDayOfWeek()
-        {
-            Assert.Throws<FormatException>(() => new CronExpression("0 0 * * * 4"), "Support for specifying both a day-of-week AND a day-of-month parameter is not implemented.");
-        }
-
-        [Test]
         public void TestNthWeekDayPassingMonth()
         {
             CronExpression ce = new CronExpression("0 30 10-13 ? * FRI#3");
@@ -411,8 +583,8 @@ namespace Quartz.Tests.Unit
         {
             try
             {
-                SimpleCronExpression cronExpression = new SimpleCronExpression(expression);
-                ICollection<int> set = cronExpression.GetSetPublic(constant);
+                var cronExpression = new CronExpression(expression);
+                var set = cronExpression.GetSet(constant);
                 if (set.Count == 0)
                 {
                     Assert.Fail("Empty field [" + constant + "] returned for " + expression);
@@ -427,18 +599,6 @@ namespace Quartz.Tests.Unit
         [Test]
         public void TestQuartz640()
         {
-            try
-            {
-                new CronExpression("0 43 9 1,5,29,L * ?");
-                Assert.Fail("Expected FormatException did not fire for L combined with other days of the month");
-            }
-            catch (FormatException fe)
-            {
-                Assert.IsTrue(
-                    fe.Message.StartsWith("Support for specifying 'L' and 'LW' with other days of the month is not implemented"),
-                    "Incorrect FormatException thrown");
-            }
-
             try
             {
                 new CronExpression("0 43 9 ? * SAT,SUN,L");
@@ -487,7 +647,7 @@ namespace Quartz.Tests.Unit
         }
 
         [Test]
-        public void TestQRTZNET152()
+        public void TestQRTZNET152_Nearest_Weekday_Expression_W_Does_Not_Work_In_CronTrigger()
         {
             CronExpression expression = new CronExpression("0 5 13 5W 1-12 ?");
             DateTimeOffset test = new DateTimeOffset(2009, 3, 8, 0, 0, 0, TimeSpan.Zero);
@@ -717,6 +877,7 @@ namespace Quartz.Tests.Unit
             Assert.That(e.Message, Is.EqualTo("'/' must be followed by an integer."));
         }
 
+
         [Test]
         public void TestInvalidCharactersAfterAsterisk()
         {
@@ -743,19 +904,6 @@ namespace Quartz.Tests.Unit
             CronExpression.ValidateExpression("0 0 18-21/1 ? * MON,TUE,WED,THU,FRI,SAT,SUN");
         }
 
-        private class SimpleCronExpression : CronExpression
-        {
-            public SimpleCronExpression(string cronExpression)
-                : base(cronExpression)
-            {
-            }
-
-            public ISet<int> GetSetPublic(int constant)
-            {
-                return GetSet(constant);
-            }
-        }
-
         [Test]
         [Explicit]
         public void PerformanceTest()
@@ -776,6 +924,60 @@ namespace Quartz.Tests.Unit
             }
 
             Console.WriteLine("{0}ms", sw.ElapsedMilliseconds);
+        }
+
+        [Test]
+        public void GetTimeBefore_IsNotImplement_AndAlwaysReturnsNull()
+        {
+            CronExpression expression = new CronExpression("0 15 15 5 11 ?");
+            var sut = expression.GetTimeBefore(new DateTimeOffset(2010, 12, 1, 1, 1, 1, TimeSpan.Zero));
+            sut.Should().Be(null);
+        }
+
+        [Test]
+        public void GetFinalFireTime_IsNotImplement_AndAlwaysReturnsNull()
+        {
+            CronExpression expression = new CronExpression("0 15 15 5 11 ?");
+            var sut = expression.GetFinalFireTime();
+            sut.Should().Be(null);
+        }
+
+        [Test]
+        public void CanGetNextInvalidTime()
+        {
+            CronExpression expression = new CronExpression("0 15 15 5 11 ?");
+            var sut = expression.GetNextInvalidTimeAfter(new DateTimeOffset(2010, 12, 1, 1, 1, 0, 0, TimeSpan.Zero));
+            sut.Should().NotBeNull();
+        }
+
+        [Test]
+        public void CanGetHashCode()
+        {
+            CronExpression expression = new CronExpression("0 15 15 5 11 ?");
+            CronExpression expression2 = new CronExpression("0 15 15 5 11 ?");
+            expression.GetHashCode().Should().Be(expression2.GetHashCode());
+        }
+
+        [Test]
+        public void CanGetExpressionSummary()
+        {
+            CronExpression expression = new CronExpression("0 15 15 5 11 ?");
+            var sut = expression.GetExpressionSummary();
+            sut.Should().Be(
+                @"seconds: 0
+minutes: 15
+hours: 15
+daysOfMonth: 5
+months: 11
+daysOfWeek: ?
+lastdayOfWeek: False
+nearestWeekday: False
+NthDayOfWeek: 0
+lastdayOfMonth: False
+calendardayOfWeek: False
+calendardayOfMonth: False
+years: *
+");
         }
     }
 }

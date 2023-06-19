@@ -74,14 +74,14 @@ namespace Quartz.Impl
 	    /// <summary>
 	    /// Lookups the specified sched name.
 	    /// </summary>
-	    public virtual Task<IScheduler?> Lookup(
+	    public virtual ValueTask<IScheduler?> Lookup(
 		    string schedName, 
 		    CancellationToken cancellationToken = default)
 		{
 			lock (syncRoot)
 			{
 				schedulers.TryGetValue(schedName, out var retValue);
-				return Task.FromResult(retValue);
+				return new ValueTask<IScheduler?>(retValue);
 			}
 		}
 
@@ -89,13 +89,13 @@ namespace Quartz.Impl
 	    /// Lookups all.
 	    /// </summary>
 	    /// <returns></returns>
-	    public virtual Task<IReadOnlyList<IScheduler>> LookupAll(
+	    public virtual ValueTask<IReadOnlyList<IScheduler>> LookupAll(
 		    CancellationToken cancellationToken = default)
 		{
 			lock (syncRoot)
 			{
 			    IReadOnlyList<IScheduler> result = new List<IScheduler>(schedulers.Values);
-			    return Task.FromResult(result);
+			    return new ValueTask<IReadOnlyList<IScheduler>>(result);
 			}
 		}
 	}

@@ -28,7 +28,7 @@ namespace Quartz
             this.processor = processor;
         }
 
-        public override async Task<IScheduler> GetScheduler(CancellationToken cancellationToken = default)
+        public override async ValueTask<IScheduler> GetScheduler(CancellationToken cancellationToken = default)
         {
             base.Initialize(options.Value.ToNameValueCollection());
             var scheduler = await base.GetScheduler(cancellationToken);
@@ -94,7 +94,7 @@ namespace Quartz
                 return connectionString;
             }
 
-            return base.GetNamedConnectionString(connectionString);
+            return base.GetNamedConnectionString(connectionStringName);
         }
 
         protected override T InstantiateType<T>(Type? implementationType)
