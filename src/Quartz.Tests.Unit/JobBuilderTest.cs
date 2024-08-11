@@ -50,9 +50,9 @@ public class JobBuilderTest
         Assert.Multiple(() =>
         {
             Assert.That(job.Key.Name, Is.EqualTo("j1"), "Unexpected job name: " + job.Key.Name);
-            Assert.That(job.Key.Group.Equals(JobKey.DefaultGroup), Is.True, "Unexpected job group: " + job.Key.Group);
-            Assert.That(job.Key.Equals(new JobKey("j1")), Is.True, "Unexpected job key: " + job.Key);
-            Assert.That(job.Description is null, Is.True, "Unexpected job description: " + job.Description);
+            Assert.That(job.Key.Group, Is.EqualTo(JobKey.DefaultGroup), "Unexpected job group: " + job.Key.Group);
+            Assert.That(job.Key, Is.EqualTo(new JobKey("j1")), "Unexpected job key: " + job.Key);
+            Assert.That(job.Description, Is.EqualTo(null), "Unexpected job description: " + job.Description);
             Assert.That(job.Durable, Is.True, "Expected isDurable == true ");
             Assert.That(job.RequestsRecovery, Is.False, "Expected requestsRecovery == false ");
             Assert.That(job.ConcurrentExecutionDisallowed, Is.False, "Expected isConcurrentExecutionDisallowed == false ");
@@ -70,7 +70,7 @@ public class JobBuilderTest
 
         Assert.Multiple(() =>
         {
-            Assert.That(job.Description.Equals("my description"), Is.True, "Unexpected job description: " + job.Description);
+            Assert.That(job.Description, Is.EqualTo("my description"), "Unexpected job description: " + job.Description);
             Assert.That(job.Durable, Is.True, "Expected isDurable == true ");
             Assert.That(job.RequestsRecovery, Is.True, "Expected requestsRecovery == true ");
             Assert.That(job.ConcurrentExecutionDisallowed, Is.True, "Expected isConcurrentExecutionDisallowed == true ");
@@ -86,7 +86,7 @@ public class JobBuilderTest
 
         Assert.Multiple(() =>
         {
-            Assert.That(job.Key.Group.Equals("g1"), Is.True, "Unexpected job group: " + job.Key.Name);
+            Assert.That(job.Key.Group, Is.EqualTo("g1"), "Unexpected job group: " + job.Key.Name);
             Assert.That(job.Durable, Is.False, "Expected isDurable == false ");
             Assert.That(job.RequestsRecovery, Is.False, "Expected requestsRecovery == false ");
             Assert.That(job.ConcurrentExecutionDisallowed, Is.True, "Expected isConcurrentExecutionDisallowed == true ");

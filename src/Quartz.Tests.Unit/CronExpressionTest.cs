@@ -698,8 +698,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         while (++i < 26)
         {
             DateTimeOffset? date = trigger.GetFireTimeAfter(pdate);
-            // Console.WriteLine("fireTime: " + date + ", previousFireTime: " + pdate);
-            Assert.That(pdate.Equals(date), Is.False, "Next fire time is the same as previous fire time!");
+            Assert.That(pdate, Is.Not.EqualTo(date), "Next fire time is the same as previous fire time!");
             pdate = date;
         }
     }
@@ -718,7 +717,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         {
             DateTimeOffset? date = trigger.GetFireTimeAfter(pdate);
             // Console.WriteLine("fireTime: " + date + ", previousFireTime: " + pdate);
-            Assert.That(pdate.Equals(date), Is.False, "Next fire time is the same as previous fire time!");
+            Assert.That(pdate, Is.Not.EqualTo(date), "Next fire time is the same as previous fire time!");
             pdate = date;
         }
     }

@@ -500,7 +500,7 @@ public sealed class QuartzScheduler
         {
             ThrowHelper.ThrowSchedulerException("Trigger cannot be null");
         }
-
+        
         if (jobDetail.Key is null)
         {
             ThrowHelper.ThrowSchedulerException("Job's key cannot be null");

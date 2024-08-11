@@ -61,9 +61,9 @@ public class StringOperatorTest
         var op = StringOperator.Anything;
 
         Assert.That(op.Equals((object) op), Is.True);
-        Assert.That(op.Equals((object) SerializeAndDeserialize(op)), Is.True);
-        Assert.That(op.Equals((object) StringOperator.Equality), Is.False);
-        Assert.That(op.Equals((object) null), Is.False);
+        Assert.That(op, Is.EqualTo(SerializeAndDeserialize(op)));
+        Assert.That(op, Is.Not.EqualTo(StringOperator.Equality));
+        Assert.That(op, Is.Not.EqualTo(null));
         Assert.That(op.Equals("xxx"), Is.False);
     }
 
@@ -73,9 +73,9 @@ public class StringOperatorTest
         var op = StringOperator.Anything;
 
         Assert.That(op.Equals(op), Is.True);
-        Assert.That(op.Equals(SerializeAndDeserialize(op)), Is.True);
-        Assert.That(op.Equals(StringOperator.Equality), Is.False);
-        Assert.That(op.Equals(null), Is.False);
+        Assert.That(op, Is.EqualTo(SerializeAndDeserialize(op)));
+        Assert.That(op, Is.Not.EqualTo(StringOperator.Equality));
+        Assert.That(op, Is.Not.EqualTo(null));
     }
 
     [Test]
@@ -145,9 +145,9 @@ public class StringOperatorTest
         var op = StringOperator.Contains;
 
         Assert.That(op.Equals((object) op), Is.True);
-        Assert.That(op.Equals((object) SerializeAndDeserialize(op)), Is.True);
-        Assert.That(op.Equals((object) StringOperator.Anything), Is.False);
-        Assert.That(op.Equals((object) null), Is.False);
+        Assert.That(op, Is.EqualTo(SerializeAndDeserialize(op)));
+        Assert.That(op, Is.Not.EqualTo(StringOperator.Anything));
+        Assert.That(op, Is.Not.EqualTo(null));
         Assert.That(op.Equals("xxx"), Is.False);
     }
 
@@ -157,8 +157,8 @@ public class StringOperatorTest
         var op = StringOperator.Contains;
 
         Assert.That(op.Equals(op), Is.True);
-        Assert.That(op.Equals(SerializeAndDeserialize(op)), Is.True);
-        Assert.That(op.Equals(StringOperator.Anything), Is.False);
+        Assert.That(op, Is.EqualTo(SerializeAndDeserialize(op)));
+        Assert.That(op, Is.Not.EqualTo(StringOperator.Anything));
         Assert.That(op.Equals(null), Is.False);
     }
 
@@ -168,9 +168,9 @@ public class StringOperatorTest
         var op = new NothingOperator();
 
         Assert.That(op.Equals((object) op), Is.True);
-        Assert.That(op.Equals((object) SerializeAndDeserialize(op)), Is.True);
-        Assert.That(op.Equals((object) StringOperator.Anything), Is.False);
-        Assert.That(op.Equals((object) null), Is.False);
+        Assert.That(op, Is.EqualTo(SerializeAndDeserialize(op)));
+        Assert.That(op, Is.Not.EqualTo(StringOperator.Anything));
+        Assert.That(op, Is.Not.EqualTo(null));
         Assert.That(op.Equals("xxx"), Is.False);
     }
 
@@ -180,8 +180,8 @@ public class StringOperatorTest
         var op = new NothingOperator();
 
         Assert.That(op.Equals(op), Is.True);
-        Assert.That(op.Equals(SerializeAndDeserialize(op)), Is.True);
-        Assert.That(op.Equals(StringOperator.Anything), Is.False);
+        Assert.That(op, Is.EqualTo(SerializeAndDeserialize(op)));
+        Assert.That(op, Is.Not.EqualTo(StringOperator.Anything));
         Assert.That(op.Equals(null), Is.False);
     }
 
@@ -264,9 +264,9 @@ public class StringOperatorTest
         var op = StringOperator.EndsWith;
 
         Assert.That(op.Equals((object) op), Is.True);
-        Assert.That(op.Equals((object) SerializeAndDeserialize(op)), Is.True);
-        Assert.That(op.Equals((object) StringOperator.Anything), Is.False);
-        Assert.That(op.Equals((object) null), Is.False);
+        Assert.That(op, Is.EqualTo(SerializeAndDeserialize(op)));
+        Assert.That(op, Is.Not.EqualTo(StringOperator.Anything));
+        Assert.That(op, Is.Not.EqualTo(null));
         Assert.That(op.Equals("xxx"), Is.False);
     }
 
@@ -345,8 +345,8 @@ public class StringOperatorTest
         var op = StringOperator.Equality;
 
         Assert.That(op.Equals(op), Is.True);
-        Assert.That(op.Equals(SerializeAndDeserialize(op)), Is.True);
-        Assert.That(op.Equals(StringOperator.Anything), Is.False);
+        Assert.That(op, Is.EqualTo(SerializeAndDeserialize(op)));
+        Assert.That(op, Is.Not.EqualTo(StringOperator.Anything));
         Assert.That(op.Equals(null), Is.False);
     }
 
@@ -441,8 +441,8 @@ public class StringOperatorTest
         var op = StringOperator.StartsWith;
 
         Assert.That(op.Equals(op), Is.True);
-        Assert.That(op.Equals(SerializeAndDeserialize(op)), Is.True);
-        Assert.That(op.Equals(StringOperator.Anything), Is.False);
+        Assert.That(op, Is.EqualTo(SerializeAndDeserialize(op)));
+        Assert.That(op, Is.Not.EqualTo(StringOperator.Anything));
         Assert.That(op.Equals(null), Is.False);
     }
 
