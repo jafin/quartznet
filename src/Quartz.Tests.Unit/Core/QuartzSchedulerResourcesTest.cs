@@ -17,14 +17,14 @@ public class QuartzSchedulerResourcesTest
     public void DefaultCtor()
     {
         var resources = new QuartzSchedulerResources();
-        Assert.AreEqual(TimeSpan.Zero, resources.BatchTimeWindow);
+        Assert.That(resources.BatchTimeWindow, Is.EqualTo(TimeSpan.Zero));
         Assert.IsNull(resources.InstanceId);
         Assert.IsFalse(resources.InterruptJobsOnShutdown);
         Assert.IsFalse(resources.InterruptJobsOnShutdownWithWait);
         Assert.IsNull(resources.JobRunShellFactory);
         Assert.IsNull(resources.JobStore);
         Assert.IsFalse(resources.MakeSchedulerThreadDaemon);
-        Assert.AreEqual(1, resources.MaxBatchSize);
+        Assert.That(resources.MaxBatchSize, Is.EqualTo(1));
         Assert.IsNull(resources.Name);
         Assert.IsNotNull(resources.SchedulerPlugins);
         Assert.IsEmpty(resources.SchedulerPlugins);
@@ -36,7 +36,7 @@ public class QuartzSchedulerResourcesTest
     public void IdleWaitTime_ValidValues([ValueSource(nameof(ValidIdleWaitTimes))] TimeSpan idleWaitTime)
     {
         _resources.IdleWaitTime = idleWaitTime;
-        Assert.AreEqual(idleWaitTime, _resources.IdleWaitTime);
+        Assert.That(_resources.IdleWaitTime, Is.EqualTo(idleWaitTime));
     }
 
     [Test]
@@ -49,7 +49,7 @@ public class QuartzSchedulerResourcesTest
         }
         catch (ArgumentOutOfRangeException ex)
         {
-            Assert.AreEqual("value", ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo("value"));
         }
     }
 
@@ -57,7 +57,7 @@ public class QuartzSchedulerResourcesTest
     public void BatchTimeWindow_ValidValues([ValueSource(nameof(ValidBatchTimeWindows))] TimeSpan batchTimeWindow)
     {
         _resources.BatchTimeWindow = batchTimeWindow;
-        Assert.AreEqual(batchTimeWindow, _resources.BatchTimeWindow);
+        Assert.That(_resources.BatchTimeWindow, Is.EqualTo(batchTimeWindow));
     }
 
     [Test]
@@ -70,7 +70,7 @@ public class QuartzSchedulerResourcesTest
         }
         catch (ArgumentOutOfRangeException ex)
         {
-            Assert.AreEqual("value", ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo("value"));
         }
     }
 
@@ -78,7 +78,7 @@ public class QuartzSchedulerResourcesTest
     public void MaxBatchSize_ValidValues([ValueSource(nameof(ValidMaxBatchSizes))] int maxBatchSize)
     {
         _resources.MaxBatchSize = maxBatchSize;
-        Assert.AreEqual(maxBatchSize, _resources.MaxBatchSize);
+        Assert.That(_resources.MaxBatchSize, Is.EqualTo(maxBatchSize));
     }
 
     [Test]
@@ -91,7 +91,7 @@ public class QuartzSchedulerResourcesTest
         }
         catch (ArgumentOutOfRangeException ex)
         {
-            Assert.AreEqual("value", ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo("value"));
         }
     }
 

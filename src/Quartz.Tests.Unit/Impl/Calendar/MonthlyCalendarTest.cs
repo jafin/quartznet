@@ -56,7 +56,7 @@ public class MonthlyCalendarTest : SerializationTestSupport<MonthlyCalendar, ICa
     {
         DateTime excluded = new DateTime(2007, 8, 3);
         cal.SetDayExcluded(3, true);
-        Assert.AreEqual(excluded.AddDays(1), cal.GetNextIncludedTimeUtc(excluded).DateTime);
+        Assert.That(cal.GetNextIncludedTimeUtc(excluded).DateTime, Is.EqualTo(excluded.AddDays(1)));
     }
 
     [Test]
@@ -105,8 +105,8 @@ public class MonthlyCalendarTest : SerializationTestSupport<MonthlyCalendar, ICa
     protected override void VerifyMatch(MonthlyCalendar original, MonthlyCalendar deserialized)
     {
         Assert.IsNotNull(deserialized);
-        Assert.AreEqual(original.Description, deserialized.Description);
-        Assert.AreEqual(original.DaysExcluded, deserialized.DaysExcluded);
-        Assert.AreEqual(original.TimeZone, deserialized.TimeZone);
+        Assert.That(deserialized.Description, Is.EqualTo(original.Description));
+        Assert.That(deserialized.DaysExcluded, Is.EqualTo(original.DaysExcluded));
+        Assert.That(deserialized.TimeZone, Is.EqualTo(original.TimeZone));
     }
 }

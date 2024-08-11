@@ -119,12 +119,12 @@ public class DailyTimeIntervalScheduleBuilderTest
             .WithIdentity("test")
             .WithDailyTimeIntervalSchedule(x => x.WithIntervalInHours(3))
             .Build();
-        Assert.AreEqual("test", trigger.Key.Name);
-        Assert.AreEqual("DEFAULT", trigger.Key.Group);
-        Assert.AreEqual(IntervalUnit.Hour, trigger.RepeatIntervalUnit);
+        Assert.That(trigger.Key.Name, Is.EqualTo("test"));
+        Assert.That(trigger.Key.Group, Is.EqualTo("DEFAULT"));
+        Assert.That(trigger.RepeatIntervalUnit, Is.EqualTo(IntervalUnit.Hour));
         //Assert.AreEqual(1, trigger.RepeatInterval);
         var fireTimes = TriggerUtils.ComputeFireTimes((IOperableTrigger) trigger, null, 48);
-        Assert.AreEqual(48, fireTimes.Count);
+        Assert.That(fireTimes.Count, Is.EqualTo(48));
     }
 
     [Test]
@@ -139,16 +139,16 @@ public class DailyTimeIntervalScheduleBuilderTest
                     .OnMondayThroughFriday())
             .Build();
 
-        Assert.AreEqual("test", trigger.Key.Name);
-        Assert.AreEqual("group", trigger.Key.Group);
-        Assert.AreEqual(true, TimeProvider.System.GetUtcNow() >= trigger.StartTimeUtc);
-        Assert.AreEqual(true, null == trigger.EndTimeUtc);
-        Assert.AreEqual(IntervalUnit.Minute, trigger.RepeatIntervalUnit);
-        Assert.AreEqual(72, trigger.RepeatInterval);
-        Assert.AreEqual(new TimeOfDay(8, 0), trigger.StartTimeOfDay);
-        Assert.AreEqual(new TimeOfDay(17, 0), trigger.EndTimeOfDay);
+        Assert.That(trigger.Key.Name, Is.EqualTo("test"));
+        Assert.That(trigger.Key.Group, Is.EqualTo("group"));
+        Assert.That(TimeProvider.System.GetUtcNow() >= trigger.StartTimeUtc, Is.EqualTo(true));
+        Assert.That(null == trigger.EndTimeUtc, Is.EqualTo(true));
+        Assert.That(trigger.RepeatIntervalUnit, Is.EqualTo(IntervalUnit.Minute));
+        Assert.That(trigger.RepeatInterval, Is.EqualTo(72));
+        Assert.That(trigger.StartTimeOfDay, Is.EqualTo(new TimeOfDay(8, 0)));
+        Assert.That(trigger.EndTimeOfDay, Is.EqualTo(new TimeOfDay(17, 0)));
         var fireTimes = TriggerUtils.ComputeFireTimes((IOperableTrigger) trigger, null, 48);
-        Assert.AreEqual(48, fireTimes.Count);
+        Assert.That(fireTimes.Count, Is.EqualTo(48));
     }
 
     [Test]
@@ -166,16 +166,16 @@ public class DailyTimeIntervalScheduleBuilderTest
             .StartAt(startTime)
             .EndAt(endTime)
             .Build();
-        Assert.AreEqual("test", trigger.Key.Name);
-        Assert.AreEqual("test", trigger.Key.Group);
-        Assert.AreEqual(true, startTime == trigger.StartTimeUtc);
-        Assert.AreEqual(true, endTime == trigger.EndTimeUtc);
-        Assert.AreEqual(IntervalUnit.Second, trigger.RepeatIntervalUnit);
-        Assert.AreEqual(121, trigger.RepeatInterval);
-        Assert.AreEqual(new TimeOfDay(10, 0, 0), trigger.StartTimeOfDay);
-        Assert.AreEqual(new TimeOfDay(23, 59, 59), trigger.EndTimeOfDay);
+        Assert.That(trigger.Key.Name, Is.EqualTo("test"));
+        Assert.That(trigger.Key.Group, Is.EqualTo("test"));
+        Assert.That(startTime == trigger.StartTimeUtc, Is.EqualTo(true));
+        Assert.That(endTime == trigger.EndTimeUtc, Is.EqualTo(true));
+        Assert.That(trigger.RepeatIntervalUnit, Is.EqualTo(IntervalUnit.Second));
+        Assert.That(trigger.RepeatInterval, Is.EqualTo(121));
+        Assert.That(trigger.StartTimeOfDay, Is.EqualTo(new TimeOfDay(10, 0, 0)));
+        Assert.That(trigger.EndTimeOfDay, Is.EqualTo(new TimeOfDay(23, 59, 59)));
         var fireTimes = TriggerUtils.ComputeFireTimes((IOperableTrigger) trigger, null, 48);
-        Assert.AreEqual(48, fireTimes.Count);
+        Assert.That(fireTimes.Count, Is.EqualTo(48));
     }
 
     [Test]
@@ -186,12 +186,12 @@ public class DailyTimeIntervalScheduleBuilderTest
             .WithDailyTimeIntervalSchedule(x => x.WithIntervalInHours(1).WithRepeatCount(9))
             .Build();
 
-        Assert.AreEqual("test", trigger.Key.Name);
-        Assert.AreEqual("DEFAULT", trigger.Key.Group);
-        Assert.AreEqual(IntervalUnit.Hour, trigger.RepeatIntervalUnit);
-        Assert.AreEqual(1, trigger.RepeatInterval);
+        Assert.That(trigger.Key.Name, Is.EqualTo("test"));
+        Assert.That(trigger.Key.Group, Is.EqualTo("DEFAULT"));
+        Assert.That(trigger.RepeatIntervalUnit, Is.EqualTo(IntervalUnit.Hour));
+        Assert.That(trigger.RepeatInterval, Is.EqualTo(1));
         var fireTimes = TriggerUtils.ComputeFireTimes((IOperableTrigger) trigger, null, 48);
-        Assert.AreEqual(10, fireTimes.Count);
+        Assert.That(fireTimes.Count, Is.EqualTo(10));
     }
 
     [Test]
@@ -206,14 +206,14 @@ public class DailyTimeIntervalScheduleBuilderTest
                     .EndingDailyAfterCount(12))
             .StartAt(startTime)
             .Build();
-        Assert.AreEqual("test", trigger.Key.Name);
-        Assert.AreEqual("DEFAULT", trigger.Key.Group);
-        Assert.AreEqual(IntervalUnit.Minute, trigger.RepeatIntervalUnit);
+        Assert.That(trigger.Key.Name, Is.EqualTo("test"));
+        Assert.That(trigger.Key.Group, Is.EqualTo("DEFAULT"));
+        Assert.That(trigger.RepeatIntervalUnit, Is.EqualTo(IntervalUnit.Minute));
         var fireTimes = TriggerUtils.ComputeFireTimes((IOperableTrigger) trigger, null, 48);
-        Assert.AreEqual(48, fireTimes.Count);
-        Assert.AreEqual(DateBuilder.DateOf(8, 0, 0, 1, 1, 2011), fireTimes[0]);
-        Assert.AreEqual(DateBuilder.DateOf(10, 45, 0, 4, 1, 2011), fireTimes[47]);
-        Assert.AreEqual(new TimeOfDay(10, 45), trigger.EndTimeOfDay);
+        Assert.That(fireTimes.Count, Is.EqualTo(48));
+        Assert.That(fireTimes[0], Is.EqualTo(DateBuilder.DateOf(8, 0, 0, 1, 1, 2011)));
+        Assert.That(fireTimes[47], Is.EqualTo(DateBuilder.DateOf(10, 45, 0, 4, 1, 2011)));
+        Assert.That(trigger.EndTimeOfDay, Is.EqualTo(new TimeOfDay(10, 45)));
     }
 
     [Test]
@@ -228,15 +228,15 @@ public class DailyTimeIntervalScheduleBuilderTest
             .StartAt(startTime)
             .ForJob("testJob", "testJobGroup")
             .Build();
-        Assert.AreEqual("test", trigger.Key.Name);
-        Assert.AreEqual("DEFAULT", trigger.Key.Group);
-        Assert.AreEqual(IntervalUnit.Minute, trigger.RepeatIntervalUnit);
+        Assert.That(trigger.Key.Name, Is.EqualTo("test"));
+        Assert.That(trigger.Key.Group, Is.EqualTo("DEFAULT"));
+        Assert.That(trigger.RepeatIntervalUnit, Is.EqualTo(IntervalUnit.Minute));
         ((IOperableTrigger) trigger).Validate();
         var fireTimes = TriggerUtils.ComputeFireTimes((IOperableTrigger) trigger, null, 48);
-        Assert.AreEqual(48, fireTimes.Count);
-        Assert.AreEqual(DateBuilder.DateOf(8, 0, 0, 1, 1, 2011), fireTimes[0]);
-        Assert.AreEqual(DateBuilder.DateOf(8, 0, 0, 17, 2, 2011), fireTimes[47]);
-        Assert.AreEqual(new TimeOfDay(8, 0), trigger.EndTimeOfDay);
+        Assert.That(fireTimes.Count, Is.EqualTo(48));
+        Assert.That(fireTimes[0], Is.EqualTo(DateBuilder.DateOf(8, 0, 0, 1, 1, 2011)));
+        Assert.That(fireTimes[47], Is.EqualTo(DateBuilder.DateOf(8, 0, 0, 17, 2, 2011)));
+        Assert.That(trigger.EndTimeOfDay, Is.EqualTo(new TimeOfDay(8, 0)));
     }
 
     [Test]
@@ -301,7 +301,7 @@ public class DailyTimeIntervalScheduleBuilderTest
                 .InTimeZone(est))
             .Build();
 
-        Assert.AreEqual(est, trigger.TimeZone);
+        Assert.That(trigger.TimeZone, Is.EqualTo(est));
     }
 
     [Test]

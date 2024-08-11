@@ -29,9 +29,16 @@ namespace Quartz.Tests.Unit;
 [TestFixture]
 public class InterruptableJobTest
 {
-    private static readonly ManualResetEvent started = new ManualResetEvent(false);
-    private static readonly ManualResetEvent ended = new ManualResetEvent(false);
+    private static readonly ManualResetEvent started = new(false);
+    private static readonly ManualResetEvent ended = new(false);
 
+    [OneTimeTearDown]
+    public void TearDown()
+    {
+        started.Dispose();
+        ended.Dispose();
+    }
+    
     public class TestInterruptableJob : IJob
     {
         public static bool interrupted;
@@ -100,7 +107,7 @@ public class InterruptableJobTest
 
         var executingJobs = await sched.GetCurrentlyExecutingJobs();
 
-        Assert.AreEqual(1, executingJobs.Count, "Number of executing jobs should be 1 ");
+        Assert.That(executingJobs.Count, Is.EqualTo(1), "Number of executing jobs should be 1 ");
 
         IJobExecutionContext jec = executingJobs.First();
 

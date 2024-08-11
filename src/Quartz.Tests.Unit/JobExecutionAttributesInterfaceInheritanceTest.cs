@@ -17,9 +17,15 @@ namespace Quartz.Tests.Unit;
 public class JobExecutionAttributesInterfaceInheritanceTest
 {
     private static readonly TimeSpan jobBlockTime = TimeSpan.FromMilliseconds(300);
-    private static readonly List<DateTime> jobExecDates = new List<DateTime>();
-    private static readonly AutoResetEvent barrier = new AutoResetEvent(false);
+    private static readonly List<DateTime> jobExecDates = new();
+    private static readonly AutoResetEvent barrier = new(false);
 
+    [OneTimeTearDown]
+    public void TearDown()
+    {
+        barrier.Dispose();
+    }
+    
     [PersistJobDataAfterExecution]
     [DisallowConcurrentExecution]
     public interface ITestJob : IJob
@@ -107,7 +113,7 @@ public class JobExecutionAttributesInterfaceInheritanceTest
         barrier.WaitOne();
         await scheduler.Shutdown(true);
 
-        Assert.AreEqual(2, jobExecDates.Count);
+        Assert.That(jobExecDates.Count, Is.EqualTo(2));
         Assert.That((jobExecDates[1] - jobExecDates[0]).TotalMilliseconds, Is.GreaterThanOrEqualTo(jobBlockTime.TotalMilliseconds).Within(5d));
     }
 
@@ -140,7 +146,7 @@ public class JobExecutionAttributesInterfaceInheritanceTest
         barrier.WaitOne();
         await scheduler.Shutdown(true);
 
-        Assert.AreEqual(2, jobExecDates.Count);
+        Assert.That(jobExecDates.Count, Is.EqualTo(2));
         Assert.That((jobExecDates[1] - jobExecDates[0]).TotalMilliseconds, Is.GreaterThanOrEqualTo(jobBlockTime.TotalMilliseconds).Within(5));
     }
 }

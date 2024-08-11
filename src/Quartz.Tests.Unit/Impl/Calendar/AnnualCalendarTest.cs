@@ -50,9 +50,9 @@ public class AnnualCalendarTest : SerializationTestSupport<AnnualCalendar, ICale
         cal.SetDayExcluded(d, true);
         Assert.IsFalse(cal.IsTimeIncluded(d.ToUniversalTime()), "Time was included when it was supposed not to be");
         Assert.IsTrue(cal.IsDayExcluded(d), "Day was not excluded when it was supposed to be excluded");
-        Assert.AreEqual(1, cal.DaysExcluded.Count);
-        Assert.AreEqual(d.Day, cal.DaysExcluded.First().Day);
-        Assert.AreEqual(d.Month, cal.DaysExcluded.First().Month);
+        Assert.That(cal.DaysExcluded.Count, Is.EqualTo(1));
+        Assert.That(cal.DaysExcluded.First().Day, Is.EqualTo(d.Day));
+        Assert.That(cal.DaysExcluded.First().Month, Is.EqualTo(d.Month));
     }
 
     [Test]
@@ -83,10 +83,10 @@ public class AnnualCalendarTest : SerializationTestSupport<AnnualCalendar, ICale
     {
         cal.DaysExcluded = null;
         DateTimeOffset test = DateTimeOffset.UtcNow.Date;
-        Assert.AreEqual(test, cal.GetNextIncludedTimeUtc(test), "Did not get today as date when nothing was excluded");
+        Assert.That(cal.GetNextIncludedTimeUtc(test), Is.EqualTo(test), "Did not get today as date when nothing was excluded");
 
         cal.SetDayExcluded(test.Date, true);
-        Assert.AreEqual(test.AddDays(1), cal.GetNextIncludedTimeUtc(test), "Did not get next day when current day excluded");
+        Assert.That(cal.GetNextIncludedTimeUtc(test), Is.EqualTo(test.AddDays(1)), "Did not get next day when current day excluded");
     }
 
     /// <summary>
@@ -142,7 +142,7 @@ public class AnnualCalendarTest : SerializationTestSupport<AnnualCalendar, ICale
 
         DateTimeOffset expectedNextAvailable = new DateTimeOffset(2012, 11, 5, 0, 0, 0, TimeSpan.FromHours(-5));
         DateTimeOffset actualNextAvailable = c.GetNextIncludedTimeUtc(date);
-        Assert.AreEqual(expectedNextAvailable, actualNextAvailable);
+        Assert.That(actualNextAvailable, Is.EqualTo(expectedNextAvailable));
     }
 
     [Test]

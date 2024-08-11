@@ -388,7 +388,7 @@ public class QuartzHostedServiceTests
         await quartzHostedService.StartAsync(startupCts.Token);
 
         Assert.NotNull(schedulerFactory.LastCreatedScheduler);
-        Assert.AreEqual(shouldSchedulerBeStartedImmediately, schedulerFactory.LastCreatedScheduler.IsStarted);
+        Assert.That(schedulerFactory.LastCreatedScheduler.IsStarted, Is.EqualTo(shouldSchedulerBeStartedImmediately));
 
         appliationLifetime.SetStarted();
 
@@ -398,7 +398,7 @@ public class QuartzHostedServiceTests
                 .ContinueWith(_ => { }, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default); // Wait for the hosted service to respond to the ApplicationStarted token
         }
 
-        Assert.AreEqual(!withStartDelay, schedulerFactory.LastCreatedScheduler.IsStarted);
+        Assert.That(schedulerFactory.LastCreatedScheduler.IsStarted, Is.EqualTo(!withStartDelay));
 
         await startupCts.CancelAsync().ConfigureAwait(false);
 
@@ -435,7 +435,7 @@ public class QuartzHostedServiceTests
 
         await startupTask;
 
-        Assert.AreEqual(shouldSchedulerBeStarted, schedulerFactory.LastCreatedScheduler.IsStarted);
+        Assert.That(schedulerFactory.LastCreatedScheduler.IsStarted, Is.EqualTo(shouldSchedulerBeStarted));
     }
 
     [Test]

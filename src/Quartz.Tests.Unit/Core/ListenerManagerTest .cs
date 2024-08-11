@@ -2,6 +2,8 @@ using Quartz.Core;
 using Quartz.Impl.Matchers;
 using Quartz.Listener;
 
+using static NUnit.Framework.Legacy.ClassicAssert;
+
 namespace Quartz.Tests.Unit.Core;
 
 /// <summary>
@@ -49,12 +51,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddJobListener(jobListener, matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(jobListener), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(jobListener)));
         }
     }
 
@@ -67,12 +69,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddJobListener(jobListener, matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(jobListener), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(jobListener)));
         }
     }
 
@@ -85,12 +87,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddJobListener(jobListener, matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(jobListener), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(jobListener)));
         }
     }
 
@@ -107,12 +109,12 @@ public class ListenerManagerTest
         _manager.AddJobListener(tl1b, setMatchers);
 
         var jobListeners = _manager.GetJobListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1b, jobListeners[0]);
+        IsNotNull(jobListeners);
+        Assert.That(jobListeners.Length, Is.EqualTo(1));
+        Assert.That(jobListeners[0], Is.SameAs(tl1b));
 
         var matchers = _manager.GetJobListenerMatchers(tl1b.Name);
-        Assert.IsNull(matchers);
+        IsNull(matchers);
     }
 
     [Test]
@@ -125,12 +127,12 @@ public class ListenerManagerTest
         _manager.AddJobListener(tl1, setMatchers);
 
         var jobListeners = _manager.GetJobListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        Assert.That(jobListeners.Length, Is.EqualTo(1));
+        Assert.That(jobListeners[0], Is.SameAs(tl1));
 
         var matchers = _manager.GetJobListenerMatchers(tl1.Name);
-        Assert.IsNull(matchers);
+        IsNull(matchers);
     }
 
     [Test]
@@ -145,12 +147,12 @@ public class ListenerManagerTest
         _manager.AddJobListener(tl1b, setMatchers);
 
         var jobListeners = _manager.GetJobListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1b, jobListeners[0]);
+        IsNotNull(jobListeners);
+        NUnit.Framework.Assert.That(jobListeners.Length, Is.EqualTo(1));
+        NUnit.Framework.Assert.That(jobListeners[0], Is.SameAs(tl1b));
 
         var matchers = _manager.GetJobListenerMatchers(tl1b.Name);
-        Assert.IsNull(matchers);
+        IsNull(matchers);
     }
 
     [Test]
@@ -162,12 +164,12 @@ public class ListenerManagerTest
         _manager.AddJobListener(tl1, setMatchers);
 
         var jobListeners = _manager.GetJobListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        NUnit.Framework.Assert.That(jobListeners.Length, Is.EqualTo(1));
+        NUnit.Framework.Assert.That(jobListeners[0], Is.SameAs(tl1));
 
         var matchers = _manager.GetJobListenerMatchers(tl1.Name);
-        Assert.IsNull(matchers);
+        IsNull(matchers);
     }
 
     [Test]
@@ -185,14 +187,14 @@ public class ListenerManagerTest
         _manager.AddJobListener(tl1b, setMatchers);
 
         var jobListeners = _manager.GetJobListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1b, jobListeners[0]);
+        IsNotNull(jobListeners);
+        NUnit.Framework.Assert.That(jobListeners.Length, Is.EqualTo(1));
+        NUnit.Framework.Assert.That(jobListeners[0], Is.SameAs(tl1b));
 
         var matchers = _manager.GetJobListenerMatchers(tl1b.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(1, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(new IMatcher<JobKey>[] { nameMatcher }));
+        IsNotNull(matchers);
+        NUnit.Framework.Assert.That(matchers.Count, Is.EqualTo(1));
+        IsTrue(matchers.SequenceEqual(new IMatcher<JobKey>[] { nameMatcher }));
     }
 
     [Test]
@@ -205,14 +207,14 @@ public class ListenerManagerTest
         _manager.AddJobListener(tl1, setMatchers);
 
         var jobListeners = _manager.GetJobListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        NUnit.Framework.Assert.That(jobListeners.Length, Is.EqualTo(1));
+        NUnit.Framework.Assert.That(jobListeners[0], Is.SameAs(tl1));
 
         var matchers = _manager.GetJobListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(1, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(new IMatcher<JobKey>[] { nameMatcher }));
+        IsNotNull(matchers);
+        NUnit.Framework.Assert.That(matchers.Count, Is.EqualTo(1));
+        IsTrue(matchers.SequenceEqual(new IMatcher<JobKey>[] { nameMatcher }));
     }
 
     [Test]
@@ -224,12 +226,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddJobListener(jobListener, matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(jobListener), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(jobListener)));
         }
     }
 
@@ -242,12 +244,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddJobListener(jobListener, matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(jobListener), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(jobListener)));
         }
     }
 
@@ -260,12 +262,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddJobListener(jobListener, matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(jobListener), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(jobListener)));
         }
     }
 
@@ -282,12 +284,12 @@ public class ListenerManagerTest
         _manager.AddJobListener(tl1b, setMatchers);
 
         var jobListeners = _manager.GetJobListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1b, jobListeners[0]);
+        IsNotNull(jobListeners);
+        NUnit.Framework.Assert.That(jobListeners.Length, Is.EqualTo(1));
+        NUnit.Framework.Assert.That(jobListeners[0], Is.SameAs(tl1b));
 
         var matchers = _manager.GetJobListenerMatchers(tl1b.Name);
-        Assert.IsNull(matchers);
+        IsNull(matchers);
     }
 
     [Test]
@@ -304,12 +306,12 @@ public class ListenerManagerTest
         _manager.AddJobListener(tl1b, setMatchers);
 
         var jobListeners = _manager.GetJobListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1b, jobListeners[0]);
+        IsNotNull(jobListeners);
+        NUnit.Framework.Assert.That(jobListeners.Length, Is.EqualTo(1));
+        NUnit.Framework.Assert.That(jobListeners[0], Is.SameAs(tl1b));
 
         var matchers = _manager.GetJobListenerMatchers(tl1b.Name);
-        Assert.IsNull(matchers);
+        IsNull(matchers);
     }
 
     [Test]
@@ -327,14 +329,14 @@ public class ListenerManagerTest
         _manager.AddJobListener(tl1b, setMatchers);
 
         var jobListeners = _manager.GetJobListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1b, jobListeners[0]);
+        IsNotNull(jobListeners);
+        NUnit.Framework.Assert.That(jobListeners.Length, Is.EqualTo(1));
+        NUnit.Framework.Assert.That(jobListeners[0], Is.SameAs(tl1b));
 
         var matchers = _manager.GetJobListenerMatchers(tl1b.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(1, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(new IMatcher<JobKey>[] { nameMatcher }));
+        IsNotNull(matchers);
+        NUnit.Framework.Assert.That(matchers.Count, Is.EqualTo(1));
+        IsTrue(matchers.SequenceEqual(new IMatcher<JobKey>[] { nameMatcher }));
     }
 
     [Test]
@@ -347,12 +349,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddJobListenerMatcher(listenerName, matcher);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(listenerName), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(listenerName)));
         }
     }
 
@@ -364,12 +366,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddJobListenerMatcher("A", matcher);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(matcher), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(matcher)));
         }
     }
 
@@ -381,13 +383,13 @@ public class ListenerManagerTest
         var nameMatcher = NameMatcher<JobKey>.NameContains("foo");
 
         _manager.AddJobListener(tl1);
-        Assert.IsTrue(_manager.AddJobListenerMatcher(tl1.Name, groupMatcher));
-        Assert.IsTrue(_manager.AddJobListenerMatcher(tl1.Name, nameMatcher));
+        IsTrue(_manager.AddJobListenerMatcher(tl1.Name, groupMatcher));
+        IsTrue(_manager.AddJobListenerMatcher(tl1.Name, nameMatcher));
 
         var matchers = _manager.GetJobListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(2, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(new IMatcher<JobKey>[] { groupMatcher, nameMatcher }));
+        IsNotNull(matchers);
+        NUnit.Framework.Assert.That(matchers.Count, Is.EqualTo(2));
+        IsTrue(matchers.SequenceEqual(new IMatcher<JobKey>[] { groupMatcher, nameMatcher }));
     }
 
     [Test]
@@ -398,12 +400,12 @@ public class ListenerManagerTest
         var nameMatcher = NameMatcher<JobKey>.NameContains("foo");
 
         _manager.AddJobListener(tl1, nameMatcher);
-        Assert.IsTrue(_manager.AddJobListenerMatcher(tl1.Name, groupMatcher));
+        IsTrue(_manager.AddJobListenerMatcher(tl1.Name, groupMatcher));
 
         var matchers = _manager.GetJobListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(2, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(new IMatcher<JobKey>[] { nameMatcher, groupMatcher }));
+        IsNotNull(matchers);
+        NUnit.Framework.Assert.That(matchers.Count, Is.EqualTo(2));
+        IsTrue(matchers.SequenceEqual(new IMatcher<JobKey>[] { nameMatcher, groupMatcher }));
     }
 
     [Test]
@@ -411,11 +413,11 @@ public class ListenerManagerTest
     {
         const string name = "A";
 
-        Assert.Throws<KeyNotFoundException>(() => _manager.GetJobListener(name));
+        NUnit.Framework.Assert.Throws<KeyNotFoundException>(() => _manager.GetJobListener(name));
 
         _manager.AddJobListener(new TestJobListener("B"));
 
-        Assert.Throws<KeyNotFoundException>(() => _manager.GetJobListener(name));
+        NUnit.Framework.Assert.Throws<KeyNotFoundException>(() => _manager.GetJobListener(name));
     }
 
     [Test]
@@ -426,12 +428,12 @@ public class ListenerManagerTest
         try
         {
             _manager.GetJobListener(name);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(name), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(name)));
         }
 
         _manager.AddJobListener(new TestJobListener("B"));
@@ -439,12 +441,12 @@ public class ListenerManagerTest
         try
         {
             _manager.GetJobListener(name);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(name), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(name)));
         }
     }
 
@@ -457,23 +459,23 @@ public class ListenerManagerTest
         _manager.AddJobListener(tl1);
 
         var jobListeners = _manager.GetJobListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        NUnit.Framework.Assert.That(jobListeners.Length, Is.EqualTo(1));
+        NUnit.Framework.Assert.That(jobListeners[0], Is.SameAs(tl1));
 
         jobListeners[0] = tl2;
 
         jobListeners = _manager.GetJobListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        NUnit.Framework.Assert.That(jobListeners.Length, Is.EqualTo(1));
+        NUnit.Framework.Assert.That(jobListeners[0], Is.SameAs(tl1));
     }
 
     [Test]
     public void GetJobListeners_ShouldReturnEmptyArrayWhenNoJobListenersHaveBeenAdded()
     {
         var jobListeners = _manager.GetJobListeners();
-        Assert.AreSame(Array.Empty<IJobListener>(), jobListeners);
+        NUnit.Framework.Assert.That(jobListeners, Is.SameAs(Array.Empty<IJobListener>()));
     }
 
     [Test]
@@ -484,12 +486,12 @@ public class ListenerManagerTest
         try
         {
             _manager.GetJobListenerMatchers(listenerName);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(listenerName), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(listenerName)));
         }
     }
 
@@ -501,12 +503,12 @@ public class ListenerManagerTest
         try
         {
             _manager.RemoveJobListener(name);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(name), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(name)));
         }
     }
 
@@ -520,18 +522,18 @@ public class ListenerManagerTest
         _manager.AddJobListener(tl1, groupMatcher);
         _manager.AddJobListener(tl2);
 
-        Assert.IsTrue(_manager.RemoveJobListener(tl2.Name));
+        IsTrue(_manager.RemoveJobListener(tl2.Name));
         var jobListeners = _manager.GetJobListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        NUnit.Framework.Assert.That(jobListeners.Length, Is.EqualTo(1));
+        NUnit.Framework.Assert.That(jobListeners[0], Is.SameAs(tl1));
 
         var matchersTl2 = _manager.GetJobListenerMatchers(tl2.Name);
-        Assert.IsNull(matchersTl2);
+        IsNull(matchersTl2);
 
         var matchersTl1 = _manager.GetJobListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchersTl1);
-        Assert.IsTrue(matchersTl1.SequenceEqual(new[] { groupMatcher }));
+        IsNotNull(matchersTl1);
+        IsTrue(matchersTl1.SequenceEqual(new[] { groupMatcher }));
     }
 
     [Test]
@@ -545,32 +547,32 @@ public class ListenerManagerTest
         _manager.AddJobListener(tl1, groupMatcher);
         _manager.AddJobListener(tl2, nameMatcher);
 
-        Assert.IsTrue(_manager.RemoveJobListener(tl2.Name));
+        IsTrue(_manager.RemoveJobListener(tl2.Name));
 
         var jobListeners = _manager.GetJobListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        NUnit.Framework.Assert.That(jobListeners.Length, Is.EqualTo(1));
+        NUnit.Framework.Assert.That(jobListeners[0], Is.SameAs(tl1));
 
         var matchersTl2 = _manager.GetJobListenerMatchers(tl2.Name);
-        Assert.IsNull(matchersTl2);
+        IsNull(matchersTl2);
 
         var matchersTl1 = _manager.GetJobListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchersTl1);
-        Assert.IsTrue(matchersTl1.SequenceEqual(new[] { groupMatcher }));
+        IsNotNull(matchersTl1);
+        IsTrue(matchersTl1.SequenceEqual(new[] { groupMatcher }));
 
         // Ensure adding back the listener without matchers does not "magically" recover the
         // matchers that were registered before we removed the listener
         _manager.AddJobListener(tl2);
 
         jobListeners = _manager.GetJobListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(2, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
-        Assert.AreSame(tl2, jobListeners[1]);
+        IsNotNull(jobListeners);
+        NUnit.Framework.Assert.That(jobListeners.Length, Is.EqualTo(2));
+        NUnit.Framework.Assert.That(jobListeners[0], Is.SameAs(tl1));
+        NUnit.Framework.Assert.That(jobListeners[1], Is.SameAs(tl2));
 
         matchersTl2 = _manager.GetJobListenerMatchers(tl2.Name);
-        Assert.IsNull(matchersTl2);
+        IsNull(matchersTl2);
     }
 
     [Test]
@@ -582,12 +584,12 @@ public class ListenerManagerTest
 
         _manager.AddJobListener(tl1, groupMatcher);
 
-        Assert.IsFalse(_manager.RemoveJobListener(tl2.Name));
+        IsFalse(_manager.RemoveJobListener(tl2.Name));
 
         var jobListeners = _manager.GetJobListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        NUnit.Framework.Assert.That(jobListeners.Length, Is.EqualTo(1));
+        NUnit.Framework.Assert.That(jobListeners[0], Is.SameAs(tl1));
     }
 
     [Test]
@@ -600,12 +602,12 @@ public class ListenerManagerTest
         try
         {
             _manager.RemoveJobListenerMatcher(listenerName, matcher);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(listenerName), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(listenerName)));
         }
     }
 
@@ -617,12 +619,12 @@ public class ListenerManagerTest
         try
         {
             _manager.RemoveJobListenerMatcher("A", matcher);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(matcher), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(matcher)));
         }
     }
 
@@ -635,15 +637,15 @@ public class ListenerManagerTest
 
         _manager.AddJobListener(tl1, groupMatcher, nameMatcher);
 
-        Assert.IsTrue(_manager.RemoveJobListenerMatcher(tl1.Name, groupMatcher));
+        IsTrue(_manager.RemoveJobListenerMatcher(tl1.Name, groupMatcher));
 
         var matchers = _manager.GetJobListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(1, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(new[] { nameMatcher }));
+        IsNotNull(matchers);
+        NUnit.Framework.Assert.That(matchers.Count, Is.EqualTo(1));
+        IsTrue(matchers.SequenceEqual(new[] { nameMatcher }));
 
-        Assert.IsTrue(_manager.RemoveJobListenerMatcher(tl1.Name, nameMatcher));
-        Assert.IsNull(_manager.GetJobListenerMatchers(tl1.Name));
+        IsTrue(_manager.RemoveJobListenerMatcher(tl1.Name, nameMatcher));
+        IsNull(_manager.GetJobListenerMatchers(tl1.Name));
     }
 
     [Test]
@@ -655,17 +657,17 @@ public class ListenerManagerTest
 
         _manager.AddJobListener(tl1);
 
-        Assert.False(_manager.RemoveJobListenerMatcher(tl1.Name, groupMatcher));
-        Assert.IsNull(_manager.GetJobListenerMatchers(tl1.Name));
+        False(_manager.RemoveJobListenerMatcher(tl1.Name, groupMatcher));
+        IsNull(_manager.GetJobListenerMatchers(tl1.Name));
 
         _manager.AddJobListenerMatcher(tl1.Name, nameMatcher);
 
-        Assert.False(_manager.RemoveJobListenerMatcher(tl1.Name, groupMatcher));
+        False(_manager.RemoveJobListenerMatcher(tl1.Name, groupMatcher));
 
         var matchers = _manager.GetJobListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(1, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(new[] { nameMatcher }));
+        IsNotNull(matchers);
+        NUnit.Framework.Assert.That(matchers.Count, Is.EqualTo(1));
+        IsTrue(matchers.SequenceEqual(new[] { nameMatcher }));
     }
 
     [Test]
@@ -675,8 +677,8 @@ public class ListenerManagerTest
 
         var groupMatcher = GroupMatcher<JobKey>.GroupEquals("foo");
 
-        Assert.False(_manager.RemoveJobListenerMatcher(listenerName, groupMatcher));
-        Assert.IsNull(_manager.GetJobListenerMatchers(listenerName));
+        False(_manager.RemoveJobListenerMatcher(listenerName, groupMatcher));
+        IsNull(_manager.GetJobListenerMatchers(listenerName));
     }
 
     [Test]
@@ -689,12 +691,12 @@ public class ListenerManagerTest
         try
         {
             _manager.SetJobListenerMatchers(listenerName, matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(listenerName), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(listenerName)));
         }
     }
 
@@ -706,12 +708,12 @@ public class ListenerManagerTest
         try
         {
             _manager.SetJobListenerMatchers("A", matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(matchers), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(matchers)));
         }
     }
 
@@ -721,8 +723,8 @@ public class ListenerManagerTest
         var tl1 = new TestJobListener("tl1");
         var setMatchers = Array.Empty<IMatcher<JobKey>>();
 
-        Assert.IsFalse(_manager.SetJobListenerMatchers(tl1.Name, setMatchers));
-        Assert.IsNull(_manager.GetJobListenerMatchers(tl1.Name));
+        IsFalse(_manager.SetJobListenerMatchers(tl1.Name, setMatchers));
+        IsNull(_manager.GetJobListenerMatchers(tl1.Name));
     }
 
     [Test]
@@ -733,8 +735,8 @@ public class ListenerManagerTest
 
         _manager.AddJobListener(tl1);
 
-        Assert.IsTrue(_manager.SetJobListenerMatchers(tl1.Name, setMatchers));
-        Assert.IsNull(_manager.GetJobListenerMatchers(tl1.Name));
+        IsTrue(_manager.SetJobListenerMatchers(tl1.Name, setMatchers));
+        IsNull(_manager.GetJobListenerMatchers(tl1.Name));
     }
 
     [Test]
@@ -747,8 +749,8 @@ public class ListenerManagerTest
 
         _manager.AddJobListener(tl1, groupMatcher);
 
-        Assert.IsTrue(_manager.SetJobListenerMatchers(tl1.Name, setMatchers));
-        Assert.IsNull(_manager.GetJobListenerMatchers(tl1.Name));
+        IsTrue(_manager.SetJobListenerMatchers(tl1.Name, setMatchers));
+        IsNull(_manager.GetJobListenerMatchers(tl1.Name));
     }
 
     [Test]
@@ -760,8 +762,8 @@ public class ListenerManagerTest
         var nameMatcher = NameMatcher<JobKey>.NameContains("foo");
         var setMatchers = new IMatcher<JobKey>[] { groupMatcher, nameMatcher };
 
-        Assert.IsFalse(_manager.SetJobListenerMatchers(tl1.Name, setMatchers));
-        Assert.IsNull(_manager.GetJobListenerMatchers(tl1.Name));
+        IsFalse(_manager.SetJobListenerMatchers(tl1.Name, setMatchers));
+        IsNull(_manager.GetJobListenerMatchers(tl1.Name));
     }
 
     [Test]
@@ -774,12 +776,12 @@ public class ListenerManagerTest
 
         _manager.AddJobListener(tl1);
 
-        Assert.IsTrue(_manager.SetJobListenerMatchers(tl1.Name, setMatchers));
+        IsTrue(_manager.SetJobListenerMatchers(tl1.Name, setMatchers));
 
         var matchers = _manager.GetJobListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(setMatchers.Length, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(setMatchers));
+        IsNotNull(matchers);
+        NUnit.Framework.Assert.That(matchers.Count, Is.EqualTo(setMatchers.Length));
+        IsTrue(matchers.SequenceEqual(setMatchers));
     }
 
     [Test]
@@ -793,12 +795,12 @@ public class ListenerManagerTest
 
         _manager.AddJobListener(tl1, groupMatcher);
 
-        Assert.IsTrue(_manager.SetJobListenerMatchers(tl1.Name, setMatchers));
+        IsTrue(_manager.SetJobListenerMatchers(tl1.Name, setMatchers));
 
         var matchers = _manager.GetJobListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(setMatchers.Length, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(setMatchers));
+        IsNotNull(matchers);
+        NUnit.Framework.Assert.That(matchers.Count, Is.EqualTo(setMatchers.Length));
+        IsTrue(matchers.SequenceEqual(setMatchers));
     }
 
     [Test]
@@ -810,12 +812,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddTriggerListener(triggerListener, matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(triggerListener), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(triggerListener)));
         }
     }
 
@@ -828,12 +830,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddTriggerListener(triggerListener, matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(triggerListener), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(triggerListener)));
         }
     }
 
@@ -846,12 +848,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddTriggerListener(triggerListener, matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(triggerListener), ex.ParamName);
+            IsNull(ex.InnerException);
+            NUnit.Framework.Assert.That(ex.ParamName, Is.EqualTo(nameof(triggerListener)));
         }
     }
 
@@ -868,12 +870,12 @@ public class ListenerManagerTest
         _manager.AddTriggerListener(tl1b, setMatchers);
 
         var jobListeners = _manager.GetTriggerListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1b, jobListeners[0]);
+        IsNotNull(jobListeners);
+        NUnit.Framework.Assert.That(jobListeners.Length, Is.EqualTo(1));
+        NUnit.Framework.Assert.That(jobListeners[0], Is.SameAs(tl1b));
 
         var matchers = _manager.GetTriggerListenerMatchers(tl1b.Name);
-        Assert.IsNull(matchers);
+        IsNull(matchers);
     }
 
     [Test]
@@ -886,12 +888,12 @@ public class ListenerManagerTest
         _manager.AddTriggerListener(tl1, setMatchers);
 
         var jobListeners = _manager.GetTriggerListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        NUnit.Framework.Assert.That(jobListeners.Length, Is.EqualTo(1));
+        NUnit.Framework.Assert.That(jobListeners[0], Is.SameAs(tl1));
 
         var matchers = _manager.GetTriggerListenerMatchers(tl1.Name);
-        Assert.IsNull(matchers);
+        IsNull(matchers);
     }
 
     [Test]
@@ -906,12 +908,12 @@ public class ListenerManagerTest
         _manager.AddTriggerListener(tl1b, setMatchers);
 
         var jobListeners = _manager.GetTriggerListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1b, jobListeners[0]);
+        IsNotNull(jobListeners);
+        Assert.That(jobListeners.Length, Is.EqualTo(1));
+        Assert.That(jobListeners[0], Is.SameAs(tl1b));
 
         var matchers = _manager.GetTriggerListenerMatchers(tl1b.Name);
-        Assert.IsNull(matchers);
+        IsNull(matchers);
     }
 
     [Test]
@@ -923,12 +925,12 @@ public class ListenerManagerTest
         _manager.AddTriggerListener(tl1, setMatchers);
 
         var jobListeners = _manager.GetTriggerListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        Assert.That(jobListeners.Length, Is.EqualTo(1));
+        Assert.That(jobListeners[0], Is.SameAs(tl1));
 
         var matchers = _manager.GetTriggerListenerMatchers(tl1.Name);
-        Assert.IsNull(matchers);
+        IsNull(matchers);
     }
 
     [Test]
@@ -946,14 +948,14 @@ public class ListenerManagerTest
         _manager.AddTriggerListener(tl1b, setMatchers);
 
         var jobListeners = _manager.GetTriggerListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1b, jobListeners[0]);
+        IsNotNull(jobListeners);
+        Assert.That(jobListeners.Length, Is.EqualTo(1));
+        Assert.That(jobListeners[0], Is.SameAs(tl1b));
 
         var matchers = _manager.GetTriggerListenerMatchers(tl1b.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(1, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(new IMatcher<TriggerKey>[] { nameMatcher }));
+        IsNotNull(matchers);
+        Assert.That(matchers.Count, Is.EqualTo(1));
+        IsTrue(matchers.SequenceEqual(new IMatcher<TriggerKey>[] { nameMatcher }));
     }
 
     [Test]
@@ -966,14 +968,14 @@ public class ListenerManagerTest
         _manager.AddTriggerListener(tl1, setMatchers);
 
         var jobListeners = _manager.GetTriggerListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        Assert.That(jobListeners.Length, Is.EqualTo(1));
+        Assert.That(jobListeners[0], Is.SameAs(tl1));
 
         var matchers = _manager.GetTriggerListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(1, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(new IMatcher<TriggerKey>[] { nameMatcher }));
+        IsNotNull(matchers);
+        Assert.That(matchers.Count, Is.EqualTo(1));
+        IsTrue(matchers.SequenceEqual(new IMatcher<TriggerKey>[] { nameMatcher }));
     }
 
     [Test]
@@ -985,12 +987,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddTriggerListener(triggerListener, matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(triggerListener), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(triggerListener)));
         }
     }
 
@@ -1003,12 +1005,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddTriggerListener(triggerListener, matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(triggerListener), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(triggerListener)));
         }
     }
 
@@ -1021,12 +1023,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddTriggerListener(triggerListener, matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(triggerListener), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(triggerListener)));
         }
     }
 
@@ -1043,12 +1045,12 @@ public class ListenerManagerTest
         _manager.AddTriggerListener(tl1b, setMatchers);
 
         var jobListeners = _manager.GetTriggerListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1b, jobListeners[0]);
+        IsNotNull(jobListeners);
+        Assert.That(jobListeners.Length, Is.EqualTo(1));
+        Assert.That(jobListeners[0], Is.SameAs(tl1b));
 
         var matchers = _manager.GetTriggerListenerMatchers(tl1b.Name);
-        Assert.IsNull(matchers);
+        IsNull(matchers);
     }
 
     [Test]
@@ -1065,12 +1067,12 @@ public class ListenerManagerTest
         _manager.AddTriggerListener(tl1b, setMatchers);
 
         var jobListeners = _manager.GetTriggerListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1b, jobListeners[0]);
+        IsNotNull(jobListeners);
+        Assert.That(jobListeners.Length, Is.EqualTo(1));
+        Assert.That(jobListeners[0], Is.SameAs(tl1b));
 
         var matchers = _manager.GetTriggerListenerMatchers(tl1b.Name);
-        Assert.IsNull(matchers);
+        IsNull(matchers);
     }
 
     [Test]
@@ -1088,14 +1090,14 @@ public class ListenerManagerTest
         _manager.AddTriggerListener(tl1b, setMatchers);
 
         var jobListeners = _manager.GetTriggerListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1b, jobListeners[0]);
+        IsNotNull(jobListeners);
+        Assert.That(jobListeners.Length, Is.EqualTo(1));
+        Assert.That(jobListeners[0], Is.SameAs(tl1b));
 
         var matchers = _manager.GetTriggerListenerMatchers(tl1b.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(1, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(new IMatcher<TriggerKey>[] { nameMatcher }));
+        IsNotNull(matchers);
+        Assert.That(matchers.Count, Is.EqualTo(1));
+        IsTrue(matchers.SequenceEqual(new IMatcher<TriggerKey>[] { nameMatcher }));
     }
 
     [Test]
@@ -1108,12 +1110,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddTriggerListenerMatcher(listenerName, matcher);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(listenerName), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(listenerName)));
         }
     }
 
@@ -1125,12 +1127,12 @@ public class ListenerManagerTest
         try
         {
             _manager.AddTriggerListenerMatcher("A", matcher);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(matcher), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(matcher)));
         }
     }
 
@@ -1142,13 +1144,13 @@ public class ListenerManagerTest
         var nameMatcher = NameMatcher<TriggerKey>.NameContains("foo");
 
         _manager.AddTriggerListener(tl1);
-        Assert.IsTrue(_manager.AddTriggerListenerMatcher(tl1.Name, groupMatcher));
-        Assert.IsTrue(_manager.AddTriggerListenerMatcher(tl1.Name, nameMatcher));
+        IsTrue(_manager.AddTriggerListenerMatcher(tl1.Name, groupMatcher));
+        IsTrue(_manager.AddTriggerListenerMatcher(tl1.Name, nameMatcher));
 
         var matchers = _manager.GetTriggerListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(2, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(new IMatcher<TriggerKey>[] { groupMatcher, nameMatcher }));
+        IsNotNull(matchers);
+        Assert.That(matchers.Count, Is.EqualTo(2));
+        IsTrue(matchers.SequenceEqual(new IMatcher<TriggerKey>[] { groupMatcher, nameMatcher }));
     }
 
     [Test]
@@ -1159,12 +1161,12 @@ public class ListenerManagerTest
         var nameMatcher = NameMatcher<TriggerKey>.NameContains("foo");
 
         _manager.AddTriggerListener(tl1, nameMatcher);
-        Assert.IsTrue(_manager.AddTriggerListenerMatcher(tl1.Name, groupMatcher));
+        IsTrue(_manager.AddTriggerListenerMatcher(tl1.Name, groupMatcher));
 
         var matchers = _manager.GetTriggerListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(2, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(new IMatcher<TriggerKey>[] { nameMatcher, groupMatcher }));
+        IsNotNull(matchers);
+        Assert.That(matchers.Count, Is.EqualTo(2));
+        IsTrue(matchers.SequenceEqual(new IMatcher<TriggerKey>[] { nameMatcher, groupMatcher }));
     }
 
     [Test]
@@ -1172,11 +1174,11 @@ public class ListenerManagerTest
     {
         const string name = "A";
 
-        Assert.Throws<KeyNotFoundException>(() => _manager.GetTriggerListener(name));
+        NUnit.Framework.Assert.Throws<KeyNotFoundException>(() => _manager.GetTriggerListener(name));
 
         _manager.AddTriggerListener(new TestTriggerListener("B"));
 
-        Assert.Throws<KeyNotFoundException>(() => _manager.GetTriggerListener(name));
+        NUnit.Framework.Assert.Throws<KeyNotFoundException>(() => _manager.GetTriggerListener(name));
     }
 
     [Test]
@@ -1187,12 +1189,12 @@ public class ListenerManagerTest
         try
         {
             _manager.GetTriggerListener(name);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(name), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(name)));
         }
 
         _manager.AddTriggerListener(new TestTriggerListener("B"));
@@ -1200,12 +1202,12 @@ public class ListenerManagerTest
         try
         {
             _manager.GetTriggerListener(name);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(name), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(name)));
         }
     }
 
@@ -1218,23 +1220,23 @@ public class ListenerManagerTest
         _manager.AddTriggerListener(tl1);
 
         var jobListeners = _manager.GetTriggerListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        Assert.That(jobListeners.Length, Is.EqualTo(1));
+        Assert.That(jobListeners[0], Is.SameAs(tl1));
 
         jobListeners[0] = tl2;
 
         jobListeners = _manager.GetTriggerListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        Assert.That(jobListeners.Length, Is.EqualTo(1));
+        Assert.That(jobListeners[0], Is.SameAs(tl1));
     }
 
     [Test]
     public void GetTriggerListeners_ShouldReturnEmptyArrayWhenNoTriggerListenersHaveBeenAdded()
     {
         var jobListeners = _manager.GetTriggerListeners();
-        Assert.AreSame(Array.Empty<ITriggerListener>(), jobListeners);
+        Assert.That(jobListeners, Is.SameAs(Array.Empty<ITriggerListener>()));
     }
 
     [Test]
@@ -1245,12 +1247,12 @@ public class ListenerManagerTest
         try
         {
             _manager.GetTriggerListenerMatchers(listenerName);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(listenerName), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(listenerName)));
         }
     }
 
@@ -1262,12 +1264,12 @@ public class ListenerManagerTest
         try
         {
             _manager.RemoveTriggerListener(name);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(name), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(name)));
         }
     }
 
@@ -1281,18 +1283,18 @@ public class ListenerManagerTest
         _manager.AddTriggerListener(tl1, groupMatcher);
         _manager.AddTriggerListener(tl2);
 
-        Assert.IsTrue(_manager.RemoveTriggerListener(tl2.Name));
+        IsTrue(_manager.RemoveTriggerListener(tl2.Name));
         var jobListeners = _manager.GetTriggerListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        Assert.That(jobListeners.Length, Is.EqualTo(1));
+        Assert.That(jobListeners[0], Is.SameAs(tl1));
 
         var matchersTl2 = _manager.GetTriggerListenerMatchers(tl2.Name);
-        Assert.IsNull(matchersTl2);
+        IsNull(matchersTl2);
 
         var matchersTl1 = _manager.GetTriggerListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchersTl1);
-        Assert.IsTrue(matchersTl1.SequenceEqual(new[] { groupMatcher }));
+        IsNotNull(matchersTl1);
+        IsTrue(matchersTl1.SequenceEqual(new[] { groupMatcher }));
     }
 
     [Test]
@@ -1306,32 +1308,32 @@ public class ListenerManagerTest
         _manager.AddTriggerListener(tl1, groupMatcher);
         _manager.AddTriggerListener(tl2, nameMatcher);
 
-        Assert.IsTrue(_manager.RemoveTriggerListener(tl2.Name));
+        IsTrue(_manager.RemoveTriggerListener(tl2.Name));
 
         var jobListeners = _manager.GetTriggerListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        Assert.That(jobListeners.Length, Is.EqualTo(1));
+        Assert.That(jobListeners[0], Is.SameAs(tl1));
 
         var matchersTl2 = _manager.GetTriggerListenerMatchers(tl2.Name);
-        Assert.IsNull(matchersTl2);
+        IsNull(matchersTl2);
 
         var matchersTl1 = _manager.GetTriggerListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchersTl1);
-        Assert.IsTrue(matchersTl1.SequenceEqual(new[] { groupMatcher }));
+        IsNotNull(matchersTl1);
+        IsTrue(matchersTl1.SequenceEqual(new[] { groupMatcher }));
 
         // Ensure adding back the listener without matchers does not "magically" recover the
         // matchers that were registered before we removed the listener
         _manager.AddTriggerListener(tl2);
 
         jobListeners = _manager.GetTriggerListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(2, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
-        Assert.AreSame(tl2, jobListeners[1]);
+        IsNotNull(jobListeners);
+        Assert.That(jobListeners.Length, Is.EqualTo(2));
+        Assert.That(jobListeners[0], Is.SameAs(tl1));
+        Assert.That(jobListeners[1], Is.SameAs(tl2));
 
         matchersTl2 = _manager.GetTriggerListenerMatchers(tl2.Name);
-        Assert.IsNull(matchersTl2);
+        IsNull(matchersTl2);
     }
 
     [Test]
@@ -1343,12 +1345,12 @@ public class ListenerManagerTest
 
         _manager.AddTriggerListener(tl1, groupMatcher);
 
-        Assert.IsFalse(_manager.RemoveTriggerListener(tl2.Name));
+        IsFalse(_manager.RemoveTriggerListener(tl2.Name));
 
         var jobListeners = _manager.GetTriggerListeners();
-        Assert.IsNotNull(jobListeners);
-        Assert.AreEqual(1, jobListeners.Length);
-        Assert.AreSame(tl1, jobListeners[0]);
+        IsNotNull(jobListeners);
+        Assert.That(jobListeners.Length, Is.EqualTo(1));
+        Assert.That(jobListeners[0], Is.SameAs(tl1));
     }
 
     [Test]
@@ -1361,12 +1363,12 @@ public class ListenerManagerTest
         try
         {
             _manager.RemoveTriggerListenerMatcher(listenerName, matcher);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(listenerName), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(listenerName)));
         }
     }
 
@@ -1378,12 +1380,12 @@ public class ListenerManagerTest
         try
         {
             _manager.RemoveTriggerListenerMatcher("A", matcher);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(matcher), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(matcher)));
         }
     }
 
@@ -1396,15 +1398,15 @@ public class ListenerManagerTest
 
         _manager.AddTriggerListener(tl1, groupMatcher, nameMatcher);
 
-        Assert.IsTrue(_manager.RemoveTriggerListenerMatcher(tl1.Name, groupMatcher));
+        IsTrue(_manager.RemoveTriggerListenerMatcher(tl1.Name, groupMatcher));
 
         var matchers = _manager.GetTriggerListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(1, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(new[] { nameMatcher }));
+        IsNotNull(matchers);
+        Assert.That(matchers.Count, Is.EqualTo(1));
+        IsTrue(matchers.SequenceEqual(new[] { nameMatcher }));
 
-        Assert.IsTrue(_manager.RemoveTriggerListenerMatcher(tl1.Name, nameMatcher));
-        Assert.IsNull(_manager.GetTriggerListenerMatchers(tl1.Name));
+        IsTrue(_manager.RemoveTriggerListenerMatcher(tl1.Name, nameMatcher));
+        IsNull(_manager.GetTriggerListenerMatchers(tl1.Name));
     }
 
     [Test]
@@ -1416,17 +1418,17 @@ public class ListenerManagerTest
 
         _manager.AddTriggerListener(tl1);
 
-        Assert.False(_manager.RemoveTriggerListenerMatcher(tl1.Name, groupMatcher));
-        Assert.IsNull(_manager.GetTriggerListenerMatchers(tl1.Name));
+        False(_manager.RemoveTriggerListenerMatcher(tl1.Name, groupMatcher));
+        IsNull(_manager.GetTriggerListenerMatchers(tl1.Name));
 
         _manager.AddTriggerListenerMatcher(tl1.Name, nameMatcher);
 
-        Assert.False(_manager.RemoveTriggerListenerMatcher(tl1.Name, groupMatcher));
+        False(_manager.RemoveTriggerListenerMatcher(tl1.Name, groupMatcher));
 
         var matchers = _manager.GetTriggerListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(1, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(new[] { nameMatcher }));
+        IsNotNull(matchers);
+        Assert.That(matchers.Count, Is.EqualTo(1));
+        IsTrue(matchers.SequenceEqual(new[] { nameMatcher }));
     }
 
     [Test]
@@ -1436,8 +1438,8 @@ public class ListenerManagerTest
 
         var groupMatcher = GroupMatcher<TriggerKey>.GroupEquals("foo");
 
-        Assert.False(_manager.RemoveTriggerListenerMatcher(listenerName, groupMatcher));
-        Assert.IsNull(_manager.GetTriggerListenerMatchers(listenerName));
+        False(_manager.RemoveTriggerListenerMatcher(listenerName, groupMatcher));
+        IsNull(_manager.GetTriggerListenerMatchers(listenerName));
     }
 
     [Test]
@@ -1450,12 +1452,12 @@ public class ListenerManagerTest
         try
         {
             _manager.SetTriggerListenerMatchers(listenerName, matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(listenerName), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(listenerName)));
         }
     }
 
@@ -1467,12 +1469,12 @@ public class ListenerManagerTest
         try
         {
             _manager.SetTriggerListenerMatchers("A", matchers);
-            Assert.Fail();
+            NUnit.Framework.Assert.Fail();
         }
         catch (ArgumentNullException ex)
         {
-            Assert.IsNull(ex.InnerException);
-            Assert.AreEqual(nameof(matchers), ex.ParamName);
+            IsNull(ex.InnerException);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(matchers)));
         }
     }
 
@@ -1482,8 +1484,8 @@ public class ListenerManagerTest
         var tl1 = new TestTriggerListener("tl1");
         var setMatchers = Array.Empty<IMatcher<TriggerKey>>();
 
-        Assert.IsFalse(_manager.SetTriggerListenerMatchers(tl1.Name, setMatchers));
-        Assert.IsNull(_manager.GetTriggerListenerMatchers(tl1.Name));
+        IsFalse(_manager.SetTriggerListenerMatchers(tl1.Name, setMatchers));
+        IsNull(_manager.GetTriggerListenerMatchers(tl1.Name));
     }
 
     [Test]
@@ -1494,8 +1496,8 @@ public class ListenerManagerTest
 
         _manager.AddTriggerListener(tl1);
 
-        Assert.IsTrue(_manager.SetTriggerListenerMatchers(tl1.Name, setMatchers));
-        Assert.IsNull(_manager.GetTriggerListenerMatchers(tl1.Name));
+        IsTrue(_manager.SetTriggerListenerMatchers(tl1.Name, setMatchers));
+        IsNull(_manager.GetTriggerListenerMatchers(tl1.Name));
     }
 
     [Test]
@@ -1508,8 +1510,8 @@ public class ListenerManagerTest
 
         _manager.AddTriggerListener(tl1, groupMatcher);
 
-        Assert.IsTrue(_manager.SetTriggerListenerMatchers(tl1.Name, setMatchers));
-        Assert.IsNull(_manager.GetTriggerListenerMatchers(tl1.Name));
+        IsTrue(_manager.SetTriggerListenerMatchers(tl1.Name, setMatchers));
+        IsNull(_manager.GetTriggerListenerMatchers(tl1.Name));
     }
 
     [Test]
@@ -1521,8 +1523,8 @@ public class ListenerManagerTest
         var nameMatcher = NameMatcher<TriggerKey>.NameContains("foo");
         var setMatchers = new IMatcher<TriggerKey>[] { groupMatcher, nameMatcher };
 
-        Assert.IsFalse(_manager.SetTriggerListenerMatchers(tl1.Name, setMatchers));
-        Assert.IsNull(_manager.GetTriggerListenerMatchers(tl1.Name));
+        IsFalse(_manager.SetTriggerListenerMatchers(tl1.Name, setMatchers));
+        IsNull(_manager.GetTriggerListenerMatchers(tl1.Name));
     }
 
     [Test]
@@ -1535,12 +1537,12 @@ public class ListenerManagerTest
 
         _manager.AddTriggerListener(tl1);
 
-        Assert.IsTrue(_manager.SetTriggerListenerMatchers(tl1.Name, setMatchers));
+        IsTrue(_manager.SetTriggerListenerMatchers(tl1.Name, setMatchers));
 
         var matchers = _manager.GetTriggerListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(setMatchers.Length, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(setMatchers));
+        IsNotNull(matchers);
+        Assert.That(matchers.Count, Is.EqualTo(setMatchers.Length));
+        IsTrue(matchers.SequenceEqual(setMatchers));
     }
 
     [Test]
@@ -1554,12 +1556,12 @@ public class ListenerManagerTest
 
         _manager.AddTriggerListener(tl1, groupMatcher);
 
-        Assert.IsTrue(_manager.SetTriggerListenerMatchers(tl1.Name, setMatchers));
+        IsTrue(_manager.SetTriggerListenerMatchers(tl1.Name, setMatchers));
 
         var matchers = _manager.GetTriggerListenerMatchers(tl1.Name);
-        Assert.IsNotNull(matchers);
-        Assert.AreEqual(setMatchers.Length, matchers.Count);
-        Assert.IsTrue(matchers.SequenceEqual(setMatchers));
+        IsNotNull(matchers);
+        Assert.That(matchers.Count, Is.EqualTo(setMatchers.Length));
+        IsTrue(matchers.SequenceEqual(setMatchers));
     }
 
     [Test]
@@ -1570,14 +1572,14 @@ public class ListenerManagerTest
 
         // test adding listener without matcher
         _manager.AddSchedulerListener(tl1);
-        Assert.AreEqual(1, _manager.GetSchedulerListeners().Count, "Unexpected size of listener list");
+        Assert.That(_manager.GetSchedulerListeners().Count, Is.EqualTo(1), "Unexpected size of listener list");
 
         // test adding listener with matcher
         _manager.AddSchedulerListener(tl2);
-        Assert.AreEqual(2, _manager.GetSchedulerListeners().Count, "Unexpected size of listener list");
+        Assert.That(_manager.GetSchedulerListeners().Count, Is.EqualTo(2), "Unexpected size of listener list");
 
         // test removing a listener
         _manager.RemoveSchedulerListener(tl1);
-        Assert.AreEqual(1, _manager.GetSchedulerListeners().Count, "Unexpected size of listener list");
+        Assert.That(_manager.GetSchedulerListeners().Count, Is.EqualTo(1), "Unexpected size of listener list");
     }
 }

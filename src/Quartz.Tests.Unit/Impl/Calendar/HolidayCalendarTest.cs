@@ -55,7 +55,7 @@ public class HolidayCalendarTest : SerializationTestSupport<HolidayCalendar, ICa
         DateTime excluded = new DateTime(2007, 12, 31);
         cal.AddExcludedDate(excluded);
 
-        Assert.AreEqual(new DateTimeOffset(2008, 1, 1, 0, 0, 0, cal.TimeZone.BaseUtcOffset), cal.GetNextIncludedTimeUtc(excluded));
+        Assert.That(cal.GetNextIncludedTimeUtc(excluded), Is.EqualTo(new DateTimeOffset(2008, 1, 1, 0, 0, 0, cal.TimeZone.BaseUtcOffset)));
     }
 
     /// <summary>
@@ -90,14 +90,14 @@ public class HolidayCalendarTest : SerializationTestSupport<HolidayCalendar, ICa
 
         DateTimeOffset expectedNextAvailable = new DateTimeOffset(2012, 11, 5, 0, 0, 0, TimeSpan.FromHours(-5));
         DateTimeOffset actualNextAvailable = c.GetNextIncludedTimeUtc(date);
-        Assert.AreEqual(expectedNextAvailable, actualNextAvailable);
+        Assert.That(actualNextAvailable, Is.EqualTo(expectedNextAvailable));
     }
 
     protected override void VerifyMatch(HolidayCalendar original, HolidayCalendar deserialized)
     {
         Assert.IsNotNull(deserialized);
-        Assert.AreEqual(original.Description, deserialized.Description);
-        Assert.AreEqual(original.ExcludedDates, deserialized.ExcludedDates);
-        Assert.AreEqual(original.TimeZone, deserialized.TimeZone);
+        Assert.That(deserialized.Description, Is.EqualTo(original.Description));
+        Assert.That(deserialized.ExcludedDates, Is.EqualTo(original.ExcludedDates));
+        Assert.That(deserialized.TimeZone, Is.EqualTo(original.TimeZone));
     }
 }

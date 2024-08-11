@@ -58,7 +58,7 @@ public class DaylightSavingTimeTest
         // fireTime always is in UTC, but DateTimeOffset comparison normalized to UTC anyway.
         // Conversion here is for clarity of interpreting errors if the test fails.
         DateTimeOffset convertedFireTime = TimeZoneInfo.ConvertTime(fireTime.Value, tz);
-        Assert.AreEqual(expectedTime, convertedFireTime);
+        Assert.That(convertedFireTime, Is.EqualTo(expectedTime));
     }
 
     [Test]
@@ -84,7 +84,7 @@ public class DaylightSavingTimeTest
         // fireTime always is in UTC, but DateTimeOffset comparison normalized to UTC anyway.
         // Conversion here is for clarity of interpreting errors if the test fails.
         DateTimeOffset convertedFireTime = TimeZoneInfo.ConvertTime(fireTime.Value, tz);
-        Assert.AreEqual(expectedTime, convertedFireTime);
+        Assert.That(convertedFireTime, Is.EqualTo(expectedTime));
     }
 
     [Test]
@@ -110,6 +110,6 @@ public class DaylightSavingTimeTest
         // fireTime always is in UTC, but DateTimeOffset comparison normalized to UTC anyway.
         // Conversion here is for clarity of interpreting errors if the test fails.
         DateTimeOffset convertedFireTime = TimeZoneInfo.ConvertTime(fireTime.Value, tz);
-        Assert.AreEqual(expectedTime, convertedFireTime);
+        Assert.That(convertedFireTime, Is.EqualTo(expectedTime));
     }
 }

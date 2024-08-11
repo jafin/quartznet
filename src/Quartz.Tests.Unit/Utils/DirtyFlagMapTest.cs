@@ -39,7 +39,7 @@ public class DirtyFlagMapTest
         var map = Deserialize<DirtyFlagMap<string, int>>("DirtyFlagMap_EmptyAndDirty_V1");
 
         Assert.IsNotNull(map);
-        Assert.AreEqual(0, map.Count);
+        Assert.That(map.Count, Is.EqualTo(0));
         Assert.IsTrue(map.Dirty);
     }
 
@@ -49,7 +49,7 @@ public class DirtyFlagMapTest
         var map = Deserialize<DirtyFlagMap<string, int>>("DirtyFlagMap_EmptyAndNotDirty_V1");
 
         Assert.IsNotNull(map);
-        Assert.AreEqual(0, map.Count);
+        Assert.That(map.Count, Is.EqualTo(0));
         Assert.IsFalse(map.Dirty);
     }
 
@@ -59,11 +59,11 @@ public class DirtyFlagMapTest
         var map = Deserialize<DirtyFlagMap<string, int>>("DirtyFlagMap_NotEmptyAndDirty_V1");
 
         Assert.IsNotNull(map);
-        Assert.AreEqual(2, map.Count);
+        Assert.That(map.Count, Is.EqualTo(2));
         Assert.IsTrue(map.ContainsKey("A"));
-        Assert.AreEqual(2, map["A"]);
+        Assert.That(map["A"], Is.EqualTo(2));
         Assert.IsTrue(map.ContainsKey("B"));
-        Assert.AreEqual(7, map["B"]);
+        Assert.That(map["B"], Is.EqualTo(7));
         Assert.IsTrue(map.Dirty);
     }
 
@@ -73,11 +73,11 @@ public class DirtyFlagMapTest
         var map = Deserialize<DirtyFlagMap<string, int>>("DirtyFlagMap_NotEmptyAndNotDirty_V1");
 
         Assert.IsNotNull(map);
-        Assert.AreEqual(2, map.Count);
+        Assert.That(map.Count, Is.EqualTo(2));
         Assert.IsTrue(map.ContainsKey("C"));
-        Assert.AreEqual(3, map["C"]);
+        Assert.That(map["C"], Is.EqualTo(3));
         Assert.IsTrue(map.ContainsKey("F"));
-        Assert.AreEqual(1, map["F"]);
+        Assert.That(map["F"], Is.EqualTo(1));
         Assert.IsFalse(map.Dirty);
     }
 
@@ -91,7 +91,7 @@ public class DirtyFlagMapTest
         var deserialized = SerializeAndDeserialize(map);
 
         Assert.IsNotNull(deserialized);
-        Assert.AreEqual(0, deserialized.Count);
+        Assert.That(deserialized.Count, Is.EqualTo(0));
         Assert.IsTrue(deserialized.Dirty);
     }
 
@@ -103,7 +103,7 @@ public class DirtyFlagMapTest
         var deserialized = SerializeAndDeserialize(map);
 
         Assert.IsNotNull(deserialized);
-        Assert.AreEqual(0, deserialized.Count);
+        Assert.That(deserialized.Count, Is.EqualTo(0));
         Assert.IsFalse(deserialized.Dirty);
     }
 
@@ -117,11 +117,11 @@ public class DirtyFlagMapTest
         var deserialized = SerializeAndDeserialize(map);
 
         Assert.IsNotNull(deserialized);
-        Assert.AreEqual(2, deserialized.Count);
+        Assert.That(deserialized.Count, Is.EqualTo(2));
         Assert.IsTrue(map.ContainsKey("A"));
-        Assert.AreEqual(2, map["A"]);
+        Assert.That(map["A"], Is.EqualTo(2));
         Assert.IsTrue(map.ContainsKey("B"));
-        Assert.AreEqual(7, map["B"]);
+        Assert.That(map["B"], Is.EqualTo(7));
         Assert.IsTrue(map.Dirty);
     }
 
@@ -136,11 +136,11 @@ public class DirtyFlagMapTest
         var deserialized = SerializeAndDeserialize(map);
 
         Assert.IsNotNull(map);
-        Assert.AreEqual(2, map.Count);
+        Assert.That(map.Count, Is.EqualTo(2));
         Assert.IsTrue(map.ContainsKey("C"));
-        Assert.AreEqual(3, map["C"]);
+        Assert.That(map["C"], Is.EqualTo(3));
         Assert.IsTrue(map.ContainsKey("F"));
-        Assert.AreEqual(1, map["F"]);
+        Assert.That(map["F"], Is.EqualTo(1));
         Assert.IsFalse(map.Dirty);
     }
 
@@ -157,7 +157,7 @@ public class DirtyFlagMapTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual(nameof(key), ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(key)));
         }
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
@@ -185,7 +185,7 @@ public class DirtyFlagMapTest
         Assert.IsTrue(dirtyFlagMap.TryGetValue("a", out var value));
         Assert.IsFalse(dirtyFlagMap.Dirty);
         Assert.IsNotNull(value);
-        Assert.AreEqual("x", value);
+        Assert.That(value, Is.EqualTo("x"));
     }
 
     [Test]
@@ -206,7 +206,7 @@ public class DirtyFlagMapTest
         Assert.IsFalse(dirtyFlagMap.TryGetValue("a", out var value));
         Assert.IsFalse(dirtyFlagMap.Dirty);
         Assert.IsNotNull(value);
-        Assert.AreEqual(default(int), value);
+        Assert.That(value, Is.EqualTo(default(int)));
     }
 
     [Test]
@@ -230,7 +230,7 @@ public class DirtyFlagMapTest
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
         Assert.IsNotNull(actual);
-        Assert.AreEqual("x", actual);
+        Assert.That(actual, Is.EqualTo("x"));
     }
 
     [Test]
@@ -257,7 +257,7 @@ public class DirtyFlagMapTest
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
         Assert.IsNotNull(actual);
-        Assert.AreEqual(default(int), actual);
+        Assert.That(actual, Is.EqualTo(default(int)));
 
         /*
         try
@@ -338,7 +338,7 @@ public class DirtyFlagMapTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual(nameof(key), ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(key)));
         }
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
@@ -355,7 +355,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("y", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("y"));
 
         dirtyFlagMap.ClearDirtyFlag();
 
@@ -371,7 +371,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("b", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("b"));
     }
 
     [Test]
@@ -386,7 +386,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("y", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("y"));
 
         dirtyFlagMap.ClearDirtyFlag();
 
@@ -406,7 +406,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("x", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("x"));
 
         dirtyFlagMap.ClearDirtyFlag();
 
@@ -430,7 +430,7 @@ public class DirtyFlagMapTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual(nameof(key), ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(key)));
         }
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
@@ -472,7 +472,7 @@ public class DirtyFlagMapTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual(nameof(key), ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(key)));
         }
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
@@ -564,7 +564,7 @@ public class DirtyFlagMapTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual("key", ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo("key"));
         }
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
@@ -589,7 +589,7 @@ public class DirtyFlagMapTest
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("x", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("x"));
 
         dirtyFlagMap.Put("b", null);
         dirtyFlagMap.ClearDirtyFlag();
@@ -623,7 +623,7 @@ public class DirtyFlagMapTest
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("c"));
-        Assert.AreEqual("z", dirtyFlagMap["c"]);
+        Assert.That(dirtyFlagMap["c"], Is.EqualTo("z"));
     }
 
     [Test]
@@ -645,7 +645,7 @@ public class DirtyFlagMapTest
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("x", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("x"));
 
         dirtyFlagMap.Clear();
         dirtyFlagMap.Put("a", null);
@@ -675,7 +675,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("x", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("x"));
 
         dirtyFlagMap.ClearDirtyFlag();
 
@@ -699,7 +699,7 @@ public class DirtyFlagMapTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual(nameof(key), ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(key)));
         }
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
@@ -718,7 +718,7 @@ public class DirtyFlagMapTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual("key", ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo("key"));
         }
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
@@ -734,7 +734,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("x", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("x"));
     }
 
     [Test]
@@ -750,7 +750,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("y", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("y"));
 
         dirtyFlagMap.ClearDirtyFlag();
 
@@ -766,7 +766,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("z", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("z"));
 
         /*
         try
@@ -830,7 +830,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("x", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("x"));
 
         dirtyFlagMap.Clear();
         dirtyFlagMap.Put("a", null);
@@ -856,7 +856,7 @@ public class DirtyFlagMapTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual("key", ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo("key"));
         }
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
@@ -944,7 +944,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("x", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("x"));
     }
 
     [Test]
@@ -1021,7 +1021,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("y", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("y"));
 
         dirtyFlagMap.ClearDirtyFlag();
 
@@ -1037,7 +1037,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("z", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("z"));
 
         /*
         try
@@ -1147,7 +1147,7 @@ public class DirtyFlagMapTest
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
         Assert.IsNotNull(actual);
-        Assert.AreEqual("x", actual);
+        Assert.That(actual, Is.EqualTo("x"));
     }
 
     [Test]
@@ -1174,7 +1174,7 @@ public class DirtyFlagMapTest
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
         Assert.IsNotNull(actual);
-        Assert.AreEqual(default(int), actual);
+        Assert.That(actual, Is.EqualTo(default(int)));
 
         /*
         try
@@ -1255,7 +1255,7 @@ public class DirtyFlagMapTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual(nameof(key), ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(key)));
         }
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
@@ -1307,7 +1307,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("y", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("y"));
 
         dirtyFlagMap.ClearDirtyFlag();
 
@@ -1323,7 +1323,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("b", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("b"));
     }
 
     [Test]
@@ -1338,7 +1338,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("y", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("y"));
 
         dirtyFlagMap.ClearDirtyFlag();
 
@@ -1358,7 +1358,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("x", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("x"));
 
         dirtyFlagMap.ClearDirtyFlag();
 
@@ -1382,7 +1382,7 @@ public class DirtyFlagMapTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual(nameof(key), ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(key)));
         }
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
@@ -1437,7 +1437,7 @@ public class DirtyFlagMapTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual("key", ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo("key"));
         }
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
@@ -1538,7 +1538,7 @@ public class DirtyFlagMapTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual(nameof(key), ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(key)));
         }
     }
 
@@ -1555,7 +1555,7 @@ public class DirtyFlagMapTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual("key", ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo("key"));
         }
     }
 
@@ -1636,7 +1636,7 @@ public class DirtyFlagMapTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual(nameof(key), ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(key)));
         }
     }
 
@@ -1697,9 +1697,9 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsNotNull(original);
-        Assert.AreEqual(5, original);
+        Assert.That(original, Is.EqualTo(5));
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual(4, dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo(4));
 
         dirtyFlagMap.ClearDirtyFlag();
 
@@ -1707,9 +1707,9 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsNotNull(original);
-        Assert.AreEqual(4, original);
+        Assert.That(original, Is.EqualTo(4));
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual(0, dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo(0));
 
         dirtyFlagMap.ClearDirtyFlag();
 
@@ -1717,9 +1717,9 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsNotNull(original);
-        Assert.AreEqual(0, original);
+        Assert.That(original, Is.EqualTo(0));
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual(7, dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo(7));
     }
 
     [Test]
@@ -1733,9 +1733,9 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsNotNull(original);
-        Assert.AreEqual(5, original);
+        Assert.That(original, Is.EqualTo(5));
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual(4, dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo(4));
 
         dirtyFlagMap.ClearDirtyFlag();
 
@@ -1743,7 +1743,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsNotNull(original);
-        Assert.AreEqual(4, original);
+        Assert.That(original, Is.EqualTo(4));
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
         Assert.IsNull(dirtyFlagMap["a"]);
 
@@ -1754,7 +1754,7 @@ public class DirtyFlagMapTest
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsNull(original);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual(7, dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo(7));
     }
 
     [Test]
@@ -1768,9 +1768,9 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsNotNull(original);
-        Assert.AreEqual("x", original);
+        Assert.That(original, Is.EqualTo("x"));
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("y", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("y"));
 
         dirtyFlagMap.ClearDirtyFlag();
 
@@ -1778,7 +1778,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsNotNull(original);
-        Assert.AreEqual("y", original);
+        Assert.That(original, Is.EqualTo("y"));
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
         Assert.IsNull(dirtyFlagMap["a"]);
 
@@ -1789,7 +1789,7 @@ public class DirtyFlagMapTest
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsNull(original);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("z", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("z"));
     }
 
     [Test]
@@ -1803,9 +1803,9 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsNotNull(original);
-        Assert.AreEqual(5, original);
+        Assert.That(original, Is.EqualTo(5));
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual(5, dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo(5));
 
         dirtyFlagMap.Clear();
         dirtyFlagMap.Put("a", 0);
@@ -1815,9 +1815,9 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsNotNull(original);
-        Assert.AreEqual(0, original);
+        Assert.That(original, Is.EqualTo(0));
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual(0, dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo(0));
     }
 
     [Test]
@@ -1831,9 +1831,9 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsNotNull(original);
-        Assert.AreEqual(5, original);
+        Assert.That(original, Is.EqualTo(5));
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual(5, dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo(5));
 
         dirtyFlagMap.Clear();
         dirtyFlagMap.Put("a", null);
@@ -1858,9 +1858,9 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsNotNull(original);
-        Assert.AreEqual("x", original);
+        Assert.That(original, Is.EqualTo("x"));
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("x", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("x"));
 
         dirtyFlagMap.Clear();
         dirtyFlagMap.Put("a", null);
@@ -1883,7 +1883,7 @@ public class DirtyFlagMapTest
 
         Assert.IsTrue(dirtyFlagMap.Dirty);
         Assert.IsTrue(dirtyFlagMap.ContainsKey("a"));
-        Assert.AreEqual("x", dirtyFlagMap["a"]);
+        Assert.That(dirtyFlagMap["a"], Is.EqualTo("x"));
 
         dirtyFlagMap.ClearDirtyFlag();
 
@@ -1907,7 +1907,7 @@ public class DirtyFlagMapTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual(nameof(key), ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo(nameof(key)));
         }
 
         Assert.IsFalse(dirtyFlagMap.Dirty);
@@ -1935,17 +1935,17 @@ public class DirtyFlagMapTest
 
         var syncRoot1 = collection1.SyncRoot;
         Assert.IsNotNull(syncRoot1);
-        Assert.AreSame(syncRoot1, collection1.SyncRoot);
-        Assert.AreEqual(typeof(object), syncRoot1.GetType());
+        Assert.That(collection1.SyncRoot, Is.SameAs(syncRoot1));
+        Assert.That(syncRoot1.GetType(), Is.EqualTo(typeof(object)));
 
         var dirtyFlagMap2 = new DirtyFlagMap<string, string>();
         var collection2 = (ICollection) dirtyFlagMap2;
 
         var syncRoot2 = collection2.SyncRoot;
         Assert.IsNotNull(syncRoot2);
-        Assert.AreSame(syncRoot2, collection2.SyncRoot);
-        Assert.AreEqual(typeof(object), syncRoot2.GetType());
-        Assert.AreNotSame(syncRoot1, syncRoot2);
+        Assert.That(collection2.SyncRoot, Is.SameAs(syncRoot2));
+        Assert.That(syncRoot2.GetType(), Is.EqualTo(typeof(object)));
+        Assert.That(syncRoot2, Is.Not.SameAs(syncRoot1));
     }
 
     [Test]

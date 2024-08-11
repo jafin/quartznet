@@ -52,7 +52,7 @@ public class CronCalendarTest : SerializationTestSupport<CronCalendar, ICalendar
     {
         CronCalendar calendar = new CronCalendar("0/15 * * * * ?");
         CronCalendar clone = (CronCalendar)calendar.Clone();
-        Assert.AreEqual(calendar.CronExpression, clone.CronExpression);
+        Assert.That(clone.CronExpression, Is.EqualTo(calendar.CronExpression));
     }
 
     [Test]
@@ -77,8 +77,8 @@ public class CronCalendarTest : SerializationTestSupport<CronCalendar, ICalendar
     protected override void VerifyMatch(CronCalendar original, CronCalendar deserialized)
     {
         Assert.IsNotNull(deserialized);
-        Assert.AreEqual(original.Description, deserialized.Description);
-        Assert.AreEqual(original.CronExpression, deserialized.CronExpression);
-        Assert.AreEqual(original.TimeZone, deserialized.TimeZone);
+        Assert.That(deserialized.Description, Is.EqualTo(original.Description));
+        Assert.That(deserialized.CronExpression, Is.EqualTo(original.CronExpression));
+        Assert.That(deserialized.TimeZone, Is.EqualTo(original.TimeZone));
     }
 }

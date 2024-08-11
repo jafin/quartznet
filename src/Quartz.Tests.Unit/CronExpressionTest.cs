@@ -58,8 +58,8 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
     protected override void VerifyMatch(CronExpression original, CronExpression deserialized)
     {
         Assert.IsNotNull(deserialized);
-        Assert.AreEqual(original.CronExpressionString, deserialized.CronExpressionString);
-        Assert.AreEqual(original.TimeZone, deserialized.TimeZone);
+        Assert.That(deserialized.CronExpressionString, Is.EqualTo(original.CronExpressionString));
+        Assert.That(deserialized.TimeZone, Is.EqualTo(original.TimeZone));
     }
 
     /// <summary>
@@ -337,7 +337,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         CronExpression cronExpression = new CronExpression("0 15 23 * * ?");
         DateTimeOffset cal = new DateTime(2005, 6, 1, 23, 16, 0).ToUniversalTime();
         DateTimeOffset nextExpectedFireTime = new DateTime(2005, 6, 2, 23, 15, 0).ToUniversalTime();
-        Assert.AreEqual(nextExpectedFireTime, cronExpression.GetTimeAfter(cal).Value);
+        Assert.That(cronExpression.GetTimeAfter(cal).Value, Is.EqualTo(nextExpectedFireTime));
     }
 
     [Test]
@@ -348,7 +348,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         CronExpression ce = new CronExpression("0 55 15 1 * ?");
         DateTimeOffset expected = new DateTime(2008, 1, 1, 15, 55, 0).ToUniversalTime();
         DateTimeOffset d = ce.GetNextValidTimeAfter(start).Value;
-        Assert.AreEqual(expected, d, "Got wrong date and time when passed year");
+        Assert.That(d, Is.EqualTo(expected), "Got wrong date and time when passed year");
     }
 
     [Test]
@@ -421,7 +421,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         CronExpression cronExpression = new CronExpression("0/5 * * * * ?");
         DateTimeOffset cal = new DateTimeOffset(2005, 6, 1, 1, 59, 55, TimeSpan.Zero);
         DateTimeOffset nextExpectedFireTime = new DateTimeOffset(2005, 6, 1, 2, 0, 0, TimeSpan.Zero);
-        Assert.AreEqual(nextExpectedFireTime, cronExpression.GetTimeAfter(cal).Value);
+        Assert.That(cronExpression.GetTimeAfter(cal).Value, Is.EqualTo(nextExpectedFireTime));
     }
 
     [Test]
@@ -431,7 +431,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         CronExpression cronExpression = new CronExpression("* * 1 * * ?");
         DateTimeOffset cal = new DateTime(2005, 7, 31, 22, 59, 57).ToUniversalTime();
         DateTimeOffset nextExpectedFireTime = new DateTime(2005, 8, 1, 1, 0, 0).ToUniversalTime();
-        Assert.AreEqual(nextExpectedFireTime, cronExpression.GetTimeAfter(cal).Value);
+        Assert.That(cronExpression.GetTimeAfter(cal).Value, Is.EqualTo(nextExpectedFireTime));
     }
 
     [Test]
@@ -455,7 +455,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         }
         catch (FormatException fe)
         {
-            Assert.AreEqual("Day-of-Week values must be between 1 and 7", fe.Message);
+            Assert.That(fe.Message, Is.EqualTo("Day-of-Week values must be between 1 and 7"));
         }
     }
 
@@ -510,7 +510,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
             shouldFire = shouldFire && start.Day > 15 && start.Day < 28;
 
             bool satisfied = ce.IsSatisfiedBy(start.ToUniversalTime());
-            Assert.AreEqual(shouldFire, satisfied);
+            Assert.That(satisfied, Is.EqualTo(shouldFire));
 
             // cycle with half hour precision
             start = start.AddHours(0.5);
@@ -638,11 +638,11 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         CronExpression expression = new CronExpression("0 0 0 29 * ?");
         DateTimeOffset? after = expression.GetNextValidTimeAfter(new DateTime(2009, 1, 30, 0, 0, 0).ToUniversalTime());
         Assert.IsTrue(after.HasValue);
-        Assert.AreEqual(new DateTime(2009, 3, 29, 0, 0, 0).ToUniversalTime(), after.Value.DateTime);
+        Assert.That(after.Value.DateTime, Is.EqualTo(new DateTime(2009, 3, 29, 0, 0, 0).ToUniversalTime()));
 
         after = expression.GetNextValidTimeAfter(new DateTime(2009, 12, 30).ToUniversalTime());
         Assert.IsTrue(after.HasValue);
-        Assert.AreEqual(new DateTime(2010, 1, 29, 0, 0, 0).ToUniversalTime(), after.Value.DateTime);
+        Assert.That(after.Value.DateTime, Is.EqualTo(new DateTime(2010, 1, 29, 0, 0, 0).ToUniversalTime()));
     }
 
     [Test]
@@ -652,9 +652,9 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         DateTimeOffset test = new DateTimeOffset(2009, 3, 8, 0, 0, 0, TimeSpan.Zero); //Sunday
         DateTimeOffset d = expression.GetNextValidTimeAfter(test).Value;
         // 2009-04-06 is Monday, Sunday is invalid for W
-        Assert.AreEqual(new DateTimeOffset(2009, 4, 6, 13, 5, 0, TimeZoneUtil.GetUtcOffset(d, TimeZoneInfo.Local)).ToUniversalTime(), d);
+        Assert.That(d, Is.EqualTo(new DateTimeOffset(2009, 4, 6, 13, 5, 0, TimeZoneUtil.GetUtcOffset(d, TimeZoneInfo.Local)).ToUniversalTime()));
         d = expression.GetNextValidTimeAfter(d).Value;
-        Assert.AreEqual(new DateTimeOffset(2009, 5, 5, 13, 5, 0, TimeZoneUtil.GetUtcOffset(d, TimeZoneInfo.Local)), d);
+        Assert.That(d, Is.EqualTo(new DateTimeOffset(2009, 5, 5, 13, 5, 0, TimeZoneUtil.GetUtcOffset(d, TimeZoneInfo.Local))));
     }
 
     [Test]
@@ -724,7 +724,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         DateTimeOffset? after = expression.GetNextValidTimeAfter(before);
         Assert.IsTrue(after.HasValue);
         DateTimeOffset expected = daylightChange.Start.Add(daylightChange.Delta).AddMinutes(15).ToUniversalTime();
-        Assert.AreEqual(expected, after.Value);
+        Assert.That(after.Value, Is.EqualTo(expected));
     }
 
     [Test]
@@ -739,7 +739,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         var actualTime = expression.GetTimeAfter(startTime);
         DateTimeOffset expected = new DateTimeOffset(2012, 11, 5, 15, 15, 0, TimeSpan.FromHours(-5));
 
-        Assert.AreEqual(expected, actualTime.Value);
+        Assert.That(actualTime.Value, Is.EqualTo(expected));
     }
 
     [Test]
@@ -754,7 +754,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
 
         var actualTime = expression.GetTimeAfter(startTime);
         DateTimeOffset expected = new DateTimeOffset(2012, 11, 8, 0, 0, 0, TimeSpan.FromHours(-5));
-        Assert.AreEqual(expected, actualTime);
+        Assert.That(actualTime, Is.EqualTo(expected));
     }
 
     [Test]

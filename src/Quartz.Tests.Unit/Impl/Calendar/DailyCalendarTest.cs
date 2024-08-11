@@ -63,8 +63,8 @@ public class DailyCalendarTest : SerializationTestSupport<DailyCalendar, ICalend
         DateTime expectedStartTime = new DateTime(d.Year, d.Month, d.Day, 1, 20, 0);
         DateTime expectedEndTime = new DateTime(d.Year, d.Month, d.Day, 14, 50, 0);
 
-        Assert.AreEqual(expectedStartTime, dailyCalendar.GetTimeRangeStartingTimeUtc(d).DateTime);
-        Assert.AreEqual(expectedEndTime, dailyCalendar.GetTimeRangeEndingTimeUtc(d).DateTime);
+        Assert.That(dailyCalendar.GetTimeRangeStartingTimeUtc(d).DateTime, Is.EqualTo(expectedStartTime));
+        Assert.That(dailyCalendar.GetTimeRangeEndingTimeUtc(d).DateTime, Is.EqualTo(expectedEndTime));
     }
 
     [Test]
@@ -159,9 +159,9 @@ public class DailyCalendarTest : SerializationTestSupport<DailyCalendar, ICalend
     protected override void VerifyMatch(DailyCalendar original, DailyCalendar deserialized)
     {
         Assert.IsNotNull(deserialized);
-        Assert.AreEqual(original.Description, deserialized.Description);
-        Assert.AreEqual(original.InvertTimeRange, deserialized.InvertTimeRange);
-        Assert.AreEqual(original.TimeZone, deserialized.TimeZone);
-        Assert.AreEqual(original.ToString(), deserialized.ToString());
+        Assert.That(deserialized.Description, Is.EqualTo(original.Description));
+        Assert.That(deserialized.InvertTimeRange, Is.EqualTo(original.InvertTimeRange));
+        Assert.That(deserialized.TimeZone, Is.EqualTo(original.TimeZone));
+        Assert.That(deserialized.ToString(), Is.EqualTo(original.ToString()));
     }
 }

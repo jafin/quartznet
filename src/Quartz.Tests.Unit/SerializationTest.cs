@@ -39,7 +39,7 @@ public class SerializationTest
         TimeZoneInfo timeZone = TimeZoneInfo.GetSystemTimeZones()[3];
         baseCalendar.TimeZone = timeZone;
         BaseCalendar clone = baseCalendar.DeepClone();
-        Assert.AreEqual(timeZone.Id, clone.TimeZone.Id);
+        Assert.That(clone.TimeZone.Id, Is.EqualTo(timeZone.Id));
     }
 
     [Test]
@@ -53,7 +53,7 @@ public class SerializationTest
     {
         CronCalendar cronCalendar = new CronCalendar("* * 8-17 ? * *");
         CronCalendar clone = cronCalendar.DeepClone();
-        Assert.AreEqual("* * 8-17 ? * *", clone.CronExpression.CronExpressionString);
+        Assert.That(clone.CronExpression.CronExpressionString, Is.EqualTo("* * 8-17 ? * *"));
     }
 
     [Test]
@@ -69,17 +69,17 @@ public class SerializationTest
         DailyCalendar clone = dailyCalendar.DeepClone();
 
         DateTimeOffset timeRangeStartTimeUtc = clone.GetTimeRangeStartingTimeUtc(DateTimeOffset.UtcNow);
-        Assert.AreEqual(12, timeRangeStartTimeUtc.Hour);
-        Assert.AreEqual(13, timeRangeStartTimeUtc.Minute);
-        Assert.AreEqual(14, timeRangeStartTimeUtc.Second);
-        Assert.AreEqual(150, timeRangeStartTimeUtc.Millisecond);
+        Assert.That(timeRangeStartTimeUtc.Hour, Is.EqualTo(12));
+        Assert.That(timeRangeStartTimeUtc.Minute, Is.EqualTo(13));
+        Assert.That(timeRangeStartTimeUtc.Second, Is.EqualTo(14));
+        Assert.That(timeRangeStartTimeUtc.Millisecond, Is.EqualTo(150));
 
         DateTimeOffset timeRangeEndingTimeUtc = clone.GetTimeRangeEndingTimeUtc(DateTimeOffset.UtcNow);
 
-        Assert.AreEqual(13, timeRangeEndingTimeUtc.Hour);
-        Assert.AreEqual(14, timeRangeEndingTimeUtc.Minute);
-        Assert.AreEqual(0, timeRangeEndingTimeUtc.Second);
-        Assert.AreEqual(0, timeRangeEndingTimeUtc.Millisecond);
+        Assert.That(timeRangeEndingTimeUtc.Hour, Is.EqualTo(13));
+        Assert.That(timeRangeEndingTimeUtc.Minute, Is.EqualTo(14));
+        Assert.That(timeRangeEndingTimeUtc.Second, Is.EqualTo(0));
+        Assert.That(timeRangeEndingTimeUtc.Millisecond, Is.EqualTo(0));
     }
 
     [Test]
@@ -113,7 +113,7 @@ public class SerializationTest
         HolidayCalendar holidayCalendar = new HolidayCalendar();
         holidayCalendar.AddExcludedDate(new DateTime(2010, 1, 20));
         HolidayCalendar clone = holidayCalendar.DeepClone();
-        Assert.AreEqual(1, clone.ExcludedDates.Count);
+        Assert.That(clone.ExcludedDates.Count, Is.EqualTo(1));
     }
 
     [Test]
@@ -170,8 +170,8 @@ public class SerializationTest
     public void TestJobDataMapDeserialization()
     {
         JobDataMap map = Deserialize<JobDataMap>();
-        Assert.AreEqual("bar", map["foo"]);
-        Assert.AreEqual(123, map["num"]);
+        Assert.That(map["foo"], Is.EqualTo("bar"));
+        Assert.That(map["num"], Is.EqualTo(123));
     }
 
     [Test]
@@ -181,8 +181,8 @@ public class SerializationTest
         map["foo"] = "bar";
         map["num"] = 123;
         JobDataMap clone = map.DeepClone();
-        Assert.AreEqual("bar", clone["foo"]);
-        Assert.AreEqual(123, clone["num"]);
+        Assert.That(clone["foo"], Is.EqualTo("bar"));
+        Assert.That(clone["num"], Is.EqualTo(123));
     }
 
     [Test]
@@ -193,8 +193,8 @@ public class SerializationTest
         map["num"] = 123;
 
         StringKeyDirtyFlagMap clone = map.DeepClone();
-        Assert.AreEqual("bar", clone["foo"]);
-        Assert.AreEqual(123, clone["num"]);
+        Assert.That(clone["foo"], Is.EqualTo("bar"));
+        Assert.That(clone["num"], Is.EqualTo(123));
     }
 
     [Test]
@@ -205,8 +205,8 @@ public class SerializationTest
         map["num"] = 123;
 
         SchedulerContext clone = map.DeepClone();
-        Assert.AreEqual("bar", clone["foo"]);
-        Assert.AreEqual(123, clone["num"]);
+        Assert.That(clone["foo"], Is.EqualTo("bar"));
+        Assert.That(clone["num"], Is.EqualTo(123));
     }
 
     [Test]
@@ -216,8 +216,8 @@ public class SerializationTest
 
         GroupMatcher<TriggerKey> got = SerializeAndDeserialize(expected);
 
-        Assert.AreEqual(expected.CompareToValue, got.CompareToValue);
-        Assert.AreEqual(expected.CompareWithOperator, got.CompareWithOperator);
+        Assert.That(got.CompareToValue, Is.EqualTo(expected.CompareToValue));
+        Assert.That(got.CompareWithOperator, Is.EqualTo(expected.CompareWithOperator));
     }
 
     [Test]
@@ -227,8 +227,8 @@ public class SerializationTest
 
         NameMatcher<JobKey> got = SerializeAndDeserialize(expected);
 
-        Assert.AreEqual(expected.CompareToValue, got.CompareToValue);
-        Assert.AreEqual(expected.CompareWithOperator, got.CompareWithOperator);
+        Assert.That(got.CompareToValue, Is.EqualTo(expected.CompareToValue));
+        Assert.That(got.CompareWithOperator, Is.EqualTo(expected.CompareWithOperator));
     }
 
     private static T SerializeAndDeserialize<T>(T instance) where T : class

@@ -47,7 +47,7 @@ public class JobBuilderTest
             .StoreDurably()
             .Build();
 
-        Assert.AreEqual("j1", job.Key.Name, "Unexpected job name: " + job.Key.Name);
+        Assert.That(job.Key.Name, Is.EqualTo("j1"), "Unexpected job name: " + job.Key.Name);
         Assert.IsTrue(job.Key.Group.Equals(JobKey.DefaultGroup), "Unexpected job group: " + job.Key.Group);
         Assert.IsTrue(job.Key.Equals(new JobKey("j1")), "Unexpected job key: " + job.Key);
         Assert.IsTrue(job.Description is null, "Unexpected job description: " + job.Description);
@@ -61,7 +61,7 @@ public class JobBuilderTest
             .OfType<TestAnnotatedJob>()
             .WithIdentity("j1")
             .WithDescription("my description")
-            .StoreDurably(true)
+            .StoreDurably()
             .RequestRecovery()
             .Build();
 

@@ -29,7 +29,9 @@ public class StringOperatorTest
     [Test]
     public void Anything_ShouldBeSingleton()
     {
-        Assert.AreSame(StringOperator.Anything, StringOperator.Anything);
+#pragma warning disable NUnit2009
+        Assert.That(StringOperator.Anything, Is.SameAs(StringOperator.Anything));
+#pragma warning restore NUnit2009
     }
 
     [Test]
@@ -95,7 +97,9 @@ public class StringOperatorTest
     [Test]
     public void Contains_ShouldBeSingleton()
     {
-        Assert.AreSame(StringOperator.Contains, StringOperator.Contains);
+#pragma warning disable NUnit2009
+        Assert.That(StringOperator.Contains, Is.SameAs(StringOperator.Contains));
+#pragma warning restore NUnit2009
     }
 
     [Test]
@@ -131,7 +135,7 @@ public class StringOperatorTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual("value", ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo("value"));
         }
     }
 
@@ -200,7 +204,9 @@ public class StringOperatorTest
     [Test]
     public void EndsWith_ShouldBeSingleton()
     {
-        Assert.AreSame(StringOperator.EndsWith, StringOperator.EndsWith);
+#pragma warning disable NUnit2009
+        Assert.That(StringOperator.EndsWith, Is.SameAs(StringOperator.EndsWith));
+#pragma warning restore NUnit2009
     }
 
     [Test]
@@ -248,7 +254,7 @@ public class StringOperatorTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual("value", ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo("value"));
         }
     }
 
@@ -294,7 +300,9 @@ public class StringOperatorTest
     [Test]
     public void Equality_ShouldBeSingleton()
     {
-        Assert.AreSame(StringOperator.Equality, StringOperator.Equality);
+#pragma warning disable NUnit2009
+        Assert.That(StringOperator.Equality, Is.SameAs(StringOperator.Equality));
+#pragma warning restore NUnit2009
     }
 
     [Test]
@@ -361,7 +369,9 @@ public class StringOperatorTest
     [Test]
     public void StartsWith_ShouldBeSingleton()
     {
-        Assert.AreSame(StringOperator.StartsWith, StringOperator.StartsWith);
+#pragma warning disable NUnit2009
+        Assert.That(StringOperator.StartsWith, Is.SameAs(StringOperator.StartsWith));
+#pragma warning restore NUnit2009
     }
 
     [Test]
@@ -409,7 +419,7 @@ public class StringOperatorTest
         }
         catch (ArgumentNullException ex)
         {
-            Assert.AreEqual("value", ex.ParamName);
+            Assert.That(ex.ParamName, Is.EqualTo("value"));
         }
     }
 

@@ -32,10 +32,10 @@ public static class TestUtil
 {
     public static void AssertCollectionEquality<T>(IList<T> col1, IList<T> col2)
     {
-        Assert.AreEqual(col1.Count, col2.Count, "Collection sizes differ");
+        Assert.That(col2.Count, Is.EqualTo(col1.Count), "Collection sizes differ");
         for (int i = 0; i < col1.Count; ++i)
         {
-            Assert.AreEqual(col1[i], col2[i], $"Collection items differ at index {i}: {col1[i]} vs {col2[i]}");
+            Assert.That(col2[i], Is.EqualTo(col1[i]), $"Collection items differ at index {i}: {col1[i]} vs {col2[i]}");
         }
     }
 

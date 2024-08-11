@@ -201,8 +201,8 @@ public class SchedulerListenerTest
 
         await scheduler.Shutdown(true);
 
-        Assert.AreEqual(2, jobExecutionCount);
-        Assert.AreEqual(3, triggerListener.FireCount);
-        Assert.AreEqual(1, schedulerListener.TriggerFinalizedCount);
+        Assert.That(jobExecutionCount, Is.EqualTo(2));
+        Assert.That(triggerListener.FireCount, Is.EqualTo(3));
+        Assert.That(schedulerListener.TriggerFinalizedCount, Is.EqualTo(1));
     }
 }

@@ -50,7 +50,7 @@ public class CronTriggerTest
         trigger.Key = new TriggerKey("Quartz-579", SchedulerConstants.DefaultGroup);
         trigger.TimeZone = tz;
         trigger.CronExpressionString = "0 0 12 * * ?";
-        Assert.AreEqual(tz, trigger.TimeZone, "TimeZone was changed");
+        Assert.That(trigger.TimeZone, Is.EqualTo(tz), "TimeZone was changed");
     }
 
     [Test]
@@ -69,7 +69,7 @@ public class CronTriggerTest
         trigger.CronExpressionString = "0 50 5,11,17,23 ? * *";
         trigger.StartTimeUtc = startDate;
 
-        Assert.AreEqual(expectedFire, trigger.GetFireTimeAfter(startDate), $"Expected to fire at {expectedFire}");
+        Assert.That(trigger.GetFireTimeAfter(startDate), Is.EqualTo(expectedFire), $"Expected to fire at {expectedFire}");
         Assert.IsTrue(trigger.WillFireOn(expectedFire), $"Expected to fire at {expectedFire}");
         Assert.IsTrue(trigger.WillFireOn(expectedFire.AddHours(6)), $"Expected to fire at {expectedFire}");
         Assert.IsTrue(trigger.WillFireOn(expectedFire.AddHours(12)), $"Expected to fire at {expectedFire}");
@@ -95,7 +95,7 @@ public class CronTriggerTest
         IOperableTrigger trigger = new CronTriggerImpl();
         trigger.StartTimeUtc = new DateTime(1982, 6, 28, 13, 5, 5, 233);
         Assert.IsFalse(trigger.HasMillisecondPrecision);
-        Assert.AreEqual(0, trigger.StartTimeUtc.Millisecond);
+        Assert.That(trigger.StartTimeUtc.Millisecond, Is.EqualTo(0));
     }
 
     [Test]
@@ -106,10 +106,10 @@ public class CronTriggerTest
         trigger.CronExpressionString = "0 0 12 * * ?";
         ICronTrigger trigger2 = (ICronTrigger) trigger.Clone();
 
-        Assert.AreEqual(trigger, trigger2, "Cloning failed");
+        Assert.That(trigger2, Is.EqualTo(trigger), "Cloning failed");
 
         // equals() doesn't test the cron expression
-        Assert.AreEqual("0 0 12 * * ?", trigger2.CronExpressionString, "Cloning failed for the cron expression");
+        Assert.That(trigger2.CronExpressionString, Is.EqualTo("0 0 12 * * ?"), "Cloning failed for the cron expression");
     }
 
     // http://jira.opensymphony.com/browse/QUARTZ-558
@@ -120,7 +120,7 @@ public class CronTriggerTest
         trigger.Key = new TriggerKey("test", "testGroup");
         ICronTrigger trigger2 = (ICronTrigger) trigger.Clone();
 
-        Assert.AreEqual(trigger, trigger2, "Cloning failed");
+        Assert.That(trigger2, Is.EqualTo(trigger), "Cloning failed");
     }
 
     [Test]

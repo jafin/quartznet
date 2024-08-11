@@ -40,8 +40,8 @@ public class KeyTest
 
         var key = new Key<string>(name);
 
-        Assert.AreSame(name, key.Name);
-        Assert.AreSame(Key<string>.DefaultGroup, key.Group);
+        Assert.That(key.Name, Is.SameAs(name));
+        Assert.That(key.Group, Is.SameAs(Key<string>.DefaultGroup));
     }
 
     [Test]
@@ -50,7 +50,7 @@ public class KeyTest
         const string name = null;
 
         var actualException = Assert.Throws<ArgumentNullException>(() => new Key<string>(name));
-        Assert.AreEqual("name", actualException.ParamName);
+        Assert.That(actualException.ParamName, Is.EqualTo("name"));
     }
 
     [Test]
@@ -61,8 +61,8 @@ public class KeyTest
 
         var key = new Key<string>(name, group);
 
-        Assert.AreSame(name, key.Name);
-        Assert.AreSame(group, key.Group);
+        Assert.That(key.Name, Is.SameAs(name));
+        Assert.That(key.Group, Is.SameAs(group));
     }
 
     [Test]
@@ -72,7 +72,7 @@ public class KeyTest
         const string group = "Group";
 
         var actualException = Assert.Throws<ArgumentNullException>(() => new Key<string>(name, group));
-        Assert.AreEqual("name", actualException.ParamName);
+        Assert.That(actualException.ParamName, Is.EqualTo("name"));
     }
 
     [Test]
@@ -82,13 +82,13 @@ public class KeyTest
         const string group = null;
 
         var actualException = Assert.Throws<ArgumentNullException>(() => new Key<string>(name, group));
-        Assert.AreEqual("group", actualException.ParamName);
+        Assert.That(actualException.ParamName, Is.EqualTo("group"));
     }
 
     [Test]
     public void DefaultGroupIsDefault()
     {
-        Assert.AreEqual("DEFAULT", Key<string>.DefaultGroup);
+        Assert.That(Key<string>.DefaultGroup, Is.EqualTo("DEFAULT"));
     }
 
     [Test]
@@ -96,7 +96,7 @@ public class KeyTest
     {
         var key = new Key<string>("A");
 
-        Assert.AreEqual(0, key.CompareTo(key));
+        Assert.That(key.CompareTo(key), Is.EqualTo(0));
     }
 
     [Test]
@@ -104,7 +104,7 @@ public class KeyTest
     {
         var key = new Key<string>("A", CreateUniqueReference(Key<string>.DefaultGroup));
 
-        Assert.AreEqual(0, key.CompareTo(key));
+        Assert.That(key.CompareTo(key), Is.EqualTo(0));
     }
 
     [Test]
@@ -112,7 +112,7 @@ public class KeyTest
     {
         var key = new Key<string>("A", Key<string>.DefaultGroup);
 
-        Assert.AreEqual(0, key.CompareTo(key));
+        Assert.That(key.CompareTo(key), Is.EqualTo(0));
     }
 
     [Test]
@@ -120,7 +120,7 @@ public class KeyTest
     {
         var key = new Key<string>("A", "G");
 
-        Assert.AreEqual(0, key.CompareTo(key));
+        Assert.That(key.CompareTo(key), Is.EqualTo(0));
     }
 
     [Test]
@@ -131,7 +131,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName);
         var key2 = new Key<string>(keyName);
 
-        Assert.AreEqual(0, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(0));
     }
 
     [Test]
@@ -142,7 +142,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, Key<string>.DefaultGroup);
         var key2 = new Key<string>(keyName, Key<string>.DefaultGroup);
 
-        Assert.AreEqual(0, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(0));
     }
 
     [Test]
@@ -153,7 +153,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, Key<string>.DefaultGroup);
         var key2 = new Key<string>(keyName, CreateUniqueReference(Key<string>.DefaultGroup));
 
-        Assert.AreEqual(0, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(0));
     }
 
     [Test]
@@ -164,7 +164,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, CreateUniqueReference(Key<string>.DefaultGroup));
         var key2 = new Key<string>(keyName, Key<string>.DefaultGroup);
 
-        Assert.AreEqual(0, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(0));
     }
 
     [Test]
@@ -175,7 +175,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, CreateUniqueReference(Key<string>.DefaultGroup));
         var key2 = new Key<string>(keyName, CreateUniqueReference(Key<string>.DefaultGroup));
 
-        Assert.AreEqual(0, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(0));
     }
 
     [Test]
@@ -187,7 +187,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, groupName);
         var key2 = new Key<string>(keyName, groupName);
 
-        Assert.AreEqual(0, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(0));
     }
 
     [Test]
@@ -199,7 +199,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, groupName);
         var key2 = new Key<string>(keyName, CreateUniqueReference(groupName));
 
-        Assert.AreEqual(0, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(0));
     }
 
     [Test]
@@ -210,7 +210,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName);
         var key2 = new Key<string>(CreateUniqueReference(keyName));
 
-        Assert.AreEqual(0, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(0));
     }
 
     [Test]
@@ -221,7 +221,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, Key<string>.DefaultGroup);
         var key2 = new Key<string>(CreateUniqueReference(keyName), Key<string>.DefaultGroup);
 
-        Assert.AreEqual(0, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(0));
     }
 
     [Test]
@@ -232,7 +232,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, Key<string>.DefaultGroup);
         var key2 = new Key<string>(CreateUniqueReference(keyName), CreateUniqueReference(Key<string>.DefaultGroup));
 
-        Assert.AreEqual(0, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(0));
     }
 
     [Test]
@@ -243,7 +243,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, CreateUniqueReference(Key<string>.DefaultGroup));
         var key2 = new Key<string>(CreateUniqueReference(keyName), Key<string>.DefaultGroup);
 
-        Assert.AreEqual(0, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(0));
     }
 
     [Test]
@@ -254,7 +254,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, CreateUniqueReference(Key<string>.DefaultGroup));
         var key2 = new Key<string>(CreateUniqueReference(keyName), CreateUniqueReference(Key<string>.DefaultGroup));
 
-        Assert.AreEqual(0, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(0));
     }
 
     [Test]
@@ -266,7 +266,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, groupName);
         var key2 = new Key<string>(CreateUniqueReference(keyName), groupName);
 
-        Assert.AreEqual(0, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(0));
     }
 
     [Test]
@@ -278,7 +278,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, groupName);
         var key2 = new Key<string>(CreateUniqueReference(keyName), CreateUniqueReference(groupName));
 
-        Assert.AreEqual(0, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(0));
     }
 
     [Test]
@@ -287,7 +287,7 @@ public class KeyTest
         var key1 = new Key<string>("A");
         var key2 = new Key<string>("B");
 
-        Assert.AreEqual(-1, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(-1));
     }
 
     [Test]
@@ -296,7 +296,7 @@ public class KeyTest
         var key1 = new Key<string>("B");
         var key2 = new Key<string>("A");
 
-        Assert.AreEqual(1, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(1));
     }
 
     [Test]
@@ -307,7 +307,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName);
         var key2 = new Key<string>(CreateUniqueReference(keyName), "G");
 
-        Assert.AreEqual(-1, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(-1));
     }
 
     [Test]
@@ -318,7 +318,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, Key<string>.DefaultGroup);
         var key2 = new Key<string>(CreateUniqueReference(keyName), "G");
 
-        Assert.AreEqual(-1, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(-1));
     }
 
     [Test]
@@ -329,7 +329,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, "DEFAULT");
         var key2 = new Key<string>(CreateUniqueReference(keyName), "G");
 
-        Assert.AreEqual(-1, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(-1));
     }
 
     [Test]
@@ -340,7 +340,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, "G");
         var key2 = new Key<string>(CreateUniqueReference(keyName));
 
-        Assert.AreEqual(1, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(1));
     }
 
     [Test]
@@ -351,7 +351,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, "G");
         var key2 = new Key<string>(CreateUniqueReference(keyName), Key<string>.DefaultGroup);
 
-        Assert.AreEqual(1, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(1));
     }
 
     [Test]
@@ -362,7 +362,7 @@ public class KeyTest
         var key1 = new Key<string>(keyName, "G");
         var key2 = new Key<string>(CreateUniqueReference(keyName), "DEFAULT");
 
-        Assert.AreEqual(1, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(1));
     }
 
     [Test]
@@ -371,7 +371,7 @@ public class KeyTest
         var key1 = new Key<string>("A", "G");
         var key2 = new Key<string>("B", "H");
 
-        Assert.AreEqual(-1, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(-1));
     }
 
     [Test]
@@ -380,7 +380,7 @@ public class KeyTest
         var key1 = new Key<string>("B", "G");
         var key2 = new Key<string>("A", "H");
 
-        Assert.AreEqual(-1, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(-1));
     }
 
     [Test]
@@ -389,7 +389,7 @@ public class KeyTest
         var key1 = new Key<string>("A", "H");
         var key2 = new Key<string>("B", "G");
 
-        Assert.AreEqual(1, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(1));
     }
 
     [Test]
@@ -398,7 +398,7 @@ public class KeyTest
         var key1 = new Key<string>("B", "H");
         var key2 = new Key<string>("A", "G");
 
-        Assert.AreEqual(1, key1.CompareTo(key2));
+        Assert.That(key1.CompareTo(key2), Is.EqualTo(1));
     }
 
     [Test]
@@ -416,8 +416,8 @@ public class KeyTest
 
         var deserialized = formatter.Deserialize(ms) as Key<string>;
         Assert.IsNotNull(deserialized);
-        Assert.AreEqual(key.Group, deserialized.Group);
-        Assert.AreEqual(key.Name, deserialized.Name);
+        Assert.That(deserialized.Group, Is.EqualTo(key.Group));
+        Assert.That(deserialized.Name, Is.EqualTo(key.Name));
 #pragma warning restore SYSLIB0050
     }
 
@@ -435,8 +435,8 @@ public class KeyTest
 
             var deserialized = formatter.Deserialize(ms) as Key<string>;
             Assert.IsNotNull(deserialized);
-            Assert.AreEqual(key.Group, deserialized.Group);
-            Assert.AreEqual(key.Name, deserialized.Name);
+            Assert.That(deserialized.Group, Is.EqualTo(key.Group));
+            Assert.That(deserialized.Name, Is.EqualTo(key.Name));
         }
     }
 

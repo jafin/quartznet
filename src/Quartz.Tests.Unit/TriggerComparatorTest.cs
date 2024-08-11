@@ -30,12 +30,12 @@ public class TriggerComparatorTest
         ts.Sort(TriggerComparer.Instance);
 
         // check the order of the list
-        Assert.AreEqual(t1, ts[0]);
-        Assert.AreEqual(t2, ts[1]);
-        Assert.AreEqual(t3, ts[2]);
-        Assert.AreEqual(t4, ts[3]);
-        Assert.AreEqual(t5, ts[4]);
-        Assert.AreEqual(t6, ts[5]);
+        Assert.That(ts[0], Is.EqualTo(t1));
+        Assert.That(ts[1], Is.EqualTo(t2));
+        Assert.That(ts[2], Is.EqualTo(t3));
+        Assert.That(ts[3], Is.EqualTo(t4));
+        Assert.That(ts[4], Is.EqualTo(t5));
+        Assert.That(ts[5], Is.EqualTo(t6));
     }
 
     [Test]
@@ -77,14 +77,14 @@ public class TriggerComparatorTest
         ts.Sort(TriggerComparer.Instance);
 
         // check the order of the list
-        Assert.AreEqual(t1, ts[0]);
-        Assert.AreEqual(t2, ts[1]);
-        Assert.AreEqual(t3, ts[2]);
-        Assert.AreEqual(t4, ts[3]);
-        Assert.AreEqual(t5, ts[4]);
-        Assert.AreEqual(t6, ts[5]);
-        Assert.AreEqual(t7, ts[6]);
-        Assert.AreEqual(t8, ts[7]);
-        Assert.AreEqual(t9, ts[8]);
+        Assert.That(ts[0], Is.EqualTo(t1));
+        Assert.That(ts[1], Is.EqualTo(t2));
+        Assert.That(ts[2], Is.EqualTo(t3));
+        Assert.That(ts[3], Is.EqualTo(t4));
+        Assert.That(ts[4], Is.EqualTo(t5));
+        Assert.That(ts[5], Is.EqualTo(t6));
+        Assert.That(ts[6], Is.EqualTo(t7));
+        Assert.That(ts[7], Is.EqualTo(t8));
+        Assert.That(ts[8], Is.EqualTo(t9));
     }
 }
