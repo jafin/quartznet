@@ -329,14 +329,14 @@ public class DailyTimeIntervalScheduleBuilderTest
 
         //check trigger 2 DOW
         //this fails because the reference collection only contains MONDAY b/c it was cleared.
-        Assert.IsTrue(trigger2.DaysOfWeek.Contains(DayOfWeek.Monday));
-        Assert.IsTrue(trigger2.DaysOfWeek.Contains(DayOfWeek.Tuesday));
-        Assert.IsTrue(trigger2.DaysOfWeek.Contains(DayOfWeek.Wednesday));
-        Assert.IsTrue(trigger2.DaysOfWeek.Contains(DayOfWeek.Thursday));
-        Assert.IsTrue(trigger2.DaysOfWeek.Contains(DayOfWeek.Friday));
+        Assert.That(trigger2.DaysOfWeek.Contains(DayOfWeek.Monday), Is.True);
+        Assert.That(trigger2.DaysOfWeek.Contains(DayOfWeek.Tuesday), Is.True);
+        Assert.That(trigger2.DaysOfWeek.Contains(DayOfWeek.Wednesday), Is.True);
+        Assert.That(trigger2.DaysOfWeek.Contains(DayOfWeek.Thursday), Is.True);
+        Assert.That(trigger2.DaysOfWeek.Contains(DayOfWeek.Friday), Is.True);
 
-        Assert.IsFalse(trigger2.DaysOfWeek.Contains(DayOfWeek.Saturday));
-        Assert.IsFalse(trigger2.DaysOfWeek.Contains(DayOfWeek.Sunday));
+        Assert.That(trigger2.DaysOfWeek.Contains(DayOfWeek.Saturday), Is.False);
+        Assert.That(trigger2.DaysOfWeek.Contains(DayOfWeek.Sunday), Is.False);
     }
 
     [Test]

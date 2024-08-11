@@ -136,13 +136,13 @@ internal sealed class ExpectedMail
 
     public void IsEqualTo(MailMessage actualMail)
     {
-        Assert.Contains(new MailAddress(recipient), actualMail.To, "Recipient equals");
+        Assert.That(actualMail.To, Does.Contain(new MailAddress(recipient)), "Recipient equals");
         Assert.That(actualMail.From, Is.EqualTo(new MailAddress(sender)), "Sender equals");
         Assert.That(actualMail.Subject, Is.EqualTo(subject), "Subject equals");
         Assert.That(actualMail.Body, Is.EqualTo(message), "Message equals");
         if (!string.IsNullOrEmpty(ccRecipient))
         {
-            Assert.Contains(new MailAddress(ccRecipient), actualMail.CC, "CC equals");
+            Assert.That(actualMail.CC, Does.Contain(new MailAddress(ccRecipient)), "CC equals");
         }
         if (!string.IsNullOrEmpty(replyTo))
         {

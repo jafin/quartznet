@@ -57,7 +57,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
 
     protected override void VerifyMatch(CronExpression original, CronExpression deserialized)
     {
-        Assert.IsNotNull(deserialized);
+        Assert.That(deserialized, Is.Not.Null);
         Assert.That(deserialized.CronExpressionString, Is.EqualTo(original.CronExpressionString));
         Assert.That(deserialized.TimeZone, Is.EqualTo(original.TimeZone));
     }
@@ -71,23 +71,23 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         CronExpression cronExpression = new CronExpression("0 15 10 * * ? 2005");
 
         DateTime cal = new DateTime(2005, 6, 1, 10, 15, 0).ToUniversalTime();
-        Assert.IsTrue(cronExpression.IsSatisfiedBy(cal));
+        Assert.That(cronExpression.IsSatisfiedBy(cal), Is.True);
 
         cal = cal.AddYears(1);
-        Assert.IsFalse(cronExpression.IsSatisfiedBy(cal));
+        Assert.That(cronExpression.IsSatisfiedBy(cal), Is.False);
 
         cal = new DateTime(2005, 6, 1, 10, 16, 0).ToUniversalTime();
-        Assert.IsFalse(cronExpression.IsSatisfiedBy(cal));
+        Assert.That(cronExpression.IsSatisfiedBy(cal), Is.False);
 
         cal = new DateTime(2005, 6, 1, 10, 14, 0).ToUniversalTime();
-        Assert.IsFalse(cronExpression.IsSatisfiedBy(cal));
+        Assert.That(cronExpression.IsSatisfiedBy(cal), Is.False);
 
         cronExpression = new CronExpression("0 15 10 ? * MON-FRI");
 
         // weekends
         cal = new DateTime(2007, 6, 9, 10, 15, 0).ToUniversalTime();
-        Assert.IsFalse(cronExpression.IsSatisfiedBy(cal));
-        Assert.IsFalse(cronExpression.IsSatisfiedBy(cal.AddDays(1)));
+        Assert.That(cronExpression.IsSatisfiedBy(cal), Is.False);
+        Assert.That(cronExpression.IsSatisfiedBy(cal.AddDays(1)), Is.False);
     }
 
     [Test]
@@ -96,25 +96,25 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         CronExpression cronExpression = new CronExpression("0 15 10 L-2 * ? 2010");
 
         DateTime cal = new DateTime(2010, 10, 29, 10, 15, 0).ToUniversalTime(); // last day - 2
-        Assert.IsTrue(cronExpression.IsSatisfiedBy(cal));
+        Assert.That(cronExpression.IsSatisfiedBy(cal), Is.True);
 
         cal = new DateTime(2010, 10, 28, 10, 15, 0).ToUniversalTime();
-        Assert.IsFalse(cronExpression.IsSatisfiedBy(cal));
+        Assert.That(cronExpression.IsSatisfiedBy(cal), Is.False);
 
         cronExpression = new CronExpression("0 15 10 L-5W * ? 2010");
 
         cal = new DateTime(2010, 10, 26, 10, 15, 0).ToUniversalTime(); // last day - 5
-        Assert.IsTrue(cronExpression.IsSatisfiedBy(cal));
+        Assert.That(cronExpression.IsSatisfiedBy(cal), Is.True);
 
         cronExpression = new CronExpression("0 15 10 L-1 * ? 2010");
 
         cal = new DateTime(2010, 10, 30, 10, 15, 0).ToUniversalTime(); // last day - 1
-        Assert.IsTrue(cronExpression.IsSatisfiedBy(cal));
+        Assert.That(cronExpression.IsSatisfiedBy(cal), Is.True);
 
         cronExpression = new CronExpression("0 15 10 L-1W * ? 2010");
 
         cal = new DateTime(2010, 10, 29, 10, 15, 0).ToUniversalTime(); // nearest weekday to last day - 1 (29th is a friday in 2010)
-        Assert.IsTrue(cronExpression.IsSatisfiedBy(cal));
+        Assert.That(cronExpression.IsSatisfiedBy(cal), Is.True);
     }
 
     [TestCase("0 15 10 6,15 * ? 2010", "0 15 10 6,15 * ? 2010")]
@@ -465,7 +465,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         // test failed before because of improper trimming
         string expr = " 30 *   * * * ?  ";
         CronExpression calendar = new CronExpression(expr);
-        Assert.IsFalse(calendar.IsSatisfiedBy(DateTime.UtcNow.Date.AddMinutes(2)), "Time was included");
+        Assert.That(calendar.IsSatisfiedBy(DateTime.UtcNow.Date.AddMinutes(2)), Is.False, "Time was included");
     }
 
     private static void TestCorrectWeekFireDays(CronExpression cronExpression, IList<int> correctFireDays)
@@ -490,12 +490,12 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         for (int i = 0; i < fireDays.Count; ++i)
         {
             int idx = correctFireDays.IndexOf(fireDays[i]);
-            Assert.Greater(idx, -1, $"CronExpression evaluated true for {fireDays[i]} even when it shouldn't have");
+            Assert.That(idx, Is.GreaterThan(-1), $"CronExpression evaluated true for {fireDays[i]} even when it shouldn't have");
             correctFireDays.RemoveAt(idx);
         }
 
         // check that all fired
-        Assert.IsTrue(correctFireDays.Count == 0, $"CronExpression did not evaluate true for all expected days (count: {correctFireDays.Count}).");
+        Assert.That(correctFireDays.Count == 0, Is.True, $"CronExpression did not evaluate true for all expected days (count: {correctFireDays.Count}).");
     }
 
     [Test]
@@ -605,8 +605,9 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         }
         catch (FormatException pe)
         {
-            Assert.IsTrue(
+            Assert.That(
                 pe.Message.StartsWith("Support for specifying 'L' with other days of the week is not implemented"),
+                Is.True,
                 "Incorrect FormatException thrown");
         }
 
@@ -617,8 +618,9 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         }
         catch (FormatException pe)
         {
-            Assert.IsTrue(
+            Assert.That(
                 pe.Message.StartsWith("Support for specifying 'L' with other days of the week is not implemented"),
+                Is.True,
                 "Incorrect FormatException thrown");
         }
 
@@ -637,11 +639,11 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
     {
         CronExpression expression = new CronExpression("0 0 0 29 * ?");
         DateTimeOffset? after = expression.GetNextValidTimeAfter(new DateTime(2009, 1, 30, 0, 0, 0).ToUniversalTime());
-        Assert.IsTrue(after.HasValue);
+        Assert.That(after.HasValue, Is.True);
         Assert.That(after.Value.DateTime, Is.EqualTo(new DateTime(2009, 3, 29, 0, 0, 0).ToUniversalTime()));
 
         after = expression.GetNextValidTimeAfter(new DateTime(2009, 12, 30).ToUniversalTime());
-        Assert.IsTrue(after.HasValue);
+        Assert.That(after.HasValue, Is.True);
         Assert.That(after.Value.DateTime, Is.EqualTo(new DateTime(2010, 1, 29, 0, 0, 0).ToUniversalTime()));
     }
 
@@ -667,7 +669,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         }
         catch (FormatException pe)
         {
-            Assert.IsTrue(pe.Message.StartsWith("The 'W' option does not make sense with values larger than"), "Incorrect ParseException thrown");
+            Assert.That(pe.Message.StartsWith("The 'W' option does not make sense with values larger than"), Is.True, "Incorrect ParseException thrown");
         }
     }
 
@@ -685,7 +687,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         {
             DateTimeOffset? date = trigger.GetFireTimeAfter(pdate);
             // Console.WriteLine("fireTime: " + date + ", previousFireTime: " + pdate);
-            Assert.False(pdate.Equals(date), "Next fire time is the same as previous fire time!");
+            Assert.That(pdate.Equals(date), Is.False, "Next fire time is the same as previous fire time!");
             pdate = date;
         }
     }
@@ -704,7 +706,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         {
             DateTimeOffset? date = trigger.GetFireTimeAfter(pdate);
             // Console.WriteLine("fireTime: " + date + ", previousFireTime: " + pdate);
-            Assert.False(pdate.Equals(date), "Next fire time is the same as previous fire time!");
+            Assert.That(pdate.Equals(date), Is.False, "Next fire time is the same as previous fire time!");
             pdate = date;
         }
     }
@@ -722,7 +724,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         var daylightChange = TimeZone.CurrentTimeZone.GetDaylightChanges(2012);
         DateTimeOffset before = daylightChange.Start.ToUniversalTime().AddMinutes(-5); // keep outside the potentially undefined interval
         DateTimeOffset? after = expression.GetNextValidTimeAfter(before);
-        Assert.IsTrue(after.HasValue);
+        Assert.That(after.HasValue, Is.True);
         DateTimeOffset expected = daylightChange.Start.Add(daylightChange.Delta).AddMinutes(15).ToUniversalTime();
         Assert.That(after.Value, Is.EqualTo(expected));
     }

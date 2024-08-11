@@ -72,10 +72,10 @@ public class DailyCalendarTest : SerializationTestSupport<DailyCalendar, ICalend
     {
         DailyCalendar dailyCalendar = new DailyCalendar("1:20", "14:50");
         dailyCalendar.InvertTimeRange = true;
-        Assert.IsTrue(dailyCalendar.ToString().IndexOf("inverted: True") > 0);
+        Assert.That(dailyCalendar.ToString().IndexOf("inverted: True") > 0, Is.True);
 
         dailyCalendar.InvertTimeRange = false;
-        Assert.IsTrue(dailyCalendar.ToString().IndexOf("inverted: False") > 0);
+        Assert.That(dailyCalendar.ToString().IndexOf("inverted: False") > 0, Is.True);
     }
 
     [Test]
@@ -89,7 +89,7 @@ public class DailyCalendarTest : SerializationTestSupport<DailyCalendar, ICalend
 
         // 11/2/2012 17:00 (utc) is 11/2/2012 13:00 (est)
         DateTimeOffset timeToCheck = new DateTimeOffset(2012, 11, 2, 17, 0, 0, TimeSpan.FromHours(0));
-        Assert.IsTrue(dailyCalendar.IsTimeIncluded(timeToCheck));
+        Assert.That(dailyCalendar.IsTimeIncluded(timeToCheck), Is.True);
     }
 
     /// <summary>
@@ -158,7 +158,7 @@ public class DailyCalendarTest : SerializationTestSupport<DailyCalendar, ICalend
 
     protected override void VerifyMatch(DailyCalendar original, DailyCalendar deserialized)
     {
-        Assert.IsNotNull(deserialized);
+        Assert.That(deserialized, Is.Not.Null);
         Assert.That(deserialized.Description, Is.EqualTo(original.Description));
         Assert.That(deserialized.InvertTimeRange, Is.EqualTo(original.InvertTimeRange));
         Assert.That(deserialized.TimeZone, Is.EqualTo(original.TimeZone));

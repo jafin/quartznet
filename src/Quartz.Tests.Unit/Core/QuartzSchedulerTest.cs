@@ -101,9 +101,9 @@ public class QuartzSchedulerTest
 
         IScheduler sched = await sf.GetScheduler();
         await sched.StartDelayed(TimeSpan.FromMilliseconds(100));
-        Assert.IsFalse(sched.IsStarted);
+        Assert.That(sched.IsStarted, Is.False);
         await Task.Delay(2000);
-        Assert.IsTrue(sched.IsStarted);
+        Assert.That(sched.IsStarted, Is.True);
     }
 
     [Test]

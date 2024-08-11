@@ -62,7 +62,7 @@ public class DirectSchedulerFactoryTest
         await _directSchedulerFactory.CreateScheduler(_threadPool, _jobStore);
 
         var scheduler = _schedulerRepository.Lookup(DirectSchedulerFactory.DefaultSchedulerName);
-        Assert.IsNotNull(scheduler);
+        Assert.That(scheduler, Is.Not.Null);
         Assert.That(scheduler.GetType(), Is.EqualTo(typeof(StdScheduler)));
 
         var stdScheduler = (StdScheduler) scheduler;
@@ -85,7 +85,7 @@ public class DirectSchedulerFactoryTest
         await _directSchedulerFactory.CreateScheduler(schedulerName, schedulerInstanceId, _threadPool, _jobStore);
 
         var scheduler = _schedulerRepository.Lookup(schedulerName);
-        Assert.IsNotNull(scheduler);
+        Assert.That(scheduler, Is.Not.Null);
         Assert.That(scheduler.GetType(), Is.EqualTo(typeof(StdScheduler)));
 
         var stdScheduler = (StdScheduler) scheduler;
@@ -127,7 +127,7 @@ public class DirectSchedulerFactoryTest
         await _directSchedulerFactory.CreateScheduler(schedulerName, schedulerInstanceId, _threadPool, _jobStore, schedulerPluginMap, idleWaitTime);
 
         var scheduler = _schedulerRepository.Lookup(schedulerName);
-        Assert.IsNotNull(scheduler);
+        Assert.That(scheduler, Is.Not.Null);
         Assert.That(scheduler.GetType(), Is.EqualTo(typeof(StdScheduler)));
 
         var stdScheduler = (StdScheduler) scheduler;
@@ -149,7 +149,7 @@ public class DirectSchedulerFactoryTest
             Assert.That(stdScheduler.sched.resources.SchedulerPlugins.Count, Is.EqualTo(schedulerPluginMap.Count));
             foreach (var plugin in schedulerPluginMap.Values)
             {
-                Assert.IsTrue(stdScheduler.sched.resources.SchedulerPlugins.Contains(plugin));
+                Assert.That(stdScheduler.sched.resources.SchedulerPlugins.Contains(plugin), Is.True);
             }
         }
     }
@@ -184,7 +184,7 @@ public class DirectSchedulerFactoryTest
         await _directSchedulerFactory.CreateScheduler(schedulerName, schedulerInstanceId, _threadPool, _jobStore, schedulerPluginMap, idleWaitTime, maxBatchSize, batchTimeWindow);
 
         var scheduler = _schedulerRepository.Lookup(schedulerName);
-        Assert.IsNotNull(scheduler);
+        Assert.That(scheduler, Is.Not.Null);
         Assert.That(scheduler.GetType(), Is.EqualTo(typeof(StdScheduler)));
 
         var stdScheduler = (StdScheduler) scheduler;
@@ -206,7 +206,7 @@ public class DirectSchedulerFactoryTest
             Assert.That(stdScheduler.sched.resources.SchedulerPlugins.Count, Is.EqualTo(schedulerPluginMap.Count));
             foreach (var plugin in schedulerPluginMap.Values)
             {
-                Assert.IsTrue(stdScheduler.sched.resources.SchedulerPlugins.Contains(plugin));
+                Assert.That(stdScheduler.sched.resources.SchedulerPlugins.Contains(plugin), Is.True);
             }
         }
     }
@@ -243,7 +243,7 @@ public class DirectSchedulerFactoryTest
         await _directSchedulerFactory.CreateScheduler(schedulerName, schedulerInstanceId, _threadPool, _jobStore, schedulerPluginMap, idleWaitTime, maxBatchSize, batchTimeWindow);
 
         var scheduler = _schedulerRepository.Lookup(schedulerName);
-        Assert.IsNotNull(scheduler);
+        Assert.That(scheduler, Is.Not.Null);
         Assert.That(scheduler.GetType(), Is.EqualTo(typeof(StdScheduler)));
 
         var stdScheduler = (StdScheduler) scheduler;
@@ -265,7 +265,7 @@ public class DirectSchedulerFactoryTest
             Assert.That(stdScheduler.sched.resources.SchedulerPlugins.Count, Is.EqualTo(schedulerPluginMap.Count));
             foreach (var plugin in schedulerPluginMap.Values)
             {
-                Assert.IsTrue(stdScheduler.sched.resources.SchedulerPlugins.Contains(plugin));
+                Assert.That(stdScheduler.sched.resources.SchedulerPlugins.Contains(plugin), Is.True);
             }
         }
     }

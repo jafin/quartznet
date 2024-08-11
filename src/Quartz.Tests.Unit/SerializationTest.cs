@@ -23,7 +23,7 @@ public class SerializationTest
         DateTime day = new DateTime(2011, 12, 20, 0, 0, 0);
         annualCalendar.SetDayExcluded(day, true);
         AnnualCalendar clone = annualCalendar.DeepClone();
-        Assert.IsTrue(clone.IsDayExcluded(day));
+        Assert.That(clone.IsDayExcluded(day), Is.True);
     }
 
     [Test]
@@ -128,7 +128,7 @@ public class SerializationTest
         MonthlyCalendar monthlyCalendar = new MonthlyCalendar();
         monthlyCalendar.SetDayExcluded(20, true);
         MonthlyCalendar clone = monthlyCalendar.DeepClone();
-        Assert.IsTrue(clone.IsDayExcluded(20));
+        Assert.That(clone.IsDayExcluded(20), Is.True);
     }
 
     [Test]
@@ -143,7 +143,7 @@ public class SerializationTest
         WeeklyCalendar weeklyCalendar = new WeeklyCalendar();
         weeklyCalendar.SetDayExcluded(DayOfWeek.Monday, true);
         WeeklyCalendar clone = weeklyCalendar.DeepClone();
-        Assert.IsTrue(clone.IsDayExcluded(DayOfWeek.Monday));
+        Assert.That(clone.IsDayExcluded(DayOfWeek.Monday), Is.True);
     }
 
     /* TODO

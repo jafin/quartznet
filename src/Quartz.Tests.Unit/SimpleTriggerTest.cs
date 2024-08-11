@@ -73,7 +73,7 @@ public class SimpleTriggerTest : SerializationTestSupport<SimpleTriggerImpl>
 
     protected override void VerifyMatch(SimpleTriggerImpl original, SimpleTriggerImpl deserialized)
     {
-        Assert.IsNotNull(deserialized);
+        Assert.That(deserialized, Is.Not.Null);
         Assert.That(deserialized.Key, Is.EqualTo(original.Key));
         Assert.That(deserialized.JobKey, Is.EqualTo(original.JobKey));
         Assert.That(deserialized.StartTimeUtc, Is.EqualTo(original.StartTimeUtc));
@@ -102,7 +102,7 @@ public class SimpleTriggerTest : SerializationTestSupport<SimpleTriggerImpl>
         simpleTrigger.UpdateAfterMisfire(null);
         Assert.That(simpleTrigger.StartTimeUtc, Is.EqualTo(startTime));
         Assert.That(simpleTrigger.EndTimeUtc.Value, Is.EqualTo(endTime));
-        Assert.IsTrue(!simpleTrigger.GetNextFireTimeUtc().HasValue);
+        Assert.That(!simpleTrigger.GetNextFireTimeUtc().HasValue, Is.True);
     }
 
     [Test]
@@ -162,7 +162,7 @@ public class SimpleTriggerTest : SerializationTestSupport<SimpleTriggerImpl>
         simpleTrigger.ComputeFirstFireTimeUtc(dailyCalendar);
         DateTimeOffset? fireTimeAfter = simpleTrigger.GetNextFireTimeUtc();
 
-        Assert.IsNull(fireTimeAfter);
+        Assert.That(fireTimeAfter, Is.Null);
     }
 
     [Test]
@@ -170,7 +170,7 @@ public class SimpleTriggerTest : SerializationTestSupport<SimpleTriggerImpl>
     {
         IOperableTrigger trigger = new SimpleTriggerImpl();
         trigger.StartTimeUtc = new DateTimeOffset(1982, 6, 28, 13, 5, 5, 233, TimeSpan.Zero);
-        Assert.IsTrue(trigger.HasMillisecondPrecision);
+        Assert.That(trigger.HasMillisecondPrecision, Is.True);
         Assert.That(trigger.StartTimeUtc.Millisecond, Is.EqualTo(233));
     }
 

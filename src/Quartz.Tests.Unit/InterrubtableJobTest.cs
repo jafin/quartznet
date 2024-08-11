@@ -115,8 +115,8 @@ public class InterruptableJobTest
 
         ended.WaitOne(); // wait for the job to terminate
 
-        Assert.IsTrue(interruptResult, "Expected successful result from interruption of job ");
-        Assert.IsTrue(TestInterruptableJob.interrupted, "Expected interrupted flag to be set on job class ");
+        Assert.That(interruptResult, Is.True, "Expected successful result from interruption of job ");
+        Assert.That(TestInterruptableJob.interrupted, Is.True, "Expected interrupted flag to be set on job class ");
 
         await sched.Clear();
         await sched.Shutdown();

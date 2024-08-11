@@ -121,12 +121,12 @@ public class ObjectUtilsTest
     [Test]
     public void TestIsAnnotationPresentOnSuperClass()
     {
-        Assert.IsTrue(ObjectUtils.IsAttributePresent(typeof(BaseJob), typeof(DisallowConcurrentExecutionAttribute)));
-        Assert.IsFalse(ObjectUtils.IsAttributePresent(typeof(BaseJob), typeof(PersistJobDataAfterExecutionAttribute)));
-        Assert.IsTrue(ObjectUtils.IsAttributePresent(typeof(ExtendedJob), typeof(DisallowConcurrentExecutionAttribute)));
-        Assert.IsFalse(ObjectUtils.IsAttributePresent(typeof(ExtendedJob), typeof(PersistJobDataAfterExecutionAttribute)));
-        Assert.IsTrue(ObjectUtils.IsAttributePresent(typeof(ReallyExtendedJob), typeof(DisallowConcurrentExecutionAttribute)));
-        Assert.IsTrue(ObjectUtils.IsAttributePresent(typeof(ReallyExtendedJob), typeof(PersistJobDataAfterExecutionAttribute)));
+        Assert.That(ObjectUtils.IsAttributePresent(typeof(BaseJob), typeof(DisallowConcurrentExecutionAttribute)), Is.True);
+        Assert.That(ObjectUtils.IsAttributePresent(typeof(BaseJob), typeof(PersistJobDataAfterExecutionAttribute)), Is.False);
+        Assert.That(ObjectUtils.IsAttributePresent(typeof(ExtendedJob), typeof(DisallowConcurrentExecutionAttribute)), Is.True);
+        Assert.That(ObjectUtils.IsAttributePresent(typeof(ExtendedJob), typeof(PersistJobDataAfterExecutionAttribute)), Is.False);
+        Assert.That(ObjectUtils.IsAttributePresent(typeof(ReallyExtendedJob), typeof(DisallowConcurrentExecutionAttribute)), Is.True);
+        Assert.That(ObjectUtils.IsAttributePresent(typeof(ReallyExtendedJob), typeof(PersistJobDataAfterExecutionAttribute)), Is.True);
     }
 
     [Test]

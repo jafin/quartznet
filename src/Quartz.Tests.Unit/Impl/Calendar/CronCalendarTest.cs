@@ -40,11 +40,11 @@ public class CronCalendarTest : SerializationTestSupport<CronCalendar, ICalendar
         string fault = "Time was included when it was not supposed to be";
         DateTime tst = DateTime.UtcNow.AddMinutes(2);
         tst = new DateTime(tst.Year, tst.Month, tst.Day, tst.Hour, tst.Minute, 30);
-        Assert.IsFalse(calendar.IsTimeIncluded(tst), fault);
+        Assert.That(calendar.IsTimeIncluded(tst), Is.False, fault);
 
         calendar.SetCronExpressionString("0/25 * * * * ?");
         fault = "Time was not included as expected";
-        Assert.IsTrue(calendar.IsTimeIncluded(tst), fault);
+        Assert.That(calendar.IsTimeIncluded(tst), Is.True, fault);
     }
 
     [Test]
@@ -63,7 +63,7 @@ public class CronCalendarTest : SerializationTestSupport<CronCalendar, ICalendar
             TimeZone = TimeZoneInfo.Utc
         };
         var dateTime = new DateTimeOffset(2017, 7, 27, 2, 0, 1, 123, TimeSpan.Zero);
-        Assert.IsFalse(calendar.IsTimeIncluded(dateTime));
+        Assert.That(calendar.IsTimeIncluded(dateTime), Is.False);
     }
 
     protected override CronCalendar GetTargetObject()
@@ -76,7 +76,7 @@ public class CronCalendarTest : SerializationTestSupport<CronCalendar, ICalendar
 
     protected override void VerifyMatch(CronCalendar original, CronCalendar deserialized)
     {
-        Assert.IsNotNull(deserialized);
+        Assert.That(deserialized, Is.Not.Null);
         Assert.That(deserialized.Description, Is.EqualTo(original.Description));
         Assert.That(deserialized.CronExpression, Is.EqualTo(original.CronExpression));
         Assert.That(deserialized.TimeZone, Is.EqualTo(original.TimeZone));

@@ -70,11 +70,11 @@ public class CronTriggerTest
         trigger.StartTimeUtc = startDate;
 
         Assert.That(trigger.GetFireTimeAfter(startDate), Is.EqualTo(expectedFire), $"Expected to fire at {expectedFire}");
-        Assert.IsTrue(trigger.WillFireOn(expectedFire), $"Expected to fire at {expectedFire}");
-        Assert.IsTrue(trigger.WillFireOn(expectedFire.AddHours(6)), $"Expected to fire at {expectedFire}");
-        Assert.IsTrue(trigger.WillFireOn(expectedFire.AddHours(12)), $"Expected to fire at {expectedFire}");
-        Assert.IsTrue(trigger.WillFireOn(expectedFire.AddHours(18)), $"Expected to fire at {expectedFire}");
-        Assert.IsTrue(trigger.WillFireOn(expectedFire.AddHours(24)), $"Expected to fire at {expectedFire}");
+        Assert.That(trigger.WillFireOn(expectedFire), Is.True, $"Expected to fire at {expectedFire}");
+        Assert.That(trigger.WillFireOn(expectedFire.AddHours(6)), Is.True, $"Expected to fire at {expectedFire}");
+        Assert.That(trigger.WillFireOn(expectedFire.AddHours(12)), Is.True, $"Expected to fire at {expectedFire}");
+        Assert.That(trigger.WillFireOn(expectedFire.AddHours(18)), Is.True, $"Expected to fire at {expectedFire}");
+        Assert.That(trigger.WillFireOn(expectedFire.AddHours(24)), Is.True, $"Expected to fire at {expectedFire}");
     }
 
     [Test]
@@ -86,7 +86,7 @@ public class CronTriggerTest
         trigger.StartTimeUtc = new DateTimeOffset(2099, 1, 1, 12, 0, 1, TimeSpan.Zero);
         trigger.EndTimeUtc = new DateTimeOffset(2099, 1, 1, 12, 0, 1, TimeSpan.Zero);
 
-        Assert.IsNull(trigger.ComputeFirstFireTimeUtc(null));
+        Assert.That(trigger.ComputeFirstFireTimeUtc(null), Is.Null);
     }
 
     [Test]
@@ -94,7 +94,7 @@ public class CronTriggerTest
     {
         IOperableTrigger trigger = new CronTriggerImpl();
         trigger.StartTimeUtc = new DateTime(1982, 6, 28, 13, 5, 5, 233);
-        Assert.IsFalse(trigger.HasMillisecondPrecision);
+        Assert.That(trigger.HasMillisecondPrecision, Is.False);
         Assert.That(trigger.StartTimeUtc.Millisecond, Is.EqualTo(0));
     }
 

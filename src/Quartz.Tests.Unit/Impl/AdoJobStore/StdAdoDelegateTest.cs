@@ -280,14 +280,14 @@ public class StdAdoDelegateTest
             new SimpleTypeLoadHelper(), // Irrelevant, not used actually by method implementation
             CancellationToken.None);
 
-        Assert.IsNotNull(jobDetail);
+        Assert.That(jobDetail, Is.Not.Null);
         Assert.That(jobDetail.Key.Name, Is.EqualTo(jobName));
         Assert.That(jobDetail.Key.Group, Is.EqualTo(jobGroup));
         Assert.That(jobDetail.Description, Is.EqualTo(jobDescription));
         Assert.That(jobDetail.JobType.Type, Is.EqualTo(typeof(TestJob)));
-        Assert.IsTrue(jobDetail.RequestsRecovery);
-        Assert.IsTrue(jobDetail.Durable);
-        Assert.IsTrue(jobDetail.ConcurrentExecutionDisallowed);
+        Assert.That(jobDetail.RequestsRecovery, Is.True);
+        Assert.That(jobDetail.Durable, Is.True);
+        Assert.That(jobDetail.ConcurrentExecutionDisallowed, Is.True);
 
         var expectedCommandText = "SELECT "
                                   + "JOB_NAME,"

@@ -79,7 +79,7 @@ public class PropertySettingJobFactoryTest
         Assert.That(myObject.LongValue, Is.EqualTo(2));
         Assert.That(myObject.FloatValue, Is.EqualTo(3.0f));
         Assert.That(myObject.DoubleValue, Is.EqualTo(4.0));
-        Assert.IsTrue(myObject.BooleanValue);
+        Assert.That(myObject.BooleanValue, Is.True);
         Assert.That(myObject.ShortValue, Is.EqualTo(5));
         Assert.That(myObject.CharValue, Is.EqualTo('a'));
         Assert.That(myObject.ByteValue, Is.EqualTo((byte) 6));
@@ -87,7 +87,7 @@ public class PropertySettingJobFactoryTest
         Assert.That(myObject.EnumValue1, Is.EqualTo(DayOfWeek.Monday));
         Assert.That(myObject.EnumValue2, Is.EqualTo(DayOfWeek.Monday));
         Assert.That(myObject.EnumValue3, Is.EqualTo(DayOfWeek.Monday));
-        Assert.IsTrue(myObject.MapValue.ContainsKey("A"));
+        Assert.That(myObject.MapValue.ContainsKey("A"), Is.True);
     }
 
     [Test]
@@ -130,7 +130,7 @@ public class PropertySettingJobFactoryTest
         map.Add("A", "B");
         testObject.MapValue = map;
         factory.SetObjectProperties(testObject, jobDataMap);
-        Assert.IsNull(testObject.MapValue);
+        Assert.That(testObject.MapValue, Is.Null);
     }
 
     [Test]

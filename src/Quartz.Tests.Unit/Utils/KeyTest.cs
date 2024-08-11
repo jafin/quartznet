@@ -415,7 +415,7 @@ public class KeyTest
         formatter.AssemblyFormat = FormatterAssemblyStyle.Simple;
 
         var deserialized = formatter.Deserialize(ms) as Key<string>;
-        Assert.IsNotNull(deserialized);
+        Assert.That(deserialized, Is.Not.Null);
         Assert.That(deserialized.Group, Is.EqualTo(key.Group));
         Assert.That(deserialized.Name, Is.EqualTo(key.Name));
 #pragma warning restore SYSLIB0050
@@ -434,7 +434,7 @@ public class KeyTest
             ms.Position = 0;
 
             var deserialized = formatter.Deserialize(ms) as Key<string>;
-            Assert.IsNotNull(deserialized);
+            Assert.That(deserialized, Is.Not.Null);
             Assert.That(deserialized.Group, Is.EqualTo(key.Group));
             Assert.That(deserialized.Name, Is.EqualTo(key.Name));
         }

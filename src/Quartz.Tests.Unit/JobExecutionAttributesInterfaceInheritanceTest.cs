@@ -84,8 +84,8 @@ public class JobExecutionAttributesInterfaceInheritanceTest
     public void TestWhetherAttributesAreInheritedFromInterfaces()
     {
         IJobDetail job = JobBuilder.Create<TestJob>().Build();
-        Assert.IsTrue(job.PersistJobDataAfterExecution);
-        Assert.IsTrue(job.ConcurrentExecutionDisallowed);
+        Assert.That(job.PersistJobDataAfterExecution, Is.True);
+        Assert.That(job.ConcurrentExecutionDisallowed, Is.True);
     }
 
     [Test]

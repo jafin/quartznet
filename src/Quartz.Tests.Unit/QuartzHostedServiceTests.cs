@@ -353,13 +353,13 @@ public class QuartzHostedServiceTests
                 StartDelay = withStartDelay ? TimeSpan.FromMinutes(1) : null,
             }));
 
-        Assert.Null(schedulerFactory.LastCreatedScheduler);
+        Assert.That(schedulerFactory.LastCreatedScheduler, Is.Null);
 
         using var startupCts = new CancellationTokenSource();
 
         await quartzHostedService.StartAsync(startupCts.Token);
 
-        Assert.NotNull(schedulerFactory.LastCreatedScheduler);
+        Assert.That(schedulerFactory.LastCreatedScheduler, Is.Not.Null);
 
         await startupCts.CancelAsync().ConfigureAwait(false);
     }
@@ -387,7 +387,7 @@ public class QuartzHostedServiceTests
 
         await quartzHostedService.StartAsync(startupCts.Token);
 
-        Assert.NotNull(schedulerFactory.LastCreatedScheduler);
+        Assert.That(schedulerFactory.LastCreatedScheduler, Is.Not.Null);
         Assert.That(schedulerFactory.LastCreatedScheduler.IsStarted, Is.EqualTo(shouldSchedulerBeStartedImmediately));
 
         appliationLifetime.SetStarted();
@@ -404,8 +404,8 @@ public class QuartzHostedServiceTests
 
         await quartzHostedService.StopAsync(CancellationToken.None);
 
-        Assert.False(schedulerFactory.LastCreatedScheduler.IsStarted);
-        Assert.True(schedulerFactory.LastCreatedScheduler.IsShutdown);
+        Assert.That(schedulerFactory.LastCreatedScheduler.IsStarted, Is.False);
+        Assert.That(schedulerFactory.LastCreatedScheduler.IsShutdown, Is.True);
     }
 
     [Test]
@@ -474,10 +474,10 @@ public class QuartzHostedServiceTests
         // Confirm that not only have we stopped, but that we have not started AFTER being stopped
         if (shouldSchedulerBeStarted)
         {
-            Assert.True(schedulerFactory.LastCreatedScheduler.IsShutdown);
+            Assert.That(schedulerFactory.LastCreatedScheduler.IsShutdown, Is.True);
         }
 
-        Assert.False(schedulerFactory.LastCreatedScheduler.IsStarted);
+        Assert.That(schedulerFactory.LastCreatedScheduler.IsStarted, Is.False);
 
         await startupCts.CancelAsync().ConfigureAwait(false);
     }

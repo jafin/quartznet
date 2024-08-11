@@ -115,16 +115,16 @@ public class SchedulerTest
             .Build();
 
         var exists = await sched.CheckExists(new JobKey("j1"));
-        Assert.IsFalse(exists, "Unexpected existence of job named 'j1'.");
+        Assert.That(exists, Is.False, "Unexpected existence of job named 'j1'.");
 
         await sched.AddJob(job, false);
 
         exists = await sched.CheckExists(new JobKey("j1"));
-        Assert.IsTrue(exists, "Expected existence of job named 'j1' but checkExists return false.");
+        Assert.That(exists, Is.True, "Expected existence of job named 'j1' but checkExists return false.");
 
         job = await sched.GetJobDetail(new JobKey("j1"));
 
-        Assert.IsNotNull(job, "Stored job not found!");
+        Assert.That(job, Is.Not.Null, "Stored job not found!");
 
         await sched.DeleteJob(new JobKey("j1"));
 
@@ -136,20 +136,20 @@ public class SchedulerTest
             .Build();
 
         exists = await sched.CheckExists(new TriggerKey("t1"));
-        Assert.IsFalse(exists, "Unexpected existence of trigger named '11'.");
+        Assert.That(exists, Is.False, "Unexpected existence of trigger named '11'.");
 
         await sched.ScheduleJob(job, trigger);
 
         exists = await sched.CheckExists(new TriggerKey("t1"));
-        Assert.IsTrue(exists, "Expected existence of trigger named 't1' but checkExists return false.");
+        Assert.That(exists, Is.True, "Expected existence of trigger named 't1' but checkExists return false.");
 
         job = await sched.GetJobDetail(new JobKey("j1"));
 
-        Assert.IsNotNull(job, "Stored job not found!");
+        Assert.That(job, Is.Not.Null, "Stored job not found!");
 
         trigger = await sched.GetTrigger(new TriggerKey("t1"));
 
-        Assert.IsNotNull(trigger, "Stored trigger not found!");
+        Assert.That(trigger, Is.Not.Null, "Stored trigger not found!");
 
         job = JobBuilder.Create()
             .OfType<TestJob>()
@@ -248,9 +248,9 @@ public class SchedulerTest
         pausedGroups = await sched.GetPausedTriggerGroups();
         Assert.That(pausedGroups.Count, Is.EqualTo(0), "Size of paused trigger groups list expected to be 0 ");
 
-        Assert.IsFalse(await sched.UnscheduleJob(new TriggerKey("foasldfksajdflk")), "Scheduler should have returned 'false' from attempt to unschedule non-existing trigger. ");
+        Assert.That(await sched.UnscheduleJob(new TriggerKey("foasldfksajdflk")), Is.False, "Scheduler should have returned 'false' from attempt to unschedule non-existing trigger. ");
 
-        Assert.IsTrue(await sched.UnscheduleJob(new TriggerKey("t3", "g1")), "Scheduler should have returned 'true' from attempt to unschedule existing trigger. ");
+        Assert.That(await sched.UnscheduleJob(new TriggerKey("t3", "g1")), Is.True, "Scheduler should have returned 'true' from attempt to unschedule existing trigger. ");
 
         jobKeys = await sched.GetJobKeys(GroupMatcher<JobKey>.GroupEquals("g1"));
         triggerKeys = await sched.GetTriggerKeys(GroupMatcher<TriggerKey>.GroupEquals("g1"));
@@ -258,7 +258,7 @@ public class SchedulerTest
         Assert.That(jobKeys.Count, Is.EqualTo(2), "Number of jobs expected in 'g1' group was 1 "); // job should have been deleted also, because it is non-durable
         Assert.That(triggerKeys.Count, Is.EqualTo(2), "Number of triggers expected in 'g1' group was 1 ");
 
-        Assert.IsTrue(await sched.UnscheduleJob(new TriggerKey("t1")), "Scheduler should have returned 'true' from attempt to unschedule existing trigger. ");
+        Assert.That(await sched.UnscheduleJob(new TriggerKey("t1")), Is.True, "Scheduler should have returned 'true' from attempt to unschedule existing trigger. ");
 
         jobKeys = await sched.GetJobKeys(GroupMatcher<JobKey>.GroupEquals(JobKey.DefaultGroup));
         triggerKeys = await sched.GetTriggerKeys(GroupMatcher<TriggerKey>.GroupEquals(TriggerKey.DefaultGroup));
@@ -381,8 +381,8 @@ public class SchedulerTest
             after = (SchedulerException) formatter.Deserialize(stream);
         }
 
-        Assert.NotNull(before.InnerException);
-        Assert.NotNull(after.InnerException);
+        Assert.That(before.InnerException, Is.Not.Null);
+        Assert.That(after.InnerException, Is.Not.Null);
         Assert.That(after.ToString(), Is.EqualTo(before.ToString()));
     }
 

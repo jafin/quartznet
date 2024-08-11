@@ -284,7 +284,7 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
         testTime = dailyTrigger.FinalFireTimeUtc;
 
-        Assert.IsTrue(endCalendar > testTime, "Final fire time not computed correctly for minutely interval.");
+        Assert.That(endCalendar > testTime, Is.True, "Final fire time not computed correctly for minutely interval.");
 
         endCalendar = endCalendar.AddMinutes(-3); // back up three more minutes
 
@@ -373,7 +373,7 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
         var targetTime = fires[1]; //get second fire
 
-        Assert.IsFalse(timeZone.IsInvalidTime(targetTime.DateTime), "did not seem to skip the day with an hour that doesn't exist.");
+        Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
 
         DateTimeOffset expectedTarget = new DateTimeOffset(2012, 3, 12, 2, 0, 0, TimeSpan.FromHours(-4)); // 3/12/2012 2am
         Assert.That(targetTime, Is.EqualTo(expectedTarget));
@@ -395,7 +395,7 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
         targetTime = fires[1]; //get second fire
 
-        Assert.IsFalse(timeZone.IsInvalidTime(targetTime.DateTime), "did not seem to skip the day with an hour that doesn't exist.");
+        Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
 
         expectedTarget = new DateTimeOffset(2012, 3, 18, 2, 0, 0, TimeSpan.FromHours(-4)); // 3/18/2012 2am
         Assert.That(targetTime, Is.EqualTo(expectedTarget));
@@ -418,7 +418,7 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
         targetTime = fires[1]; //get second fire
 
-        Assert.IsFalse(timeZone.IsInvalidTime(targetTime.DateTime), "did not seem to skip the day with an hour that doesn't exist.");
+        Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
 
         expectedTarget = new DateTimeOffset(2012, 4, 11, 2, 0, 0, TimeSpan.FromHours(-4)); // 4/11/2012 2am
         Assert.That(targetTime, Is.EqualTo(expectedTarget));
@@ -441,7 +441,7 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
         targetTime = fires[1]; //get second fire
 
-        Assert.IsFalse(timeZone.IsInvalidTime(targetTime.DateTime), "did not seem to skip the day with an hour that doesn't exist.");
+        Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
 
         expectedTarget = new DateTimeOffset(2013, 3, 11, 2, 0, 0, TimeSpan.FromHours(-4)); // 3/11/2013 2am
         Assert.That(targetTime, Is.EqualTo(expectedTarget));
@@ -476,7 +476,7 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
         var targetTime = fires[1]; //get second fire
 
-        Assert.IsFalse(timeZone.IsInvalidTime(targetTime.DateTime), "did not seem to skip the day with an hour that doesn't exist.");
+        Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
         Assert.That(targetTime, Is.EqualTo(expectedTarget));
 
         //-------------------------------------------------
@@ -496,7 +496,7 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
         targetTime = fires[1]; //get second fire
 
-        Assert.IsFalse(timeZone.IsInvalidTime(targetTime.DateTime), "did not seem to skip the day with an hour that doesn't exist.");
+        Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
         Assert.That(targetTime, Is.EqualTo(expectedTarget));
 
         //-------------------------------------------------
@@ -516,7 +516,7 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
         targetTime = fires[1]; //get second fire
 
-        Assert.IsFalse(timeZone.IsInvalidTime(targetTime.DateTime), "did not seem to skip the day with an hour that doesn't exist.");
+        Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
         Assert.That(targetTime, Is.EqualTo(expectedTarget));
 
         //-------------------------------------------------
@@ -537,7 +537,7 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
         targetTime = fires[1]; //get second fire
 
-        Assert.IsFalse(timeZone.IsInvalidTime(targetTime.DateTime), "did not seem to skip the day with an hour that doesn't exist.");
+        Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
         Assert.That(targetTime, Is.EqualTo(expectedTarget));
     }
 
@@ -643,7 +643,7 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
         DateTimeOffset? fireTime = trigger.GetFireTimeAfter(fireTimeAfter);
 
         Assert.That(fireTimeAfter, Is.Not.EqualTo(fireTime));
-        Assert.IsTrue(fireTime > fireTimeAfter);
+        Assert.That(fireTime > fireTimeAfter, Is.True);
     }
 
     [Test]
@@ -760,7 +760,7 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
     protected override void VerifyMatch(CalendarIntervalTriggerImpl original, CalendarIntervalTriggerImpl deserialized)
     {
-        Assert.IsNotNull(deserialized);
+        Assert.That(deserialized, Is.Not.Null);
         Assert.That(deserialized.Key, Is.EqualTo(original.Key));
         Assert.That(deserialized.JobKey, Is.EqualTo(original.JobKey));
         Assert.That(deserialized.StartTimeUtc, Is.EqualTo(original.StartTimeUtc).Within(TimeSpan.FromSeconds(1)));

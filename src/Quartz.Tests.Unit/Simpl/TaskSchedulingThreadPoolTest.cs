@@ -48,7 +48,7 @@ public class TaskSchedulingThreadPoolTest
             task2Done.Set();
         });
 
-        Assert.IsTrue(WaitHandle.WaitAll(new[] { task1Done, task2Done }, TimeSpan.FromSeconds(1)));
+        Assert.That(WaitHandle.WaitAll(new[] { task1Done, task2Done }, TimeSpan.FromSeconds(1)), Is.True);
 
         Assert.That(logBook.Count, Is.EqualTo(4));
         Assert.That(logBook[0], Is.EqualTo("START #1"));

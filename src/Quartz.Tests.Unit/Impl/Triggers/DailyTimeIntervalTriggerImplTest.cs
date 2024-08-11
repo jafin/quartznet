@@ -683,13 +683,13 @@ public class DailyTimeIntervalTriggerImplTest
 
         //check trigger 2 DOW
         //this fails because the reference collection only contains MONDAY b/c it was cleared.
-        Assert.IsTrue(trigger2.DaysOfWeek.Contains(DayOfWeek.Monday));
-        Assert.IsTrue(trigger2.DaysOfWeek.Contains(DayOfWeek.Tuesday));
-        Assert.IsTrue(trigger2.DaysOfWeek.Contains(DayOfWeek.Wednesday));
-        Assert.IsTrue(trigger2.DaysOfWeek.Contains(DayOfWeek.Thursday));
-        Assert.IsTrue(trigger2.DaysOfWeek.Contains(DayOfWeek.Friday));
-        Assert.IsTrue(trigger2.DaysOfWeek.Contains(DayOfWeek.Saturday));
-        Assert.IsTrue(trigger2.DaysOfWeek.Contains(DayOfWeek.Sunday));
+        Assert.That(trigger2.DaysOfWeek.Contains(DayOfWeek.Monday), Is.True);
+        Assert.That(trigger2.DaysOfWeek.Contains(DayOfWeek.Tuesday), Is.True);
+        Assert.That(trigger2.DaysOfWeek.Contains(DayOfWeek.Wednesday), Is.True);
+        Assert.That(trigger2.DaysOfWeek.Contains(DayOfWeek.Thursday), Is.True);
+        Assert.That(trigger2.DaysOfWeek.Contains(DayOfWeek.Friday), Is.True);
+        Assert.That(trigger2.DaysOfWeek.Contains(DayOfWeek.Saturday), Is.True);
+        Assert.That(trigger2.DaysOfWeek.Contains(DayOfWeek.Sunday), Is.True);
     }
 
     [Test]
@@ -785,10 +785,10 @@ public class DailyTimeIntervalTriggerImplTest
             new TimeOfDay(8, 0, 0), new TimeOfDay(17, 0, 0),
             IntervalUnit.Hour, 1);
 
-        Assert.IsNotNull(trigger.Key);
+        Assert.That(trigger.Key, Is.Not.Null);
         Assert.That(trigger.Key.Name, Is.EqualTo("triggerName"));
         Assert.That(trigger.Key.Group, Is.EqualTo("triggerGroup"));
-        Assert.IsNotNull(trigger.JobKey);
+        Assert.That(trigger.JobKey, Is.Not.Null);
         Assert.That(trigger.JobKey.Name, Is.EqualTo("jobName"));
         Assert.That(trigger.JobKey.Group, Is.EqualTo("jobGroup"));
         Assert.That(trigger.StartTimeUtc, Is.EqualTo(dateOf(8, 0, 0, 1, 1, 2012)));
@@ -804,10 +804,10 @@ public class DailyTimeIntervalTriggerImplTest
             new TimeOfDay(8, 0, 0), new TimeOfDay(17, 0, 0),
             IntervalUnit.Hour, 1);
 
-        Assert.IsNotNull(trigger.Key);
+        Assert.That(trigger.Key, Is.Not.Null);
         Assert.That(trigger.Key.Name, Is.EqualTo("triggerName"));
         Assert.That(trigger.Key.Group, Is.EqualTo("triggerGroup"));
-        Assert.IsNull(trigger.JobKey);
+        Assert.That(trigger.JobKey, Is.Null);
         Assert.That(trigger.StartTimeUtc, Is.EqualTo(dateOf(8, 0, 0, 1, 1, 2012)));
         Assert.That(trigger.EndTimeUtc, Is.EqualTo(null));
         Assert.That(trigger.StartTimeOfDay, Is.EqualTo(new TimeOfDay(8, 0, 0)));

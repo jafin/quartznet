@@ -41,7 +41,7 @@ public class JobDetailTest
         Assert.That(jd2, Is.EqualTo(jd1));
         Assert.That(jd3, Is.Not.EqualTo(jd1));
         Assert.That(jd3, Is.Not.EqualTo(jd2));
-        Assert.IsNotNull(jd1);
+        Assert.That(jd1, Is.Not.Null);
     }
 
     [Test]

@@ -188,10 +188,10 @@ public class RAMJobStoreTest
         Assert.That(await fJobStore.GetTriggerState(trigger.Key), Is.EqualTo(TriggerState.Normal));
 
         trigger = (await fJobStore.AcquireNextTriggers(trigger.GetNextFireTimeUtc().Value.AddSeconds(10), 1, TimeSpan.FromMilliseconds(1))).First();
-        Assert.IsNotNull(trigger);
+        Assert.That(trigger, Is.Not.Null);
         await fJobStore.ReleaseAcquiredTrigger(trigger);
         trigger = (await fJobStore.AcquireNextTriggers(trigger.GetNextFireTimeUtc().Value.AddSeconds(10), 1, TimeSpan.FromMilliseconds(1))).First();
-        Assert.IsNotNull(trigger);
+        Assert.That(trigger, Is.Not.Null);
         Assert.That((await fJobStore.AcquireNextTriggers(trigger.GetNextFireTimeUtc().Value.AddSeconds(10), 1, TimeSpan.FromMilliseconds(1))).Count, Is.EqualTo(0));
     }
 
@@ -243,7 +243,7 @@ public class RAMJobStoreTest
         {
             exceptionRaised = true;
         }
-        Assert.IsTrue(exceptionRaised, "an attempt to store duplicate trigger succeeded");
+        Assert.That(exceptionRaised, Is.True, "an attempt to store duplicate trigger succeeded");
     }
 
     [Test]
@@ -279,7 +279,7 @@ public class RAMJobStoreTest
     {
         RAMJobStore store = new RAMJobStore();
         IJobDetail job = await store.RetrieveJob(new JobKey("not", "existing"));
-        Assert.IsNull(job);
+        Assert.That(job, Is.Null);
     }
 
     [Test]
@@ -287,7 +287,7 @@ public class RAMJobStoreTest
     {
         RAMJobStore store = new RAMJobStore();
         IOperableTrigger trigger = await store.RetrieveTrigger(new TriggerKey("not", "existing"));
-        Assert.IsNull(trigger);
+        Assert.That(trigger, Is.Null);
     }
 
     [Test]
@@ -471,10 +471,10 @@ public class RAMJobStoreTest
         await store.StoreJob(job, false);
 
         var deleteSuccess = await store.RemoveJob(new JobKey("job0"));
-        Assert.IsTrue(deleteSuccess, "Expected RemoveJob to return True when deleting an existing job");
+        Assert.That(deleteSuccess, Is.True, "Expected RemoveJob to return True when deleting an existing job");
 
         deleteSuccess = await store.RemoveJob(new JobKey("job0"));
-        Assert.IsFalse(deleteSuccess, "Expected RemoveJob to return False when deleting an non-existing job");
+        Assert.That(deleteSuccess, Is.False, "Expected RemoveJob to return False when deleting an non-existing job");
     }
 
     public class SampleSignaler : ISchedulerSignaler
