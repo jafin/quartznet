@@ -11,20 +11,20 @@ public class QuartzHostedServiceTests
 {
     private sealed class MockApplicationLifetime : Lifetime
     {
-        public CancellationTokenSource StartedSource { get; } = new CancellationTokenSource();
-        public CancellationTokenSource StoppingSource { get; } = new CancellationTokenSource();
-        public CancellationToken ApplicationStarted => this.StartedSource.Token;
-        public CancellationToken ApplicationStopping => this.StoppingSource.Token;
+        public CancellationTokenSource StartedSource { get; } = new();
+        public CancellationTokenSource StoppingSource { get; } = new();
+        public CancellationToken ApplicationStarted => StartedSource.Token;
+        public CancellationToken ApplicationStopping => StoppingSource.Token;
         public CancellationToken ApplicationStopped => throw new NotImplementedException();
 
         public void SetStarted()
         {
-            this.StartedSource.Cancel();
+            StartedSource.Cancel();
         }
 
         public void StopApplication()
         {
-            this.StoppingSource.Cancel();
+            StoppingSource.Cancel();
         }
     }
 

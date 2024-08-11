@@ -80,12 +80,14 @@ public class InterruptableJobTest
     {
         // create a simple scheduler
 
-        NameValueCollection config = new NameValueCollection();
-        config["quartz.scheduler.instanceName"] = "InterruptableJobTest_Scheduler";
-        config["quartz.scheduler.instanceId"] = "AUTO";
-        config["quartz.threadPool.threadCount"] = "2";
-        config["quartz.threadPool.type"] = "Quartz.Simpl.DefaultThreadPool";
-        config["quartz.serializer.type"] = TestConstants.DefaultSerializerType;
+        NameValueCollection config = new NameValueCollection
+        {
+            ["quartz.scheduler.instanceName"] = "InterruptableJobTest_Scheduler",
+            ["quartz.scheduler.instanceId"] = "AUTO",
+            ["quartz.threadPool.threadCount"] = "2",
+            ["quartz.threadPool.type"] = "Quartz.Simpl.DefaultThreadPool",
+            ["quartz.serializer.type"] = TestConstants.DefaultSerializerType
+        };
         IScheduler sched = await new StdSchedulerFactory(config).GetScheduler();
         await sched.Start();
 

@@ -328,9 +328,11 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
     {
         TimeZoneInfo timeZone = TimeZoneUtil.FindTimeZoneById("Eastern Standard Time");
 
-        CalendarIntervalTriggerImpl trigger = new CalendarIntervalTriggerImpl("trigger", IntervalUnit.Day, 1);
-        trigger.TimeZone = timeZone;
-        trigger.StartTimeUtc = new DateTimeOffset(2012, 11, 2, 12, 0, 0, TimeSpan.FromHours(-4));
+        CalendarIntervalTriggerImpl trigger = new CalendarIntervalTriggerImpl("trigger", IntervalUnit.Day, 1)
+        {
+            TimeZone = timeZone,
+            StartTimeUtc = new DateTimeOffset(2012, 11, 2, 12, 0, 0, TimeSpan.FromHours(-4))
+        };
 
         var fireTimes = TriggerUtils.ComputeFireTimes(trigger, null, 6);
 
@@ -359,12 +361,14 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
         //-------------------------------------------------
         // DAILY
         //-------------------------------------------------
-        CalendarIntervalTriggerImpl trigger = new CalendarIntervalTriggerImpl();
-        trigger.TimeZone = timeZone;
-        trigger.RepeatInterval = 1;
-        trigger.RepeatIntervalUnit = IntervalUnit.Day;
-        trigger.PreserveHourOfDayAcrossDaylightSavings = true;
-        trigger.SkipDayIfHourDoesNotExist = true;
+        CalendarIntervalTriggerImpl trigger = new CalendarIntervalTriggerImpl
+        {
+            TimeZone = timeZone,
+            RepeatInterval = 1,
+            RepeatIntervalUnit = IntervalUnit.Day,
+            PreserveHourOfDayAcrossDaylightSavings = true,
+            SkipDayIfHourDoesNotExist = true
+        };
 
         DateTimeOffset startDate = new DateTimeOffset(2012, 3, 10, 2, 0, 0, 0, TimeSpan.FromHours(-5));
         trigger.StartTimeUtc = startDate;
@@ -427,12 +431,14 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
         // YEARLY
         //-------------------------------------------------
 
-        trigger = new CalendarIntervalTriggerImpl();
-        trigger.TimeZone = timeZone;
-        trigger.RepeatInterval = 1;
-        trigger.RepeatIntervalUnit = IntervalUnit.Year;
-        trigger.PreserveHourOfDayAcrossDaylightSavings = true;
-        trigger.SkipDayIfHourDoesNotExist = true;
+        trigger = new CalendarIntervalTriggerImpl
+        {
+            TimeZone = timeZone,
+            RepeatInterval = 1,
+            RepeatIntervalUnit = IntervalUnit.Year,
+            PreserveHourOfDayAcrossDaylightSavings = true,
+            SkipDayIfHourDoesNotExist = true
+        };
 
         startDate = new DateTimeOffset(2011, 3, 11, 2, 0, 0, 0, TimeSpan.FromHours(-5));
         trigger.StartTimeUtc = startDate;
@@ -462,12 +468,14 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
         // DAILY
         //-------------------------------------------------
 
-        CalendarIntervalTriggerImpl trigger = new CalendarIntervalTriggerImpl();
-        trigger.TimeZone = timeZone;
-        trigger.RepeatInterval = 1;
-        trigger.RepeatIntervalUnit = IntervalUnit.Day;
-        trigger.PreserveHourOfDayAcrossDaylightSavings = true;
-        trigger.SkipDayIfHourDoesNotExist = false;
+        CalendarIntervalTriggerImpl trigger = new CalendarIntervalTriggerImpl
+        {
+            TimeZone = timeZone,
+            RepeatInterval = 1,
+            RepeatIntervalUnit = IntervalUnit.Day,
+            PreserveHourOfDayAcrossDaylightSavings = true,
+            SkipDayIfHourDoesNotExist = false
+        };
 
         DateTimeOffset startDate = new DateTimeOffset(2012, 3, 10, 2, 0, 0, 0, TimeSpan.FromHours(-5));
         trigger.StartTimeUtc = startDate;
@@ -476,18 +484,23 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
         var targetTime = fires[1]; //get second fire
 
-        Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
-        Assert.That(targetTime, Is.EqualTo(expectedTarget));
+        Assert.Multiple(() =>
+        {
+            Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
+            Assert.That(targetTime, Is.EqualTo(expectedTarget));
+        });
 
         //-------------------------------------------------
         // WEEKLY
         //-------------------------------------------------
-        trigger = new CalendarIntervalTriggerImpl();
-        trigger.TimeZone = timeZone;
-        trigger.RepeatInterval = 1;
-        trigger.RepeatIntervalUnit = IntervalUnit.Week;
-        trigger.PreserveHourOfDayAcrossDaylightSavings = true;
-        trigger.SkipDayIfHourDoesNotExist = false;
+        trigger = new CalendarIntervalTriggerImpl
+        {
+            TimeZone = timeZone,
+            RepeatInterval = 1,
+            RepeatIntervalUnit = IntervalUnit.Week,
+            PreserveHourOfDayAcrossDaylightSavings = true,
+            SkipDayIfHourDoesNotExist = false
+        };
 
         startDate = new DateTimeOffset(2012, 3, 4, 2, 0, 0, 0, TimeSpan.FromHours(-5));
         trigger.StartTimeUtc = startDate;
@@ -496,18 +509,23 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
         targetTime = fires[1]; //get second fire
 
-        Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
-        Assert.That(targetTime, Is.EqualTo(expectedTarget));
+        Assert.Multiple(() =>
+        {
+            Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
+            Assert.That(targetTime, Is.EqualTo(expectedTarget));
+        });
 
         //-------------------------------------------------
         // MONTHLY
         //-------------------------------------------------
-        trigger = new CalendarIntervalTriggerImpl();
-        trigger.TimeZone = timeZone;
-        trigger.RepeatInterval = 1;
-        trigger.RepeatIntervalUnit = IntervalUnit.Month;
-        trigger.PreserveHourOfDayAcrossDaylightSavings = true;
-        trigger.SkipDayIfHourDoesNotExist = false;
+        trigger = new CalendarIntervalTriggerImpl
+        {
+            TimeZone = timeZone,
+            RepeatInterval = 1,
+            RepeatIntervalUnit = IntervalUnit.Month,
+            PreserveHourOfDayAcrossDaylightSavings = true,
+            SkipDayIfHourDoesNotExist = false
+        };
 
         startDate = new DateTimeOffset(2012, 2, 11, 2, 0, 0, 0, TimeSpan.FromHours(-5));
         trigger.StartTimeUtc = startDate;
@@ -516,19 +534,24 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
         targetTime = fires[1]; //get second fire
 
-        Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
-        Assert.That(targetTime, Is.EqualTo(expectedTarget));
+        Assert.Multiple(() =>
+        {
+            Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
+            Assert.That(targetTime, Is.EqualTo(expectedTarget));
+        });
 
         //-------------------------------------------------
         // YEARLY
         //-------------------------------------------------
 
-        trigger = new CalendarIntervalTriggerImpl();
-        trigger.TimeZone = timeZone;
-        trigger.RepeatInterval = 1;
-        trigger.RepeatIntervalUnit = IntervalUnit.Year;
-        trigger.PreserveHourOfDayAcrossDaylightSavings = true;
-        trigger.SkipDayIfHourDoesNotExist = false;
+        trigger = new CalendarIntervalTriggerImpl
+        {
+            TimeZone = timeZone,
+            RepeatInterval = 1,
+            RepeatIntervalUnit = IntervalUnit.Year,
+            PreserveHourOfDayAcrossDaylightSavings = true,
+            SkipDayIfHourDoesNotExist = false
+        };
 
         startDate = new DateTimeOffset(2011, 3, 11, 2, 0, 0, 0, TimeSpan.FromHours(-5));
         trigger.StartTimeUtc = startDate;
@@ -537,8 +560,11 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
         targetTime = fires[1]; //get second fire
 
-        Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
-        Assert.That(targetTime, Is.EqualTo(expectedTarget));
+        Assert.Multiple(() =>
+        {
+            Assert.That(timeZone.IsInvalidTime(targetTime.DateTime), Is.False, "did not seem to skip the day with an hour that doesn't exist.");
+            Assert.That(targetTime, Is.EqualTo(expectedTarget));
+        });
     }
 
     [Test]
@@ -547,13 +573,15 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
         TimeZoneInfo est = TimeZoneUtil.FindTimeZoneById("Eastern Standard Time");
         DateTimeOffset startDate = new DateTimeOffset(2012, 3, 11, 12, 0, 0, TimeSpan.FromHours(-5));
 
-        CalendarIntervalTriggerImpl t = new CalendarIntervalTriggerImpl();
-        t.RepeatInterval = 1;
-        t.RepeatIntervalUnit = IntervalUnit.Day;
-        t.PreserveHourOfDayAcrossDaylightSavings = true;
-        t.SkipDayIfHourDoesNotExist = false;
-        t.StartTimeUtc = startDate;
-        t.TimeZone = est;
+        CalendarIntervalTriggerImpl t = new CalendarIntervalTriggerImpl
+        {
+            RepeatInterval = 1,
+            RepeatIntervalUnit = IntervalUnit.Day,
+            PreserveHourOfDayAcrossDaylightSavings = true,
+            SkipDayIfHourDoesNotExist = false,
+            StartTimeUtc = startDate,
+            TimeZone = est
+        };
 
         var fireTimes = TriggerUtils.ComputeFireTimes(t, null, 10);
 
@@ -569,13 +597,15 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
         TimeZoneInfo est = TimeZoneUtil.FindTimeZoneById("Eastern Standard Time");
         DateTimeOffset startDate = new DateTimeOffset(1990, 10, 27, 0, 0, 0, TimeSpan.FromHours(-4));
 
-        CalendarIntervalTriggerImpl t = new CalendarIntervalTriggerImpl();
-        t.RepeatInterval = 1;
-        t.RepeatIntervalUnit = IntervalUnit.Day;
-        t.PreserveHourOfDayAcrossDaylightSavings = true;
-        t.SkipDayIfHourDoesNotExist = false;
-        t.StartTimeUtc = startDate;
-        t.TimeZone = est;
+        CalendarIntervalTriggerImpl t = new CalendarIntervalTriggerImpl
+        {
+            RepeatInterval = 1,
+            RepeatIntervalUnit = IntervalUnit.Day,
+            PreserveHourOfDayAcrossDaylightSavings = true,
+            SkipDayIfHourDoesNotExist = false,
+            StartTimeUtc = startDate,
+            TimeZone = est
+        };
 
         var fireTimes = TriggerUtils.ComputeFireTimes(t, null, 10);
 
@@ -586,13 +616,15 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
         //try to trigger a shift in month
         startDate = new DateTimeOffset(2012, 6, 1, 0, 0, 0, TimeSpan.FromHours(-4));
 
-        t = new CalendarIntervalTriggerImpl();
-        t.RepeatInterval = 1;
-        t.RepeatIntervalUnit = IntervalUnit.Month;
-        t.PreserveHourOfDayAcrossDaylightSavings = true;
-        t.SkipDayIfHourDoesNotExist = false;
-        t.StartTimeUtc = startDate;
-        t.TimeZone = est;
+        t = new CalendarIntervalTriggerImpl
+        {
+            RepeatInterval = 1,
+            RepeatIntervalUnit = IntervalUnit.Month,
+            PreserveHourOfDayAcrossDaylightSavings = true,
+            SkipDayIfHourDoesNotExist = false,
+            StartTimeUtc = startDate,
+            TimeZone = est
+        };
 
         fireTimes = TriggerUtils.ComputeFireTimes(t, null, 10);
 
@@ -642,8 +674,11 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
         DateTimeOffset? fireTime = trigger.GetFireTimeAfter(fireTimeAfter);
 
-        Assert.That(fireTimeAfter, Is.Not.EqualTo(fireTime));
-        Assert.That(fireTime > fireTimeAfter, Is.True);
+        Assert.Multiple(() =>
+        {
+            Assert.That(fireTimeAfter, Is.Not.EqualTo(fireTime));
+            Assert.That(fireTime > fireTimeAfter, Is.True);
+        });
     }
 
     [Test]
@@ -700,12 +735,15 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
         var scheduleBuilder = trigger.GetScheduleBuilder();
 
         var cloned = (CalendarIntervalTriggerImpl) scheduleBuilder.Build();
-        Assert.That(cloned.PreserveHourOfDayAcrossDaylightSavings, Is.EqualTo(trigger.PreserveHourOfDayAcrossDaylightSavings));
-        Assert.That(cloned.SkipDayIfHourDoesNotExist, Is.EqualTo(trigger.SkipDayIfHourDoesNotExist));
-        Assert.That(cloned.RepeatInterval, Is.EqualTo(trigger.RepeatInterval));
-        Assert.That(cloned.RepeatIntervalUnit, Is.EqualTo(trigger.RepeatIntervalUnit));
-        Assert.That(cloned.MisfireInstruction, Is.EqualTo(trigger.MisfireInstruction));
-        Assert.That(cloned.TimeZone, Is.EqualTo(trigger.TimeZone));
+        Assert.Multiple(() =>
+        {
+            Assert.That(cloned.PreserveHourOfDayAcrossDaylightSavings, Is.EqualTo(trigger.PreserveHourOfDayAcrossDaylightSavings));
+            Assert.That(cloned.SkipDayIfHourDoesNotExist, Is.EqualTo(trigger.SkipDayIfHourDoesNotExist));
+            Assert.That(cloned.RepeatInterval, Is.EqualTo(trigger.RepeatInterval));
+            Assert.That(cloned.RepeatIntervalUnit, Is.EqualTo(trigger.RepeatIntervalUnit));
+            Assert.That(cloned.MisfireInstruction, Is.EqualTo(trigger.MisfireInstruction));
+            Assert.That(cloned.TimeZone, Is.EqualTo(trigger.TimeZone));
+        });
     }
 
     [Test(Description = "https://github.com/quartznet/quartznet/issues/505")]
@@ -760,15 +798,18 @@ public class CalendarIntervalTriggerTest : SerializationTestSupport<CalendarInte
 
     protected override void VerifyMatch(CalendarIntervalTriggerImpl original, CalendarIntervalTriggerImpl deserialized)
     {
-        Assert.That(deserialized, Is.Not.Null);
-        Assert.That(deserialized.Key, Is.EqualTo(original.Key));
-        Assert.That(deserialized.JobKey, Is.EqualTo(original.JobKey));
-        Assert.That(deserialized.StartTimeUtc, Is.EqualTo(original.StartTimeUtc).Within(TimeSpan.FromSeconds(1)));
-        Assert.That(deserialized.EndTimeUtc, Is.EqualTo(original.EndTimeUtc));
-        Assert.That(deserialized.CalendarName, Is.EqualTo(original.CalendarName));
-        Assert.That(deserialized.Description, Is.EqualTo(original.Description));
-        Assert.That(deserialized.JobDataMap, Is.EqualTo(original.JobDataMap));
-        Assert.That(deserialized.RepeatInterval, Is.EqualTo(original.RepeatInterval));
-        Assert.That(deserialized.RepeatIntervalUnit, Is.EqualTo(original.RepeatIntervalUnit));
+        Assert.Multiple(() =>
+        {
+            Assert.That(deserialized, Is.Not.Null);
+            Assert.That(deserialized.Key, Is.EqualTo(original.Key));
+            Assert.That(deserialized.JobKey, Is.EqualTo(original.JobKey));
+            Assert.That(deserialized.StartTimeUtc, Is.EqualTo(original.StartTimeUtc).Within(TimeSpan.FromSeconds(1)));
+            Assert.That(deserialized.EndTimeUtc, Is.EqualTo(original.EndTimeUtc));
+            Assert.That(deserialized.CalendarName, Is.EqualTo(original.CalendarName));
+            Assert.That(deserialized.Description, Is.EqualTo(original.Description));
+            Assert.That(deserialized.JobDataMap, Is.EqualTo(original.JobDataMap));
+            Assert.That(deserialized.RepeatInterval, Is.EqualTo(original.RepeatInterval));
+            Assert.That(deserialized.RepeatIntervalUnit, Is.EqualTo(original.RepeatIntervalUnit));
+        });
     }
 }

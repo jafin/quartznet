@@ -177,9 +177,11 @@ public class SerializationTest
     [Test]
     public void TestJobDataMapSerialization()
     {
-        JobDataMap map = new JobDataMap();
-        map["foo"] = "bar";
-        map["num"] = 123;
+        JobDataMap map = new JobDataMap
+        {
+            ["foo"] = "bar",
+            ["num"] = 123
+        };
         JobDataMap clone = map.DeepClone();
         Assert.That(clone["foo"], Is.EqualTo("bar"));
         Assert.That(clone["num"], Is.EqualTo(123));

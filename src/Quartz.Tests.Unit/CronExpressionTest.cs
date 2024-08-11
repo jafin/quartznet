@@ -124,7 +124,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         expr.ToString().Should().Be(expected);
     }
 
-    [TestCase("0 15 10 L-1,L-2 * ? 2010", new int[] { 31 - 1, 31 - 2 })] //Multiple L Not supported
+    [TestCase("0 15 10 L-1,L-2 * ? 2010", new[] { 31 - 1, 31 - 2 })] //Multiple L Not supported
     public void CannotUseMultipleLastDayOfMonthInArray(string cronExpression, int[] expectedDays, string scenario = "")
     {
         // Limitation of implementation, could be supported but for now we throw an error.
@@ -133,14 +133,14 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
             .WithMessage("Support for specifying 'L' with other days of the month is limited to one instance of L");
     }
 
-    [TestCase("0 15 10 6,15,LW * ? 2010", new int[] { 6, 15, 29 })] //31 oct 2010 is a Sunday, week day would be 29
-    [TestCase("0 15 10 6,15,L * ? 2010", new int[] { 6, 15, 31 })]
-    [TestCase("0 15 10 15,L * ? 2010", new int[] { 15, 31 })]
-    [TestCase("0 15 10 15,31 * ? 2010", new int[] { 15, 31 })]
-    [TestCase("0 15 10 15,L-2 * ? 2010", new int[] { 15, 31 - 2 })]
-    [TestCase("0 15 10 31,L-2 * ? 2010", new int[] { 31 }, "duplicate day specified + last are equal")]
-    [TestCase("0 15 10 1,3,6,15,L * ? 2010", new int[] { 1, 3, 6, 15, 31 })]
-    [TestCase("0 15 10 15,LW-2 * ? 2010", new int[] { 15, 29 - 2 })] //29 is last week day
+    [TestCase("0 15 10 6,15,LW * ? 2010", new[] { 6, 15, 29 })] //31 oct 2010 is a Sunday, week day would be 29
+    [TestCase("0 15 10 6,15,L * ? 2010", new[] { 6, 15, 31 })]
+    [TestCase("0 15 10 15,L * ? 2010", new[] { 15, 31 })]
+    [TestCase("0 15 10 15,31 * ? 2010", new[] { 15, 31 })]
+    [TestCase("0 15 10 15,L-2 * ? 2010", new[] { 15, 31 - 2 })]
+    [TestCase("0 15 10 31,L-2 * ? 2010", new[] { 31 }, "duplicate day specified + last are equal")]
+    [TestCase("0 15 10 1,3,6,15,L * ? 2010", new[] { 1, 3, 6, 15, 31 })]
+    [TestCase("0 15 10 15,LW-2 * ? 2010", new[] { 15, 29 - 2 })] //29 is last week day
     public void CanUseLastDayOfMonthInArray(string cronExpression, int[] expectedDays, string scenario = "")
     {
         var expr = new CronExpression(cronExpression); //10:15am <variable days> October 2010
@@ -164,11 +164,11 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         return numbers.ToArray();
     }
 
-    [TestCase("0 15 10 5/5 * MON 2010", new int[] { 4, 11, 18, 25, 5, 10, 15, 20, 25, 30 }, "10:15am every 5th day of the month from 5 to 31, and on Mondays in October 2010")]
-    [TestCase("0 15 10 3 * MON,THU,FRI 2010", new int[] { 1, 3, 4, 11, 18, 25, 7, 14, 21, 28, 8, 15, 22, 29 }, "10:15am 3rd of month and every mon,thu,fri October 2010")]
-    [TestCase("0 15 10 1,2,3,4,5,6 * MON,THU,FRI 2010", new int[] { 1, 2, 3, 4, 5, 6, 11, 18, 25, 7, 14, 21, 28, 8, 15, 22, 29 }, "10:15am 1-6th of mon and every Mon,Thu,Fri October 2010")]
-    [TestCase("0 15 10 * * MON,THU,FRI 2010", new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 }, "10:15am EveryDay of Month October 2010, Wildcard specified")]
-    [TestCase("0 15 10 1 * * 2010", new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 }, "10:15am Every Day of Month October 2010, Wildcard specified")]
+    [TestCase("0 15 10 5/5 * MON 2010", new[] { 4, 11, 18, 25, 5, 10, 15, 20, 25, 30 }, "10:15am every 5th day of the month from 5 to 31, and on Mondays in October 2010")]
+    [TestCase("0 15 10 3 * MON,THU,FRI 2010", new[] { 1, 3, 4, 11, 18, 25, 7, 14, 21, 28, 8, 15, 22, 29 }, "10:15am 3rd of month and every mon,thu,fri October 2010")]
+    [TestCase("0 15 10 1,2,3,4,5,6 * MON,THU,FRI 2010", new[] { 1, 2, 3, 4, 5, 6, 11, 18, 25, 7, 14, 21, 28, 8, 15, 22, 29 }, "10:15am 1-6th of mon and every Mon,Thu,Fri October 2010")]
+    [TestCase("0 15 10 * * MON,THU,FRI 2010", new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 }, "10:15am EveryDay of Month October 2010, Wildcard specified")]
+    [TestCase("0 15 10 1 * * 2010", new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 }, "10:15am Every Day of Month October 2010, Wildcard specified")]
     public void CanUse_DayOfMonth_And_DayOfWeek_Together(string cronExpression, int[] expectedDays, string scenario = "")
     {
         var expr = new CronExpression(cronExpression);

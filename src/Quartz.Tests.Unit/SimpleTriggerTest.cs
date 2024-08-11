@@ -62,11 +62,13 @@ public class SimpleTriggerTest : SerializationTestSupport<SimpleTriggerImpl>
 
         SimpleTriggerImpl t = new SimpleTriggerImpl("SimpleTrigger", "SimpleGroup",
             "JobName", "JobGroup", StartTime,
-            EndTime, 5, TimeSpan.FromSeconds(1));
-        t.CalendarName = "MyCalendar";
-        t.Description = "SimpleTriggerDesc";
-        t.JobDataMap = jobDataMap;
-        t.MisfireInstruction = MisfireInstruction.SimpleTrigger.RescheduleNextWithRemainingCount;
+            EndTime, 5, TimeSpan.FromSeconds(1))
+        {
+            CalendarName = "MyCalendar",
+            Description = "SimpleTriggerDesc",
+            JobDataMap = jobDataMap,
+            MisfireInstruction = MisfireInstruction.SimpleTrigger.RescheduleNextWithRemainingCount
+        };
 
         return t;
     }
@@ -93,11 +95,13 @@ public class SimpleTriggerTest : SerializationTestSupport<SimpleTriggerImpl>
 
         DateTimeOffset endTime = new DateTimeOffset(2005, 7, 5, 10, 0, 0, TimeSpan.Zero);
 
-        SimpleTriggerImpl simpleTrigger = new SimpleTriggerImpl();
-        simpleTrigger.MisfireInstruction = MisfireInstruction.SimpleTrigger.RescheduleNowWithExistingRepeatCount;
-        simpleTrigger.RepeatCount = 5;
-        simpleTrigger.StartTimeUtc = startTime;
-        simpleTrigger.EndTimeUtc = endTime;
+        SimpleTriggerImpl simpleTrigger = new SimpleTriggerImpl
+        {
+            MisfireInstruction = MisfireInstruction.SimpleTrigger.RescheduleNowWithExistingRepeatCount,
+            RepeatCount = 5,
+            StartTimeUtc = startTime,
+            EndTimeUtc = endTime
+        };
 
         simpleTrigger.UpdateAfterMisfire(null);
         Assert.That(simpleTrigger.StartTimeUtc, Is.EqualTo(startTime));
@@ -116,8 +120,7 @@ public class SimpleTriggerTest : SerializationTestSupport<SimpleTriggerImpl>
         simpleTrigger.RepeatInterval = TimeSpan.FromMilliseconds(10);
         simpleTrigger.RepeatCount = 4;
 
-        DateTimeOffset? fireTimeAfter;
-        fireTimeAfter = simpleTrigger.GetFireTimeAfter(startTime.AddMilliseconds(34));
+        var fireTimeAfter = simpleTrigger.GetFireTimeAfter(startTime.AddMilliseconds(34));
         Assert.That(fireTimeAfter.Value, Is.EqualTo(startTime.AddMilliseconds(40)));
     }
 
@@ -153,9 +156,11 @@ public class SimpleTriggerTest : SerializationTestSupport<SimpleTriggerImpl>
     public void TestGetFireTimeAfter_WithCalendar()
     {
         DailyCalendar dailyCalendar = new DailyCalendar("1:20", "14:50");
-        SimpleTriggerImpl simpleTrigger = new SimpleTriggerImpl();
-        simpleTrigger.RepeatInterval = TimeSpan.FromMilliseconds(10);
-        simpleTrigger.RepeatCount = 1;
+        SimpleTriggerImpl simpleTrigger = new SimpleTriggerImpl
+        {
+            RepeatInterval = TimeSpan.FromMilliseconds(10),
+            RepeatCount = 1
+        };
         DateTimeOffset neverFireTime = DateBuilder.EvenMinuteDateBefore(dailyCalendar.GetTimeRangeStartingTimeUtc(DateTime.Now));
         simpleTrigger.StartTimeUtc = neverFireTime;
 

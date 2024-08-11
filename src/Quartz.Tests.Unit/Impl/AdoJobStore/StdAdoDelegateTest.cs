@@ -85,9 +85,7 @@ public class StdAdoDelegateTest
         }
     }
 
-    private class NonSerializableTestClass
-    {
-    }
+    private class NonSerializableTestClass;
 
     [Test]
     public async Task TestSelectBlobTriggerWithNoBlobContent()
@@ -496,6 +494,4 @@ public class StubParameterCollection : DbParameterCollection
     }
 }
 
-internal class TestTriggerPersistenceDelegate : SimpleTriggerPersistenceDelegate
-{
-}
+internal class TestTriggerPersistenceDelegate : SimpleTriggerPersistenceDelegate;

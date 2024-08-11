@@ -42,8 +42,10 @@ public class DailyTimeIntervalScheduleBuilderTest
     [Test]
     public async Task TestScheduleActualTrigger()
     {
-        NameValueCollection properties = new NameValueCollection();
-        properties["quartz.serializer.type"] = TestConstants.DefaultSerializerType;
+        NameValueCollection properties = new NameValueCollection
+        {
+            ["quartz.serializer.type"] = TestConstants.DefaultSerializerType
+        };
 
         var factory = new StdSchedulerFactory(properties);
         IScheduler scheduler = await factory.GetScheduler();
@@ -70,8 +72,10 @@ public class DailyTimeIntervalScheduleBuilderTest
             return;
         }
 
-        NameValueCollection properties = new NameValueCollection();
-        properties["quartz.serializer.type"] = TestConstants.DefaultSerializerType;
+        NameValueCollection properties = new NameValueCollection
+        {
+            ["quartz.serializer.type"] = TestConstants.DefaultSerializerType
+        };
         ISchedulerFactory sf = new StdSchedulerFactory(properties);
         IScheduler scheduler = await sf.GetScheduler();
 

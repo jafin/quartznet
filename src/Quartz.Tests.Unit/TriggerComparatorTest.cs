@@ -17,14 +17,16 @@ public class TriggerComparatorTest
         ITrigger t5 = TriggerBuilder.Create().WithIdentity("a", "b").Build();
         ITrigger t6 = TriggerBuilder.Create().WithIdentity("a", "c").Build();
 
-        List<ITrigger> ts = new List<ITrigger>();
         // add triggers to list in somewhat randomized order
-        ts.Add(t5);
-        ts.Add(t6);
-        ts.Add(t4);
-        ts.Add(t3);
-        ts.Add(t1);
-        ts.Add(t2);
+        List<ITrigger> ts =
+        [
+            t5,
+            t6,
+            t4,
+            t3,
+            t1,
+            t2
+        ];
 
         // sort the list
         ts.Sort(TriggerComparer.Instance);
@@ -61,17 +63,20 @@ public class TriggerComparatorTest
         ITrigger t9 = TriggerBuilder.Create().WithIdentity("j").StartAt(DateBuilder.FutureDate(7, IntervalUnit.Minute)).Build();
         ((IOperableTrigger) t9).ComputeFirstFireTimeUtc(null);
 
-        List<ITrigger> ts = new List<ITrigger>();
         // add triggers to list in somewhat randomized order
-        ts.Add(t5);
-        ts.Add(t9);
-        ts.Add(t6);
-        ts.Add(t8);
-        ts.Add(t4);
-        ts.Add(t3);
-        ts.Add(t1);
-        ts.Add(t7);
-        ts.Add(t2);
+        List<ITrigger> ts =
+        [
+            t5,
+            t9,
+            t6,
+            t8,
+            t4,
+            t3,
+            t1,
+            t7,
+            t2
+            // sort the list
+        ];
 
         // sort the list
         ts.Sort(TriggerComparer.Instance);

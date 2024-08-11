@@ -7,7 +7,7 @@ public class TriggerKeyTest
     [Test]
     public void TriggerKeyShouldBeSerializable()
     {
-        TriggerKey original = new TriggerKey("name", "group");
+        TriggerKey original = new("name", "group");
 
         TriggerKey cloned = original.DeepClone();
 

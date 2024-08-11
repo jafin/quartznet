@@ -1929,7 +1929,7 @@ public class DirtyFlagMapTest
     public void ICollection_SyncRoot()
     {
         var dirtyFlagMap1 = new DirtyFlagMap<string, string>();
-        var collection1 = (ICollection) dirtyFlagMap1;
+        var collection1 = (ICollection)dirtyFlagMap1;
 
         var syncRoot1 = collection1.SyncRoot;
         Assert.That(syncRoot1, Is.Not.Null);
@@ -1937,7 +1937,7 @@ public class DirtyFlagMapTest
         Assert.That(syncRoot1.GetType(), Is.EqualTo(typeof(object)));
 
         var dirtyFlagMap2 = new DirtyFlagMap<string, string>();
-        var collection2 = (ICollection) dirtyFlagMap2;
+        var collection2 = (ICollection)dirtyFlagMap2;
 
         var syncRoot2 = collection2.SyncRoot;
         Assert.That(syncRoot2, Is.Not.Null);
@@ -1950,7 +1950,7 @@ public class DirtyFlagMapTest
     public void ICollectionKeyValuePairOfTKeyAndTValue_IsReadOnly()
     {
         var dirtyFlagMap = new DirtyFlagMap<string, string>();
-        var collection = (ICollection<KeyValuePair<string, string>>) dirtyFlagMap;
+        var collection = (ICollection<KeyValuePair<string, string>>)dirtyFlagMap;
         Assert.That(collection.IsReadOnly, Is.False);
     }
 
@@ -1958,7 +1958,7 @@ public class DirtyFlagMapTest
     public void IDictionary_IsReadOnly()
     {
         var dirtyFlagMap = new DirtyFlagMap<string, string>();
-        var dictionary = (IDictionary) dirtyFlagMap;
+        var dictionary = (IDictionary)dirtyFlagMap;
         Assert.That(dictionary.IsReadOnly, Is.False);
     }
 
@@ -1966,7 +1966,7 @@ public class DirtyFlagMapTest
     public void IDictionary_IsSynchronized()
     {
         var dirtyFlagMap = new DirtyFlagMap<string, string>();
-        var dictionary = (IDictionary) dirtyFlagMap;
+        var dictionary = (IDictionary)dirtyFlagMap;
         Assert.That(dictionary.IsSynchronized, Is.False);
     }
 
@@ -1974,7 +1974,7 @@ public class DirtyFlagMapTest
     public void IDictionary_IsFixedSize()
     {
         var dirtyFlagMap = new DirtyFlagMap<string, string>();
-        var dictionary = (IDictionary) dirtyFlagMap;
+        var dictionary = (IDictionary)dirtyFlagMap;
         Assert.That(dictionary.IsFixedSize, Is.False);
     }
 
@@ -2135,7 +2135,7 @@ public class DirtyFlagMapTest
 
             ms.Position = 0;
 
-            return (T) formatter.Deserialize(ms);
+            return (T)formatter.Deserialize(ms);
         }
     }
 
@@ -2145,7 +2145,7 @@ public class DirtyFlagMapTest
         using var fs = File.OpenRead(Path.Combine("Serialized", name + ".ser"));
         BinaryFormatter binaryFormatter = new BinaryFormatter();
         binaryFormatter.AssemblyFormat = FormatterAssemblyStyle.Simple;
-        return (T) binaryFormatter.Deserialize(fs);
+        return (T)binaryFormatter.Deserialize(fs);
 #pragma warning restore SYSLIB0050
     }
 }

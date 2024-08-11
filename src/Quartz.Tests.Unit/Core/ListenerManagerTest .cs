@@ -30,9 +30,7 @@ public class ListenerManagerTest
 
         public override string Name { get; }
     }
-    private class TestSchedulerListener : SchedulerListenerSupport
-    {
-    }
+    private class TestSchedulerListener : SchedulerListenerSupport;
 
     [SetUp]
     public void SetUp()

@@ -120,7 +120,7 @@ public class SchedulerListenerTest
             return default;
         }
 
-        public ValueTask JobInterrupted(JobKey jobKey, CancellationToken cancellationToken = new CancellationToken())
+        public ValueTask JobInterrupted(JobKey jobKey, CancellationToken cancellationToken = new())
         {
             return default;
         }

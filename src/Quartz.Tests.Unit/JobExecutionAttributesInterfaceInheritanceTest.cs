@@ -28,9 +28,7 @@ public class JobExecutionAttributesInterfaceInheritanceTest
     
     [PersistJobDataAfterExecution]
     [DisallowConcurrentExecution]
-    public interface ITestJob : IJob
-    {
-    }
+    public interface ITestJob : IJob;
 
     public class TestJob : ITestJob
     {
