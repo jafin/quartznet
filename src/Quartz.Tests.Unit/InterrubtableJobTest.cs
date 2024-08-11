@@ -109,7 +109,7 @@ public class InterruptableJobTest
 
         var executingJobs = await sched.GetCurrentlyExecutingJobs();
 
-        Assert.That(executingJobs.Count, Is.EqualTo(1), "Number of executing jobs should be 1 ");
+        Assert.That(executingJobs, Has.Count.EqualTo(1), "Number of executing jobs should be 1 ");
 
         IJobExecutionContext jec = executingJobs.First();
 
@@ -117,8 +117,11 @@ public class InterruptableJobTest
 
         ended.WaitOne(); // wait for the job to terminate
 
-        Assert.That(interruptResult, Is.True, "Expected successful result from interruption of job ");
-        Assert.That(TestInterruptableJob.interrupted, Is.True, "Expected interrupted flag to be set on job class ");
+        Assert.Multiple(() =>
+        {
+            Assert.That(interruptResult, Is.True, "Expected successful result from interruption of job ");
+            Assert.That(TestInterruptableJob.interrupted, Is.True, "Expected interrupted flag to be set on job class ");
+        });
 
         await sched.Clear();
         await sched.Shutdown();

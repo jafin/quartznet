@@ -111,8 +111,11 @@ public class JobExecutionAttributesInterfaceInheritanceTest
         barrier.WaitOne();
         await scheduler.Shutdown(true);
 
-        Assert.That(jobExecDates.Count, Is.EqualTo(2));
-        Assert.That((jobExecDates[1] - jobExecDates[0]).TotalMilliseconds, Is.GreaterThanOrEqualTo(jobBlockTime.TotalMilliseconds).Within(5d));
+        Assert.Multiple(() =>
+        {
+            Assert.That(jobExecDates.Count, Is.EqualTo(2));
+            Assert.That((jobExecDates[1] - jobExecDates[0]).TotalMilliseconds, Is.GreaterThanOrEqualTo(jobBlockTime.TotalMilliseconds).Within(5d));
+        });
     }
 
     /** QTZ-202 */
@@ -144,7 +147,10 @@ public class JobExecutionAttributesInterfaceInheritanceTest
         barrier.WaitOne();
         await scheduler.Shutdown(true);
 
-        Assert.That(jobExecDates.Count, Is.EqualTo(2));
-        Assert.That((jobExecDates[1] - jobExecDates[0]).TotalMilliseconds, Is.GreaterThanOrEqualTo(jobBlockTime.TotalMilliseconds).Within(5));
+        Assert.Multiple(() =>
+        {
+            Assert.That(jobExecDates.Count, Is.EqualTo(2));
+            Assert.That((jobExecDates[1] - jobExecDates[0]).TotalMilliseconds, Is.GreaterThanOrEqualTo(jobBlockTime.TotalMilliseconds).Within(5));
+        });
     }
 }

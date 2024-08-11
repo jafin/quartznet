@@ -42,13 +42,16 @@ public class TriggerBuilderTest
         ITrigger trigger = TriggerBuilder.Create()
             .Build();
 
-        Assert.That(trigger.Key.Name is not null, Is.True, "Expected non-null trigger name ");
-        Assert.That(trigger.Key.Group.Equals(JobKey.DefaultGroup), Is.True, "Unexpected trigger group: " + trigger.Key.Group);
-        Assert.That(trigger.JobKey is null, Is.True, "Unexpected job key: " + trigger.JobKey);
-        Assert.That(trigger.Description is null, Is.True, "Unexpected job description: " + trigger.Description);
-        Assert.That(trigger.Priority == TriggerConstants.DefaultPriority, Is.True, "Unexpected trigger priority: " + trigger.Priority);
-        Assert.That(trigger.StartTimeUtc.DateTime, Is.EqualTo(DateTimeOffset.UtcNow.DateTime).Within(TimeSpan.FromSeconds(1)), "Unexpected start-time: " + trigger.StartTimeUtc);
-        Assert.That(trigger.EndTimeUtc is null, Is.True, "Unexpected end-time: " + trigger.EndTimeUtc);
+        Assert.Multiple(() =>
+        {
+            Assert.That(trigger.Key.Name is not null, Is.True, "Expected non-null trigger name ");
+            Assert.That(trigger.Key.Group.Equals(JobKey.DefaultGroup), Is.True, "Unexpected trigger group: " + trigger.Key.Group);
+            Assert.That(trigger.JobKey is null, Is.True, "Unexpected job key: " + trigger.JobKey);
+            Assert.That(trigger.Description is null, Is.True, "Unexpected job description: " + trigger.Description);
+            Assert.That(trigger.Priority == TriggerConstants.DefaultPriority, Is.True, "Unexpected trigger priority: " + trigger.Priority);
+            Assert.That(trigger.StartTimeUtc.DateTime, Is.EqualTo(DateTimeOffset.UtcNow.DateTime).Within(TimeSpan.FromSeconds(1)), "Unexpected start-time: " + trigger.StartTimeUtc);
+            Assert.That(trigger.EndTimeUtc is null, Is.True, "Unexpected end-time: " + trigger.EndTimeUtc);
+        });
 
         DateTimeOffset stime = DateBuilder.EvenSecondDateAfterNow();
 
@@ -60,13 +63,16 @@ public class TriggerBuilderTest
             .StartAt(stime)
             .Build();
 
-        Assert.That(trigger.Key.Name.Equals("t1"), Is.True, "Unexpected trigger name " + trigger.Key.Name);
-        Assert.That(trigger.Key.Group.Equals(JobKey.DefaultGroup), Is.True, "Unexpected trigger group: " + trigger.Key.Group);
-        Assert.That(trigger.JobKey is null, Is.True, "Unexpected job key: " + trigger.JobKey);
-        Assert.That(trigger.Description.Equals("my description"), Is.True, "Unexpected job description: " + trigger.Description);
-        Assert.That(trigger.Priority == 2, Is.True, "Unexpected trigger priority: " + trigger);
-        Assert.That(trigger.StartTimeUtc.Equals(stime), Is.True, "Unexpected start-time: " + trigger.StartTimeUtc);
-        Assert.That(trigger.EndTimeUtc is not null, Is.True, "Unexpected end-time: " + trigger.EndTimeUtc);
+        Assert.Multiple(() =>
+        {
+            Assert.That(trigger.Key.Name.Equals("t1"), Is.True, "Unexpected trigger name " + trigger.Key.Name);
+            Assert.That(trigger.Key.Group.Equals(JobKey.DefaultGroup), Is.True, "Unexpected trigger group: " + trigger.Key.Group);
+            Assert.That(trigger.JobKey is null, Is.True, "Unexpected job key: " + trigger.JobKey);
+            Assert.That(trigger.Description.Equals("my description"), Is.True, "Unexpected job description: " + trigger.Description);
+            Assert.That(trigger.Priority == 2, Is.True, "Unexpected trigger priority: " + trigger);
+            Assert.That(trigger.StartTimeUtc.Equals(stime), Is.True, "Unexpected start-time: " + trigger.StartTimeUtc);
+            Assert.That(trigger.EndTimeUtc is not null, Is.True, "Unexpected end-time: " + trigger.EndTimeUtc);
+        });
     }
 
     [Test]

@@ -57,9 +57,12 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
 
     protected override void VerifyMatch(CronExpression original, CronExpression deserialized)
     {
-        Assert.That(deserialized, Is.Not.Null);
-        Assert.That(deserialized.CronExpressionString, Is.EqualTo(original.CronExpressionString));
-        Assert.That(deserialized.TimeZone, Is.EqualTo(original.TimeZone));
+        Assert.Multiple(() =>
+        {
+            Assert.That(deserialized, Is.Not.Null);
+            Assert.That(deserialized.CronExpressionString, Is.EqualTo(original.CronExpressionString));
+            Assert.That(deserialized.TimeZone, Is.EqualTo(original.TimeZone));
+        });
     }
 
     /// <summary>
@@ -86,8 +89,11 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
 
         // weekends
         cal = new DateTime(2007, 6, 9, 10, 15, 0).ToUniversalTime();
-        Assert.That(cronExpression.IsSatisfiedBy(cal), Is.False);
-        Assert.That(cronExpression.IsSatisfiedBy(cal.AddDays(1)), Is.False);
+        Assert.Multiple(() =>
+        {
+            Assert.That(cronExpression.IsSatisfiedBy(cal), Is.False);
+            Assert.That(cronExpression.IsSatisfiedBy(cal.AddDays(1)), Is.False);
+        });
     }
 
     [Test]
@@ -606,8 +612,8 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         catch (FormatException pe)
         {
             Assert.That(
-                pe.Message.StartsWith("Support for specifying 'L' with other days of the week is not implemented"),
-                Is.True,
+                pe.Message,
+                Does.StartWith("Support for specifying 'L' with other days of the week is not implemented"),
                 "Incorrect FormatException thrown");
         }
 
@@ -619,8 +625,8 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         catch (FormatException pe)
         {
             Assert.That(
-                pe.Message.StartsWith("Support for specifying 'L' with other days of the week is not implemented"),
-                Is.True,
+                pe.Message,
+                Does.StartWith("Support for specifying 'L' with other days of the week is not implemented"),
                 "Incorrect FormatException thrown");
         }
 
@@ -639,12 +645,18 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
     {
         CronExpression expression = new CronExpression("0 0 0 29 * ?");
         DateTimeOffset? after = expression.GetNextValidTimeAfter(new DateTime(2009, 1, 30, 0, 0, 0).ToUniversalTime());
-        Assert.That(after.HasValue, Is.True);
-        Assert.That(after.Value.DateTime, Is.EqualTo(new DateTime(2009, 3, 29, 0, 0, 0).ToUniversalTime()));
+        Assert.Multiple(() =>
+        {
+            Assert.That(after.HasValue, Is.True);
+            Assert.That(after.Value.DateTime, Is.EqualTo(new DateTime(2009, 3, 29, 0, 0, 0).ToUniversalTime()));
+        });
 
         after = expression.GetNextValidTimeAfter(new DateTime(2009, 12, 30).ToUniversalTime());
-        Assert.That(after.HasValue, Is.True);
-        Assert.That(after.Value.DateTime, Is.EqualTo(new DateTime(2010, 1, 29, 0, 0, 0).ToUniversalTime()));
+        Assert.Multiple(() =>
+        {
+            Assert.That(after.HasValue, Is.True);
+            Assert.That(after.Value.DateTime, Is.EqualTo(new DateTime(2010, 1, 29, 0, 0, 0).ToUniversalTime()));
+        });
     }
 
     [Test]
@@ -669,7 +681,7 @@ public class CronExpressionTest : SerializationTestSupport<CronExpression>
         }
         catch (FormatException pe)
         {
-            Assert.That(pe.Message.StartsWith("The 'W' option does not make sense with values larger than"), Is.True, "Incorrect ParseException thrown");
+            Assert.That(pe.Message, Does.StartWith("The 'W' option does not make sense with values larger than"), "Incorrect ParseException thrown");
         }
     }
 

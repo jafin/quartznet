@@ -75,17 +75,20 @@ public class SimpleTriggerTest : SerializationTestSupport<SimpleTriggerImpl>
 
     protected override void VerifyMatch(SimpleTriggerImpl original, SimpleTriggerImpl deserialized)
     {
-        Assert.That(deserialized, Is.Not.Null);
-        Assert.That(deserialized.Key, Is.EqualTo(original.Key));
-        Assert.That(deserialized.JobKey, Is.EqualTo(original.JobKey));
-        Assert.That(deserialized.StartTimeUtc, Is.EqualTo(original.StartTimeUtc));
-        Assert.That(deserialized.EndTimeUtc, Is.EqualTo(original.EndTimeUtc));
-        Assert.That(deserialized.RepeatCount, Is.EqualTo(original.RepeatCount));
-        Assert.That(deserialized.RepeatInterval, Is.EqualTo(original.RepeatInterval));
-        Assert.That(deserialized.CalendarName, Is.EqualTo(original.CalendarName));
-        Assert.That(deserialized.Description, Is.EqualTo(original.Description));
-        Assert.That(deserialized.JobDataMap, Is.EqualTo(original.JobDataMap));
-        Assert.That(deserialized.MisfireInstruction, Is.EqualTo(original.MisfireInstruction));
+        Assert.Multiple(() =>
+        {
+            Assert.That(deserialized, Is.Not.Null);
+            Assert.That(deserialized.Key, Is.EqualTo(original.Key));
+            Assert.That(deserialized.JobKey, Is.EqualTo(original.JobKey));
+            Assert.That(deserialized.StartTimeUtc, Is.EqualTo(original.StartTimeUtc));
+            Assert.That(deserialized.EndTimeUtc, Is.EqualTo(original.EndTimeUtc));
+            Assert.That(deserialized.RepeatCount, Is.EqualTo(original.RepeatCount));
+            Assert.That(deserialized.RepeatInterval, Is.EqualTo(original.RepeatInterval));
+            Assert.That(deserialized.CalendarName, Is.EqualTo(original.CalendarName));
+            Assert.That(deserialized.Description, Is.EqualTo(original.Description));
+            Assert.That(deserialized.JobDataMap, Is.EqualTo(original.JobDataMap));
+            Assert.That(deserialized.MisfireInstruction, Is.EqualTo(original.MisfireInstruction));
+        });
     }
 
     [Test]
@@ -104,9 +107,12 @@ public class SimpleTriggerTest : SerializationTestSupport<SimpleTriggerImpl>
         };
 
         simpleTrigger.UpdateAfterMisfire(null);
-        Assert.That(simpleTrigger.StartTimeUtc, Is.EqualTo(startTime));
-        Assert.That(simpleTrigger.EndTimeUtc.Value, Is.EqualTo(endTime));
-        Assert.That(!simpleTrigger.GetNextFireTimeUtc().HasValue, Is.True);
+        Assert.Multiple(() =>
+        {
+            Assert.That(simpleTrigger.StartTimeUtc, Is.EqualTo(startTime));
+            Assert.That(simpleTrigger.EndTimeUtc.Value, Is.EqualTo(endTime));
+            Assert.That(!simpleTrigger.GetNextFireTimeUtc().HasValue, Is.True);
+        });
     }
 
     [Test]
@@ -137,18 +143,24 @@ public class SimpleTriggerTest : SerializationTestSupport<SimpleTriggerImpl>
         simpleTrigger.JobDataMap.Put("K1", "V1");
         simpleTrigger.JobDataMap.Put("K2", "V2");
         clone = simpleTrigger.Clone();
-        Assert.That(clone.JobDataMap.Count, Is.EqualTo(2));
-        Assert.That(clone.JobDataMap["K1"], Is.EqualTo("V1"));
-        Assert.That(clone.JobDataMap["K2"], Is.EqualTo("V2"));
+        Assert.Multiple(() =>
+        {
+            Assert.That(clone.JobDataMap.Count, Is.EqualTo(2));
+            Assert.That(clone.JobDataMap["K1"], Is.EqualTo("V1"));
+            Assert.That(clone.JobDataMap["K2"], Is.EqualTo("V2"));
+        });
 
         // Make sure sub-object collections have really been cloned by ensuring
         // their modification does not change the source Trigger
         clone.JobDataMap.Remove("K1");
-        Assert.That(clone.JobDataMap.Count, Is.EqualTo(1));
-
-        Assert.That(simpleTrigger.JobDataMap.Count, Is.EqualTo(2));
-        Assert.That(simpleTrigger.JobDataMap["K1"], Is.EqualTo("V1"));
-        Assert.That(simpleTrigger.JobDataMap["K2"], Is.EqualTo("V2"));
+        Assert.Multiple(() =>
+        {
+            Assert.That(clone.JobDataMap.Count, Is.EqualTo(1));
+            Assert.That(simpleTrigger.JobDataMap.Count, Is.EqualTo(2));
+            Assert.That(simpleTrigger.JobDataMap["K1"], Is.EqualTo("V1"));
+            Assert.That(simpleTrigger.JobDataMap["K2"], Is.EqualTo("V2"));
+        });
+        
     }
 
     // QRTZNET-73

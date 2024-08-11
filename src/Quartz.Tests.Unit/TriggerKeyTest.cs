@@ -11,7 +11,10 @@ public class TriggerKeyTest
 
         TriggerKey cloned = original.DeepClone();
 
-        Assert.That(cloned.Name, Is.EqualTo(original.Name));
-        Assert.That(cloned.Group, Is.EqualTo(original.Group));
+        Assert.Multiple(() =>
+        {
+            Assert.That(cloned.Name, Is.EqualTo(original.Name));
+            Assert.That(cloned.Group, Is.EqualTo(original.Group));
+        });
     }
 }

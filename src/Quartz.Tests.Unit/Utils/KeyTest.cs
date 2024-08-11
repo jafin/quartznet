@@ -61,8 +61,11 @@ public class KeyTest
 
         var key = new Key<string>(name, group);
 
-        Assert.That(key.Name, Is.SameAs(name));
-        Assert.That(key.Group, Is.SameAs(group));
+        Assert.Multiple(() =>
+        {
+            Assert.That(key.Name, Is.SameAs(name));
+            Assert.That(key.Group, Is.SameAs(group));
+        });
     }
 
     [Test]
@@ -434,9 +437,12 @@ public class KeyTest
             ms.Position = 0;
 
             var deserialized = formatter.Deserialize(ms) as Key<string>;
-            Assert.That(deserialized, Is.Not.Null);
-            Assert.That(deserialized.Group, Is.EqualTo(key.Group));
-            Assert.That(deserialized.Name, Is.EqualTo(key.Name));
+            Assert.Multiple(() =>
+            {
+                Assert.That(deserialized, Is.Not.Null);
+                Assert.That(deserialized.Group, Is.EqualTo(key.Group));
+                Assert.That(deserialized.Name, Is.EqualTo(key.Name));
+            });
         }
     }
 

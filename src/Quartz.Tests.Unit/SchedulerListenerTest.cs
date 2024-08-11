@@ -201,8 +201,11 @@ public class SchedulerListenerTest
 
         await scheduler.Shutdown(true);
 
-        Assert.That(jobExecutionCount, Is.EqualTo(2));
-        Assert.That(triggerListener.FireCount, Is.EqualTo(3));
-        Assert.That(schedulerListener.TriggerFinalizedCount, Is.EqualTo(1));
+        Assert.Multiple(() =>
+        {
+            Assert.That(jobExecutionCount, Is.EqualTo(2));
+            Assert.That(triggerListener.FireCount, Is.EqualTo(3));
+            Assert.That(schedulerListener.TriggerFinalizedCount, Is.EqualTo(1));
+        });
     }
 }

@@ -169,9 +169,12 @@ public class CronTriggerTest
         var triggerBuilder = trigger.GetTriggerBuilder();
         var trigger2 = triggerBuilder.Build();
 
-        Assert.That(trigger.StartTimeUtc, Is.EqualTo(trigger2.StartTimeUtc));
-        Assert.That(trigger.EndTimeUtc, Is.EqualTo(trigger2.EndTimeUtc));
-        Assert.That(trigger.Priority, Is.EqualTo(trigger2.Priority));
+        Assert.Multiple(() =>
+        {
+            Assert.That(trigger.StartTimeUtc, Is.EqualTo(trigger2.StartTimeUtc));
+            Assert.That(trigger.EndTimeUtc, Is.EqualTo(trigger2.EndTimeUtc));
+            Assert.That(trigger.Priority, Is.EqualTo(trigger2.Priority));
+        });
     }
 
     [Test]
@@ -184,8 +187,11 @@ public class CronTriggerTest
         var scheduleBuilder = trigger.GetScheduleBuilder();
 
         var cloned = (CronTriggerImpl) scheduleBuilder.Build();
-        Assert.That(cloned.MisfireInstruction, Is.EqualTo(trigger.MisfireInstruction));
-        Assert.That(cloned.TimeZone, Is.EqualTo(trigger.TimeZone));
-        Assert.That(cloned.CronExpressionString, Is.EqualTo(trigger.CronExpressionString));
+        Assert.Multiple(() =>
+        {
+            Assert.That(cloned.MisfireInstruction, Is.EqualTo(trigger.MisfireInstruction));
+            Assert.That(cloned.TimeZone, Is.EqualTo(trigger.TimeZone));
+            Assert.That(cloned.CronExpressionString, Is.EqualTo(trigger.CronExpressionString));
+        });
     }
 }
