@@ -588,24 +588,45 @@ public class CronTriggerImpl : AbstractTrigger, ICronTrigger
             afterTimeUtc = SystemTime.UtcNow();
         }
 
-        if (StartTimeUtc > afterTimeUtc.Value)
-        {
-            afterTimeUtc = startTimeUtc.AddSeconds(-1);
-        }
+            if (EndTimeUtc.HasValue && afterTimeUtc.Value.CompareTo(EndTimeUtc.Value) >= 0)
+            {
+                return null;
+            }
 
-        if (EndTimeUtc.HasValue && afterTimeUtc.Value.CompareTo(EndTimeUtc.Value) >= 0)
-        {
-            return null;
-        }
+            DateTimeOffset? pot = GetTimeAfter(afterTimeUtc.Value);
+            if (EndTimeUtc.HasValue && pot.HasValue && pot.Value > EndTimeUtc.Value)
+            {
+                return null;
+            }
 
-        DateTimeOffset? pot = GetTimeAfter(afterTimeUtc.Value);
-        if (EndTimeUtc.HasValue && pot.HasValue && pot.Value > EndTimeUtc.Value)
-        {
-            return null;
+            return pot;
         }
+        
+        /// <summary>
+        /// Returns the next time at which the <see cref="ITrigger" /> will fire, at or after the given time. If the trigger will not fire at or after the given time, <see langword="null" /> will be returned.
+        /// </summary>
+        /// <param name="afterTimeUtc">The time to check for the next fire time after.</param>
+        /// <returns>The next fire time at or after the given time, or <see langword="null" /> if the trigger will not fire at or after the given time.</returns>
+        public  DateTimeOffset? GetFireTimeAtOrAfter(DateTimeOffset? afterTimeUtc)
+        {
+            if (!afterTimeUtc.HasValue)
+            {
+                afterTimeUtc = SystemTime.UtcNow();
+            }
 
-        return pot;
-    }
+            if (EndTimeUtc.HasValue && afterTimeUtc.Value.CompareTo(EndTimeUtc.Value) >= 0)
+            {
+                return null;
+            }
+
+            var pot = GetTimeAtOrAfter(afterTimeUtc.Value);
+            if (EndTimeUtc.HasValue && pot.HasValue && pot.Value > EndTimeUtc.Value)
+            {
+                return null;
+            }
+
+            return pot;
+        }
 
     public override IScheduleBuilder GetScheduleBuilder()
     {
@@ -887,7 +908,7 @@ public class CronTriggerImpl : AbstractTrigger, ICronTrigger
     /// </returns>
     public override DateTimeOffset? ComputeFirstFireTimeUtc(ICalendar? cal)
     {
-        nextFireTimeUtc = GetFireTimeAfter(startTimeUtc.AddSeconds(-1));
+            nextFireTimeUtc = GetFireTimeAtOrAfter(startTimeUtc);
 
         while (nextFireTimeUtc.HasValue && cal != null && !cal.IsTimeIncluded(nextFireTimeUtc.Value))
         {
@@ -921,6 +942,16 @@ public class CronTriggerImpl : AbstractTrigger, ICronTrigger
     {
         return cronEx?.GetTimeAfter(afterTime);
     }
+        
+        /// <summary>
+        /// Gets the next valid time to fire at or after the given time.
+        /// </summary>
+        /// <param name="afterTime">The time to compute from.</param>
+        /// <returns>The next time to fire at or after the given time, or null if there is no such time.</returns>
+        protected DateTimeOffset? GetTimeAtOrAfter(DateTimeOffset afterTime)
+        {
+            return cronEx?.GetTimeAfter(afterTime,0);
+        }
 
     /// <summary>
     /// Returns the time before the given time that this <see cref="ICronTrigger" /> will fire.
